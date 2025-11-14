@@ -1,0 +1,37 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Chorus Meta Block",
+    "type": "object",
+    "properties": {
+        "op": {
+            "type": "string",
+            "description": "The operation to perform on documentation/spec files.",
+            "enum": [
+                "create_file",
+                "append_section",
+                "replace_section",
+                "delete_section",
+                "update_schema",
+                "rename_heading"
+            ]
+        },
+        "target": {
+            "type": "string",
+            "description": "Path to the target file relative to the repository root."
+        },
+        "section": {
+            "type": "string",
+            "description": "Heading text of the Markdown section to operate on, when applicable."
+        },
+        "content": {
+            "type": "string",
+            "description": "New content to insert, append, or use as a replacement."
+        },
+        "notes": {
+            "type": "string",
+            "description": "Optional free-form notes for the human reviewer or middle agent."
+        }
+    },
+    "required": [ "op", "target" ],
+    "additionalProperties": false
+}
