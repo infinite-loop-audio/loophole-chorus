@@ -10,15 +10,24 @@
   L O O P H O L E - C H O R U S
 </pre>
 
-# Overview
-Meta-Repository for Architecture, Specifications, ADRs, and Development Protocols
+# Meta-Repository for Loophole Architecture and Specifications
 
-**Chorus** is the meta-repository for the **Loophole** Digital Audio Workstation.
+Chorus is the meta-repository that defines the architecture, specifications,
+protocols, and decision records for the Loophole Digital Audio Workstation.
 
-It contains no runtime code.
-Instead, it defines the architecture, specifications, protocols, and workflows that bind the Loophole ecosystem into a coherent whole.
+It contains no runtime code. All other repositories in the Loophole ecosystem
+(Signal, Pulse and Aura) must conform to the documents stored here.
 
-If you are working anywhere within the Loophole system, **this is your source of truth**.
+---
+
+## Contents
+
+- [Purpose](#purpose)
+- [Repository Structure](#repository-structure)
+- [The Loophole Ecosystem](#the-loophole-ecosystem)
+- [Getting Started](#getting-started)
+- [AI-Assisted Development](#ai-assisted-development)
+- [Licence](#licence)
 
 ---
 
@@ -35,7 +44,7 @@ Chorus provides the authoritative definitions for:
 - AI editing rules and the Meta-Protocol
 - Collaboration and task instructions
 
-Every other repository—Signal, Pulse, and Aura—MUST conform to Chorus.
+Every other repository—Signal, Pulse, Aura—must conform to Chorus.
 
 ---
 
@@ -76,18 +85,16 @@ tasks/
 
 ## The Loophole Ecosystem
 
-Chorus defines the contracts and boundaries between these three runtime repositories:
+Chorus defines the architectural and contractual relationships between the three
+runtime repositories:
 
 ### Signal — Audio Engine (C++ / JUCE)
-Real-time native audio engine.
 https://github.com/infinite-loop-audio/loophole-signal
 
 ### Pulse — Project and Data Model (TypeScript)
-Authoritative project state and modelling engine.
 https://github.com/infinite-loop-audio/loophole-pulse
 
 ### Aura — User Interface (Electron / TypeScript)
-Editing environments, interaction surface, plugin UIs, meters.
 https://github.com/infinite-loop-audio/loophole-aura
 
 ---
@@ -99,7 +106,7 @@ Recommended reading order:
 1. Architecture Overview
    [`@chorus:/docs/architecture/01-overview.md`](docs/architecture/01-overview.md)
 
-2. Specifications (IPC, data structures, schema contracts)
+2. Specifications (IPC, structures, schema contracts)
    [`@chorus:/docs/specs/`](docs/specs/)
 
 3. Decision Records
@@ -112,7 +119,7 @@ Recommended reading order:
 
 ## AI-Assisted Development
 
-Loophole adopts a structured, deterministic approach to AI-assisted editing.
+Loophole uses a structured and deterministic approach to AI-assisted editing.
 
 ### Core Meta Documents
 
@@ -128,15 +135,16 @@ Loophole adopts a structured, deterministic approach to AI-assisted editing.
 - Cursor Rule Set
   [`@chorus:/.cursor/rules/00-architecture.md`](.cursor/rules/00-architecture.md)
 
-AI tools MUST follow these rules exactly.
+AI tools must follow these documents precisely.
 
 ---
 
 ## Licence
 
-This repository is provided under the **MIT Licence**:
+This repository is provided under the MIT Licence with the following additional clause:
 
-**The Loophole name (including its component names: Signal, Pulse, Aura, Chorus)
-may not be used to promote or endorse derived products without prior permission.**
+**The Loophole name (including its components: Signal, Pulse, Aura and Chorus)
+may not be used to promote or endorse any derived product without prior written
+permission from the copyright holder.**
 
-This clause applies to all repositories in the Loophole project.
+This clause applies to all repositories within the Loophole ecosystem.
