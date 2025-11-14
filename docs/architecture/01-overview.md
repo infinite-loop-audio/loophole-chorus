@@ -20,9 +20,9 @@ This protects audio stability, prevents UI stalls from affecting audio, and
 enables a more flexible system architecture.
 
 - **Signal** — real-time safe, minimal, deterministic
-- **Pulse** — model layer (complex operations allowed; off RT thread)
-- **Aura** — UI (unbounded complexity permitted)
-- **Chorus** — architectural system of record
+- **Pulse** — project/model state (complex NRT logic)
+- **Aura** — user interface (expressive, unconstrained)
+- **Chorus** — coordination, contracts, specifications
 
 ## 1.2 Multi-Process Model
 
@@ -30,163 +30,150 @@ Where possible, major responsibilities are isolated into separate processes:
 
 - Prevent plugin crashes from taking down the UI
 - Allow independent scaling and optimisation
-- Allow sophisticated visual UI frameworks without RT penalties
+- Allow sophisticated visual UI frameworks without compromising engine safety
 
 ## 1.3 Declarative Contracts
 
 Communication between layers uses explicit schemas defined in `@chorus:/docs/specs/`.
-Each layer operates using *declared interfaces*, not implicit assumptions.
+Each layer operates using declared interfaces, not assumptions.
 
 ## 1.4 Replaceability
 
 Any layer can be replaced independently:
 
-- A new UI style/theme
-- A rewritten engine
-- A separate Pulse service
-- A headless renderer
-- Experimental data modelling
+- UI themes or frameworks
+- rewritten engine
+- standalone Pulse service
+- remote control surfaces
+- headless renderers
 
-This modularity is key for long-term evolution.
+This modularity is central to Loophole’s long-term evolution.
 
 ---
 
-# 2. Repository Overview
+# 2. Normative Language
+
+This document uses **normative language** consistent with IETF standards.
+These keywords indicate requirements and expectations that apply to all Loophole
+implementations and specifications:
+
+- **MUST / MUST NOT**
+  - A strict requirement of the architecture.
+  - Violations will lead to undefined behaviour or incompatibilities.
+
+- **SHOULD / SHOULD NOT**
+  - A recommended practice that should be followed unless a justified reason exists.
+
+- **MAY**
+  - An optional capability or behaviour.
+
+Whenever such terms appear in this document or others in the **Chorus**
+repository, they are meant in the formal sense defined above.
+
+---
+
+# 3. Repository Overview
 
 The Loophole ecosystem consists of four repositories:
 
 | Repo | Role | Language | Notes |
 |------|------|----------|-------|
 | **Signal** | Real-time engine | C++ (JUCE) | Plugin hosting, audio graph, RT state |
-| **Pulse**  | Model layer | TypeScript | Project, routing, automation, taxonomy |
-| **Aura**   | Interface layer | Electron + TS | Views, editors, workspace, telemetry |
-| **Chorus** | Meta-repo | Markdown + JSON | Specs, ADRs, IPC, docs, meta-protocol |
+| **Pulse**  | Model layer      | TypeScript | Project, routing, automation, taxonomy |
+| **Aura**   | UI layer         | Electron + TS | Views, editors, workspace, telemetry |
+| **Chorus** | Meta repository  | Markdown + JSON | Specs, ADRs, IPC, meta-protocol |
 
-Chorus anchors the architecture.
-The other three repos implement it.
+Chorus anchors the architecture; the runtime repos implement it.
 
 ---
 
-# 3. Runtime Components
+# 4. Runtime Components
 
 Loophole’s runtime consists of:
 
-- **Signal process** — native application hosting the audio engine
-- **Aura process** — the main UI + embedded Pulse
-- **(Future)** Pulse as a separate process for improved isolation
+- **Signal process** — native audio engine
+- **Aura process** — UI + embedded Pulse
+- **(Future)** Pulse process — isolated model layer
 - IPC channels between processes defined in `@chorus:/docs/specs/`
 
 ---
 
-# 4. Layer Responsibilities
+# 5. Layer Responsibilities
 
-Each layer’s responsibilities are defined *normatively* (i.e., as binding rules).
+Each layer’s responsibilities are defined normatively.
 
-## 4.1 Signal (Audio Engine)
+## 5.1 Signal (Audio Engine)
 
 **Primary Responsibilities:**
 
-- Own and manage audio/MIDI devices
+- Manage audio/MIDI devices
 - Maintain the audio processing graph
-- Host plugin formats (VST3, AU, CLAP)
+- Host plugins (VST3, AU, CLAP)
 - Guarantee real-time behaviour
-- Apply parameter changes sample-accurately
-- Stream telemetry (meters, transport, analysers)
-- Expose an IPC surface for:
-  - Graph instructions
-  - Parameter changes
-  - Transport commands
-  - Telemetry subscriptions
+- Provide telemetry
+- Apply sample-accurate parameter changes
+- Expose an IPC command surface
 
-**Signal DOES NOT:**
+**Signal MUST NOT:**
 
 - Store project structures
-- Manage high-level plugin organisation
-- Own undo/redo
-- Perform complex/lazy computations on the audio thread
-- Render plugin UI
-
-This strict boundary keeps the engine minimal and robust.
+- Perform non-real-time computations
+- Handle UI logic
+- Block or allocate in RT code
 
 ---
 
-## 4.2 Pulse (Project and Data Model)
+## 5.2 Pulse (Project and Data Model)
 
-Pulse is the **source of truth** for Loophole’s logical project state.
+Pulse is the authoritative project-state owner.
 
 **Primary Responsibilities:**
 
-- Project structure:
-  - Tracks, buses, groups
-  - Clips, regions, items
-  - Timeline, tempo map, markers
-- Routing model:
-  - Sends, sidechains, track I/O
-- Plugin models:
-  - Instances
-  - Metadata
-  - Categorisation/taxonomy
-  - Parameter schemas
-- Automation representation
-- Undo/redo engine
-- Serialization / persistence
-- Deriving engine-ready graph instructions for Signal
+- Tracks, routing, groups
+- Plugin models and taxonomy
+- Automation data
+- Clip/region/item structures
+- Undo/redo
+- Project serialisation
+- Deriving RT-safe graph instructions for Signal
 
-**Initial Deployment Model:**
-
-- Pulse is embedded inside the Aura process.
-
-**Future Model (ADR TBD):**
-
-- Extract Pulse into its own service to improve isolation.
+Initially Pulse is embedded in Aura; later it MAY run as its own service.
 
 ---
 
-## 4.3 Aura (User Interface Layer)
+## 5.3 Aura (User Interface Layer)
 
-Aura provides the user experience layer.
-It is free to be expressive and computationally heavy.
+Aura provides all interaction and visual elements.
 
 **Primary Responsibilities:**
 
-- Arrange, edit, mix, and manage content
-- Render plugin/editor UIs (native or generic)
-- Provide plugin discovery and categorisation UI
-- Relay user operations to Pulse (state changes)
-- Relay engine control to Signal (transport, commands)
-- Display engine telemetry
-- Handle keyboard, pointer, and gesture events
-- Save/load projects via Pulse
+- Arrange/editor/mixer views
+- Plugin UIs (native windows)
+- Engine control (via Signal IPC)
+- Project manipulation (via Pulse)
+- Displaying engine telemetry
+- Managing plugin browsing and categorisation
 
-**Aura DOES NOT:**
-
-- Perform any audio processing
-- Hold authoritative project state
-- Maintain undo/redo independently
-- Bypass Pulse to communicate directly with Signal (except where specified by IPC rules)
-
-Aura is intentionally “fat” — designed for creativity, responsiveness, and discoverability.
+Aura MUST NOT perform audio processing.
 
 ---
 
-## 4.4 Chorus (Meta Repository)
+## 5.4 Chorus (Meta Repository)
 
-Chorus provides the governing framework for:
+Chorus defines:
 
-- Architectural documents (`docs/architecture/`)
-- Specifications (`docs/specs/`)
-- Decisions (`docs/decisions/`)
-- AI meta-protocol (`docs/meta/`)
-- Inter-repo tasks (`tasks/`)
-- Cursor rules (`.cursor/rules/`)
-- Conventions and guidelines
+- architectural documents
+- specifications
+- ADRs
+- IPC schemas
+- meta-protocol
+- agent rules
 
-Chorus is authoritative.
-Other repos MUST conform to Chorus.
+Chorus MUST contain no runtime code and serves as the system’s source of truth.
 
 ---
 
-# 5. Inter-Process Communication (IPC)
+# 6. Inter-Process Communication (IPC)
 
 IPC contracts between processes live under:
 
@@ -199,66 +186,55 @@ IPC includes:
 - Command messages
 - Telemetry streams
 - Parameter updates
-- Plugin editor window requests
-- Lifecycle messages (initialisation, shutdown, heartbeat)
+- Graph-change instructions
+- Lifecycle messages (initialisation, shutdown)
 
-No assumptions between layers are permitted without being documented here.
+No implicit behaviour is permitted; all expectations MUST be documented.
 
 ---
 
-# 6. Real-Time Safety
+# 7. Real-Time Safety
 
-Any operation that might violate RT constraints MUST NOT occur in Signal’s audio
-processing callback.
+Any operation that might violate RT constraints MUST NOT occur in the audio
+callback. This includes:
 
-This includes:
-
-- Memory allocation
+- memory allocation
+- locking
 - I/O
-- Locks
-- Maps, vectors, or containers that may resize
-- Plugin scanning
-- Logging
-- Dynamic string manipulation
-- Any non-O(1) behaviour
+- logging
+- container resizing
 
-Pulse must derive real-time-safe, immutable graph instructions for Signal.
+Pulse MUST provide RT-safe immutable graph instructions that Signal can swap
+atomically.
 
 ---
 
-# 7. Evolution Strategy
+# 8. Evolution Strategy
 
-The architecture is designed to evolve:
+The architecture is designed for long-term extensibility:
 
-- Pulse may become a separate process
-- Telemetry protocols may expand
-- Plugin sandboxes may be added
-- Aura may support multiple windows or remote control surfaces
-- Render nodes may be introduced (offline rendering)
+- Pulse MAY be extracted to its own process
+- Plugin sandboxing MAY be added
+- Telemetry MAY expand to richer analysis formats
+- Remote/UI extensions MAY communicate over network IPC
 
-Such changes require:
-
-1. A new ADR
-2. Updated specs
-3. Updated architecture docs
-4. Coordinated updates across Signal, Pulse, and Aura
+Such changes require new ADRs and spec updates.
 
 ---
 
-# 8. Document Conventions
+# 9. Document Conventions
 
 - British English
-- Stable, predictable section headings
-- Cross-references must use `@repo:/path` notation
-- Internal code blocks use fenced triple backticks
-- Entire documents generated by AI must be wrapped in quadruple backticks
-- Maximum clarity, minimum ambiguity
+- Stable heading structure
+- All file references use `@repo:/path/` shorthand
+- Internal examples use triple-backtick fences
+- AI-generated files MUST be wrapped in quadruple backticks
 
 ---
 
-# 9. Summary
+# 10. Summary
 
-This document establishes the structural foundation for all Loophole components.
+This document defines the conceptual structure of the Loophole system.
 
 Chorus defines the architecture.
 Pulse defines the project state.
