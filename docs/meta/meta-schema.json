@@ -5,31 +5,30 @@
     "properties": {
         "op": {
             "type": "string",
-            "description": "The operation to perform on documentation/spec files.",
             "enum": [
                 "create_file",
                 "append_section",
                 "replace_section",
                 "delete_section",
-                "update_schema",
-                "rename_heading"
+                "rename_heading",
+                "update_schema"
             ]
         },
         "target": {
             "type": "string",
-            "description": "Path to the target file relative to the repository root."
+            "description": "File path relative to repository root."
         },
         "section": {
             "type": "string",
-            "description": "Heading text of the Markdown section to operate on, when applicable."
+            "description": "Heading to operate on when relevant."
         },
         "content": {
             "type": "string",
-            "description": "New content to insert, append, or use as a replacement."
+            "description": "Content to insert or replace."
         },
         "notes": {
             "type": "string",
-            "description": "Optional free-form notes for the human reviewer or middle agent."
+            "description": "Optional comments for human reviewers."
         }
     },
     "required": [ "op", "target" ],
