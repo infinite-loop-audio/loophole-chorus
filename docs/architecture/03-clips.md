@@ -1,6 +1,6 @@
 # Clips Architecture
 
-This document defines the conceptual model for **Clips** in Loophole. It covers
+This document defines the conceptual model for Clips in Loophole. It covers
 their structure, timing, relationship to Tracks, their ownership of Lanes, and
 how Pulse resolves Clip contents into active audio, MIDI and control streams
 during playback.
@@ -44,27 +44,27 @@ implementation specifics or IPC syntax.
   - [8.1 Splitting](#81-splitting)
   - [8.2 Consolidation](#82-consolidation)
   - [8.3 Cross-Clip Lane Consistency](#83-crossclip-lane-consistency)
-- [9. Future Extensions](#9-future-extensions)
+- [9. Interaction with Composer (Metadata and Automation Mapping)](#9-interaction-with-composer)
+- [10. Future Extensions](#10-future-extensions)
 
 ---
 
 ## 1. Overview
 
-A **Clip** is a time-bounded container placed on a Track. Clips contain one or
-more **Lanes**, and Lanes contain the actual musical or media content: audio
-regions, MIDI notes, automation curves, or other future types.
+A Clip is a time-bounded container placed on a Track. Clips contain one or more
+Lanes, and Lanes contain the actual musical or media content: audio regions, MIDI
+notes, automation curves, or other future types.
 
 In Loophole:
 
 - Tracks do **not** directly own Lanes.
 - Clips own Lanes.
 - Tracks simply arrange Clips along the timeline.
-- Pulse resolves, at any playback time, which Clip Lanes are active on each
-  Track and how they feed the Track’s Channel.
+- Pulse resolves, at any playback time, which Clip Lanes are active on each Track
+  and how they feed the Track’s Channel.
 
 This allows different Clips on a single Track to contain different lane
-configurations, enabling hybrid and experimental workflows without forcing
-permanent Track-level lane templates.
+configurations, enabling hybrid and experimental workflows.
 
 ---
 
@@ -81,7 +81,7 @@ A Clip defines a strict time range on its Track:
 Pulse uses the Clip’s time range to:
 
 - determine which Clips are active at any given playhead position,
-- resolve Cross-Fade, comping and overlap interactions,
+- resolve cross-fade, comping and overlap interactions,
 - identify which lanes to feed into LaneStream nodes.
 
 Time ranges use project time units (beats or seconds, depending on timebase).
@@ -100,7 +100,8 @@ Time-stretching is a lane-level behaviour (audio/MIDI) but is represented at the
 Clip level, e.g.:
 
 - Clip has a time-stretch multiplier,
-- Lanes inside the Clip interpret their content using the Clip’s stretch context.
+- Lanes inside the Clip interpret their content using the Clip’s stretch
+  context.
 
 ### 2.3 Start/End Behaviour
 
@@ -139,15 +140,13 @@ Clips track editing metadata such as:
 - last-used editing mode (draw, scissors, comp, etc.),
 - per-lane editor state (zoom, transient detection markers, etc.).
 
-This state lives purely in Pulse/Aura and does not affect rendering or the
-engine.
+This state lives purely in Pulse/Aura and does not affect rendering or the engine.
 
 ### 3.3 Transient Clip IDs
 
-Pulse uses stable IDs for Clips, but long-running edits (slice, glue,
-compilation) may introduce new transient Clip IDs. Aura should treat IDs as
-immutable references but should not assume permanence beyond a single editing
-transaction.
+Pulse uses stable IDs for Clips, but long-running edits (slice, glue, compilation)
+may introduce new transient Clip IDs. Aura should treat IDs as immutable
+references but should not assume permanence beyond a single editing transaction.
 
 ---
 
@@ -176,34 +175,47 @@ architecture:
 
 ### 4.3 Per-Clip Lane Routing (Audio)
 
-Audio Lanes must route to a **LaneStream** node in the Track’s Channel chain.
+Audio lanes must route to a LaneStream node in the Track’s Channel chain.
 
 Default behaviour:
 
-- When a Track first receives audio in any Clip, a LaneStream node is created at
-  the top of the Channel chain.
-- The first audio Lane in a Clip routes automatically to this LaneStream.
-- Adding additional audio Lanes:
-  - They also route to the same LaneStream by default.
-  - Aura exposes a UI to **split** the lane, creating a **new LaneStream** in
-    the chain and routing the lane to that node.
-- For subsequent Clips:
-  - Audio Lanes route to the first LaneStream by default.
-  - Users may override routing via per-lane dropdown.
+- When a Track first receives audio in any Clip, Pulse ensures that the
+  Channel has a LaneStream node at the top of its processor chain.
+- The first audio Lane added to a Clip routes to this LaneStream node by
+  default.
+- If a second audio Lane is added to that Clip, it also routes to the same
+  LaneStream by default. Aura presents an option in the UI to “split” this Lane
+  to its own LaneStream node.
+- Splitting creates a new LaneStream node in the Channel chain, and the chosen
+  audio Lane’s output is routed to that new node.
+- For subsequent Clips on the same Track, audio Lanes route to the first
+  LaneStream by default. Audio Lanes expose a UI element (such as a dropdown)
+  allowing users to route that Lane’s output to a different LaneStream node.
 
 ### 4.4 Per-Clip Lane Routing (MIDI)
 
-MIDI Lanes route to **instrument processors** in the Channel chain.
+MIDI lanes route to **instrument processors** in the Channel chain.
 
 Default behaviour:
 
-- MIDI Lanes route to the first instrument in the processor chain.
-- If none exists, the UI offers to add a new instrument processor and route to
-  it.
-- Multiple MIDI Lanes may route to the same instrument.
-- Users can intentionally route different MIDI Lanes to different instruments.
+- When a Track first gains an instrument in its Channel chain, MIDI Lanes on
+  Clips route to that instrument by default.
+- If there are multiple instruments in the chain, MIDI Lanes default to the
+  first instrument unless configured otherwise.
 
-Routing is always explicit and controlled at the lane level.
+Aura exposes:
+
+- a UI control on MIDI Lanes that shows which instrument(s) they feed,
+- an option to add a new instrument to the Channel chain directly from a MIDI
+  Lane and route that Lane to the new instrument.
+
+This mirrors the audio lane behaviour:
+
+- adding MIDI content does not create a new processor by itself, but the UI
+  provides a discoverable path to create and route a new instrument.
+- users can build sophisticated MIDI processing chains (MIDI FX before
+  instruments, multiple instruments per Track, etc.) while retaining a clear
+  serial processor model.
 
 ---
 
@@ -239,8 +251,8 @@ Automation Lanes contain curves targeting:
 - parameters of other Channels (mounted automation),
 - potential device controls (future).
 
-Automation is evaluated at Clip scope and clipped or combined when Clips overlap
-according to Pulse rules.
+Automation is evaluated at Clip scope and clipped or combined when Clips
+overlap according to Pulse rules.
 
 ### 5.4 Video Lanes (Future)
 
@@ -271,8 +283,8 @@ Device Lanes are likely **global-only** and not Clip-scoped.
 
 A Track’s apparent set of Lanes in Aura is an **aggregate view**:
 
-- If Clips on a Track contain different lane types, the Track header may show a
-  union of those types.
+- If Clips on a Track contain different lane types, the Track header may show
+  a union of those types.
 - Aura can display only the Lanes relevant to the visible Clip, or all logical
   lane types the Track has used.
 
@@ -305,7 +317,7 @@ At runtime, Pulse continuously computes:
 
 ### 7.2 Lane → Channel Routing
 
-Pulse builds a stable Channel processor chain. Clip Lanes do not mutate the
+Pulse builds a stable Channel processor chain. Clip Lanes do *not* mutate the
 processor chain; instead:
 
 - audio Lanes are mapped to the configured LaneStream slots,
@@ -314,7 +326,7 @@ processor chain; instead:
 
 ### 7.3 State Updates
 
-During playback, Pulse emits state changes when:
+During playback, Pulse issues state change events when:
 
 - a Clip enters or exits play,
 - Lanes change routing or active status,
@@ -337,9 +349,9 @@ Splitting a Clip yields two Clips:
 
 ### 8.2 Consolidation
 
-Consolidating (render-in-place or bounce) merges multiple Lanes into a new Clip
-with a single audio Lane pointing to a new rendered buffer. Original Clips may
-be muted or archived depending on user preferences.
+Consolidating (render-in-place or bounce) merges multiple Lanes into a new
+Clip with a single audio Lane pointing to a new rendered buffer. Original Clips
+may be muted or archived depending on user preferences.
 
 ### 8.3 Cross-Clip Lane Consistency
 
@@ -348,7 +360,23 @@ projection of lane headers and user editing tools on a per-clip basis.
 
 ---
 
-## 9. Future Extensions
+## 9. Interaction with Composer (Metadata and Automation Mapping)
+
+Automation Lanes inside Clips target parameters via fully qualified IDs. When
+Clips contain Lanes that automate plugin parameters, Pulse may use metadata
+from Composer to help:
+
+- interpret what parameter a given Lane was automating (via semantic roles),
+- suggest remapping of automation when a plugin version or variant changes,
+- identify equivalent parameters when Clips are moved between Tracks or
+  plugin instances change.
+
+Such suggestions are advisory: Pulse remains the authority. Composer data is
+optional and cached locally; Loophole must always remain operational without it.
+
+---
+
+## 10. Future Extensions
 
 The Clip model is intentionally flexible. Future extensions may include:
 

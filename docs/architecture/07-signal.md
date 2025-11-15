@@ -1,0 +1,345 @@
+# Signal Architecture
+
+Signal is the real-time audio engine of Loophole. It runs as an independent,
+high-performance process responsible for deterministic audio execution, plugin
+hosting, real-time parameter application and delivering sample-accurate output.
+
+Signal performs *no* project management, editing logic, metadata interpretation,
+or structural inference. Pulse constructs the engine graph; Signal executes it.
+
+---
+
+## Contents
+
+- [1. Overview](#1-overview)
+- [2. Responsibilities](#2-responsibilities)
+- [3. Process Model](#3-process-model)
+  - [3.1 Real-Time Constraints](#31-real-time-constraints)
+  - [3.2 Multi-Threading Model](#32-multi-threading-model)
+  - [3.3 Memory Management Rules](#33-memory-management-rules)
+- [4. Engine Graph](#4-engine-graph)
+  - [4.1 Graph Structure](#41-graph-structure)
+  - [4.2 Nodes](#42-nodes)
+  - [4.3 Processor Order](#43-processor-order)
+  - [4.4 LaneStreams](#44-lanestreams)
+  - [4.5 Graph Updates](#45-graph-updates)
+- [5. Plugin Hosting](#5-plugin-hosting)
+  - [5.1 Formats](#51-formats)
+  - [5.2 Plugin Isolation](#52-plugin-isolation)
+  - [5.3 UI Windows](#53-ui-windows)
+- [6. Parameter Application](#6-parameter-application)
+  - [6.1 Registered Parameters](#61-registered-parameters)
+  - [6.2 Automation Streams](#62-automation-streams)
+  - [6.3 Gesture Streams](#63-gesture-streams)
+  - [6.4 Value Smoothing](#64-value-smoothing)
+- [7. Transport](#7-transport)
+  - [7.1 Clock and Timeline](#71-clock-and-timeline)
+  - [7.2 Playback State](#72-playback-state)
+  - [7.3 Synchronisation](#73-synchronisation)
+- [8. Interaction with Pulse](#8-interaction-with-pulse)
+  - [8.1 Structural Commands](#81-structural-commands)
+  - [8.2 Parameter and Automation Commands](#82-parameter-and-automation-commands)
+  - [8.3 High-Rate Control Path](#83-high-rate-control-path)
+  - [8.4 Engine Status Events](#84-engine-status-events)
+- [9. Interaction with Composer](#9-interaction-with-composer)
+- [10. Persistence](#10-persistence)
+- [11. Future Extensions](#11-future-extensions)
+
+---
+
+## 1. Overview
+
+Signal is a dedicated audio engine responsible for:
+
+- deterministic audio processing,
+- hosting plugins and DSP units,
+- processing automation and gestures,
+- running transport,
+- delivering final audio output.
+
+Signal receives a fully resolved, validated engine graph from Pulse. It does not
+interpret or modify project structure.
+
+Signal is written in C++ (JUCE-based foundation). It must remain small,
+focused and real-time safe.
+
+---
+
+## 2. Responsibilities
+
+Signal handles:
+
+1. **Plugin hosting**
+   Loading, initialising and running instrument and effect plugins.
+
+2. **Real-time DSP**
+   Executing processors sample-accurately.
+
+3. **Parameter updates**
+   Applying automation and gestures at audio-rate.
+
+4. **Transport**
+   Maintaining playback position, tempo, sync and sample clocks.
+
+5. **Audio I/O**
+   Capturing and rendering audio to hardware.
+
+6. **Engine graph execution**
+   Running the processor chain constructed by Pulse.
+
+Signal does *not* manage routing rules, editing operations, or metadata resolution.
+
+---
+
+## 3. Process Model
+
+### 3.1 Real-Time Constraints
+
+Signal must:
+
+- perform no dynamic allocation in the audio thread,
+- avoid locks, system calls, or blocking IPC in the audio thread,
+- keep all plugin calls within deterministic time limits,
+- never parse JSON or perform text processing during audio callbacks.
+
+### 3.2 Multi-Threading Model
+
+Signal uses:
+
+- a high-priority audio thread (non-negotiable real-time constraints),
+- a message thread for IPC, plugin scanning, parameter staging,
+- optional worker threads for background tasks.
+
+All IPC messages from Pulse are processed outside the audio thread.
+
+### 3.3 Memory Management Rules
+
+- All buffers pre-allocated.
+- No heap usage during processing.
+- All plugin allocations occur at load/prepare time.
+
+---
+
+## 4. Engine Graph
+
+### 4.1 Graph Structure
+
+Pulse sends Signal a linear processor chain. Signal does not build or modify the
+graph; it only prepares and executes it.
+
+### 4.2 Nodes
+
+Node types include:
+
+- **LaneStream nodes** (audio input from Tracks),
+- **Instruments**,
+- **Audio effects**,
+- **Utility DSP** (gain, pan, meters),
+- **Output nodes**.
+
+### 4.3 Processor Order
+
+Order is strictly serial. Signal executes processors in the order defined by Pulse.
+
+### 4.4 LaneStreams
+
+LaneStreams provide a buffer for audio from Clip Lanes routed via Pulse. Signal
+treats them as input sources. They are:
+
+- created/destroyed by graph updates,
+- filled with audio data from Pulse-provided buffers or internal feeders,
+- processed as standard audio nodes.
+
+### 4.5 Graph Updates
+
+Pulse may send:
+
+- node addition/removal,
+- reordering instructions,
+- instrument replacement,
+- routing updates.
+
+Signal must:
+
+- commit these changes outside the audio thread,
+- prepare any new processors before activation,
+- swap to the new graph atomically and safely.
+
+---
+
+## 5. Plugin Hosting
+
+### 5.1 Formats
+
+Signal supports:
+
+- VST3,
+- CLAP,
+- AU (platform-dependent).
+
+Other formats can be added later.
+
+### 5.2 Plugin Isolation
+
+Signal may optionally support:
+
+- per-plugin sandboxing,
+- crash recovery,
+- watchdog monitoring.
+
+These features must never degrade real-time performance.
+
+### 5.3 UI Windows
+
+Signal hosts plugin UIs as native windows and hands their handles to Aura.
+
+Signal takes no part in UI layout, styling or event management beyond OS-level window embedding.
+
+---
+
+## 6. Parameter Application
+
+### 6.1 Registered Parameters
+
+Pulse registers each parameter with Signal:
+
+- parameter ID,
+- target processor,
+- scaling/normalisation,
+- smoothing behaviour.
+
+Signal stores this in a fast lookup table.
+
+### 6.2 Automation Streams
+
+Automation from Pulse arrives as timestamped value updates. Signal:
+
+- applies them at audio-rate,
+- interpolates if required,
+- guarantees ordering and determinism.
+
+### 6.3 Gesture Streams
+
+High-rate gestures bypass automation evaluation.
+Signal receives gesture packets on a separate fast channel and applies them directly.
+
+### 6.4 Value Smoothing
+
+Signal provides built-in smoothing for:
+
+- gain,
+- filter parameters,
+- pitch parameters,
+- any parameter with defined smoothing rules.
+
+Smoothing specifications come from Pulse metadata.
+
+---
+
+## 7. Transport
+
+### 7.1 Clock and Timeline
+
+Signal maintains:
+
+- sample counter,
+- beat/bar position (derived),
+- tempo and time signature (from Pulse),
+- loop boundaries.
+
+### 7.2 Playback State
+
+Playback states include:
+
+- stopped,
+- playing,
+- paused,
+- seeking.
+
+Transport changes must not interrupt or reallocate DSP nodes except as instructed.
+
+### 7.3 Synchronisation
+
+Signal ensures:
+
+- sample-accurate timing of events,
+- stable transport at all buffer sizes,
+- tight sync with external devices (future).
+
+---
+
+## 8. Interaction with Pulse
+
+### 8.1 Structural Commands
+
+Signal receives commands for:
+
+- loading/unloading processors,
+- reordering processors,
+- adding LaneStreams,
+- removing nodes,
+- updating routing,
+- resending full engine graph when required.
+
+### 8.2 Parameter and Automation Commands
+
+Pulse sends:
+
+- parameter value updates,
+- automation curves,
+- modulation routing (future).
+
+Signal applies them without reinterpreting or validating semantics.
+
+### 8.3 High-Rate Control Path
+
+Gesture updates are delivered via a dedicated low-latency channel. Signal applies
+them immediately to plugin processors.
+
+### 8.4 Engine Status Events
+
+Signal emits back to Pulse:
+
+- plugin load failures,
+- processing errors (with safe fallback),
+- plugin crashes (if isolation is enabled),
+- transport state confirmations.
+
+---
+
+## 9. Interaction with Composer
+
+Signal **never** interacts with Composer.
+
+Signal receives already-resolved processor identities, parameter targets and roles
+from Pulse. All metadata interpretation is complete before Signal receives the
+instruction.
+
+---
+
+## 10. Persistence
+
+Signal holds no persistent state. All persistent representation lives in Pulse.
+
+Signal may cache:
+
+- plugin binaries,
+- plugin scanning results,
+- DSP configurations,
+
+but none of these form part of the project state.
+
+---
+
+## 11. Future Extensions
+
+Signal may evolve to support:
+
+- multi-engine distributed processing,
+- GPU-accelerated DSP nodes,
+- per-plugin sandboxes,
+- hybrid offline/real-time processing,
+- real-time stem bounces,
+- remote/networked DSP.
+
+These must not affect the core contract: Pulse owns structure; Signal executes.
