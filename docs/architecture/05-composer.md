@@ -237,7 +237,7 @@ Other Pulse systems never talk to Composer directly.
 
 ### 5.2 Interaction with Parameter Aliasing
 
-Pulse’s aliasing layer (defined in `04-parameters.md`) uses Composer when:
+Pulse's aliasing layer (defined in `08-parameters.md`) uses Composer when:
 
 - local alias mappings are insufficient,
 - a plugin changes version,
