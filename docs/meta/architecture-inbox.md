@@ -116,3 +116,69 @@ Implement fully extensible and customizable keyboard, action, and macro shortcut
 **Status:** proposed  
 Design Aura's UI layout to be visually similar to other DAWs but with a much more predictable interaction model. Main arrangement windows contain the full sequence, with an optional clip launcher interface able to replace or partially cover it (similar to Studio One 7). Clip/lane editors, mixer, media library, etc. should have easy shortcuts by default and replace the whole internal window space for focused editing work. A secondary level of editor window can be attached in-place where appropriate for smaller editing facilities, similar to Bitwig/Ableton's bottom strip. This layered approach provides both full-screen focus and contextual secondary tools without disrupting the primary workflow.
 
+### Multiple Mixer and Console Views
+**Tag:** Aura / UX / Workflow  
+**Priority:** P2  
+**Status:** proposed  
+Enable users to build different collections of Channels across multiple mixer/console views. For example, instruments and audio tracks in one view, group busses in another, send effects in another. This allows users to organize their mixing workflow by function or signal flow, reducing visual clutter and improving focus on specific mixing tasks. Rules for categorizing tracks into collections can be defined and refined later, but the core capability should support flexible channel grouping and filtering. Separate these views into easily accessible tabs or docked windows.
+
+### Two-Layer UI Architecture with Theme Separation
+**Tag:** Aura / UX  
+**Priority:** P2  
+**Status:** proposed  
+Build Aura's UI layer with two distinct layers of markup and CSS. The lowest layer defines the basic visual structure of all UI elements without styling intent, establishing only layout, positioning, and structural relationships. A theme layer sits on top and paints over the basic structure, applying colors, fonts, borders, shadows, and all visual styling. This separation allows complete retheming of the entire UI without having to redefine core basic layout, enabling users and third parties to create custom themes while maintaining structural consistency and reducing maintenance burden.
+
+### UI Modding and Extension Ecosystem
+**Tag:** Aura / UX / Pulse / Workflow  
+**Priority:** P2  
+**Status:** proposed  
+Give users the ability to "mod" the UI by building new creative interfaces to the standard set of features provided by Pulse. This should work similarly to the VSCode plugin ecosystem, with a well-defined extension API and marketplace. These extensions won't be able to extend the project data model, maintaining data integrity and compatibility. However, we can provide often-requested Pulse extensions later down the line to accommodate more complex UI ideas that require additional backend support. Enables community-driven innovation and customization while preserving core system stability.
+
+### Multiple MIDI Editor View Types
+**Tag:** Aura / UX / Workflow  
+**Priority:** P2  
+**Status:** proposed  
+Design MIDI clip/lane editor views with support for multiple interface types: standard piano roll, drum sequencer, and room for more creative MIDI interpretations. All variants must be able to control notes and automation, ensuring consistent data access regardless of the visual representation. Beyond these core requirements, additional creative interfaces become an exercise in Aura extension building, leveraging the UI modding ecosystem. Discussion to be scheduled for brainstorming other possible interfaces for editing MIDI data, exploring alternative visualizations and interaction paradigms that could enhance workflow or inspire new creative approaches.
+
+### MIDI Humanization Controls
+**Tag:** Pulse / Aura / Signal / DSP  
+**Priority:** P2  
+**Status:** proposed  
+Implement global and track-local humanization controls for MIDI playback. Apply a pre-buffered randomization pass prior to playback that affects timing and velocity without modifying the note data stored in the project. This makes quantized notes feel more natural and human-like during playback while preserving the original quantized data for editing. Experiment with intelligent placement of notes and velocity based on analysis of real recordings to create more authentic-sounding humanization patterns. The humanization should be applied in the playback pipeline, ensuring it can be toggled on/off and adjusted without affecting project data integrity. Can be represented visually with a background blur effect around notes to indicate the possible range of humanized note timings / velocity.
+
+### Pre-Programmable Quantization Rulesets
+**Tag:** Aura / UX / Workflow / Pulse  
+**Priority:** P2  
+**Status:** proposed  
+Enable users to create and save pre-programmable quantization rulesets as quantize patches that can be easily selected. Support various quantization styles including "soft" quantizing (applying to only a small percentage), swing, groove templates, and other timing variations. The quantize UI should be extremely minimal by default, with advanced options only made available in a contextual modal when needed. This keeps the interface clean and fast for common operations while providing full flexibility for power users. Quantize patches can be shared, saved, and quickly applied to selections, improving workflow efficiency and enabling consistent quantization styles across projects.
+
+### Channel Headroom Knobs and Gain Staging Analysis
+**Tag:** Pulse / Aura / Signal / DSP / Workflow  
+**Priority:** P2  
+**Status:** proposed  
+Concept to explore: implement headroom knobs on each channel allowing seamless pre-gain and equal post negative gain on either side of the effects processing list. This enables precise gain staging by adjusting input levels before processing and compensating output levels after processing, maintaining optimal signal levels throughout the chain. Complement this with detailed analysis of levels and loudness per-channel, providing real-time visual feedback on peak levels, RMS, LUFS, and other metering data. This combination allows for much simpler gain staging at mix time, giving users clear visibility and control over signal levels at every stage of processing without needing to insert dedicated gain plugins.
+
+### Plugin Gain Comparison Indicators
+**Tag:** Aura / UX / Pulse / Signal / Workflow  
+**Priority:** P2  
+**Status:** proposed  
+Offer users a visual guide on effects plugins showing how much gain each plugin is adding or subtracting, displayed directly within the processor chain view. This eliminates the need for external tools or manual level checking, providing immediate feedback on gain changes at each processing stage. The indicator should show both input and output levels with a clear visual comparison (e.g., before/after meters, gain delta display, or color-coded indicators). Potentially allow users to apply an automatic gain adjustment to compensate for plugin gain changes, maintaining consistent levels throughout the processing chain and simplifying gain staging workflows.
+
+### Modulation System
+**Tag:** Pulse / Aura / Signal / DSP / Workflow  
+**Priority:** P2  
+**Status:** proposed  
+Implement a modulation system similar to Bitwig's approach, with modulation generators (LFOs, envelopes, step sequencers, etc.) that can be routed to any parameter on any processor, instrument, or console channel. This provides powerful real-time control and automation capabilities, enabling complex parameter modulation without requiring traditional automation lanes. The system should support multiple modulation sources per parameter, with visual feedback showing modulation routing and active modulations. This enables creative sound design workflows and dynamic parameter control that goes beyond static automation curves.
+
+### Built-In Professional Analysis Tools
+**Tag:** Pulse / Aura / Signal / DSP / Workflow  
+**Priority:** P2  
+**Status:** proposed  
+Provide a full suite of professional-grade analysis tools built directly into the system, including spectrum analyzers, waveform displays, FFT analysis, loudness metering (LUFS, LU, etc.), phase correlation, stereo imaging, and other advanced analysis capabilities. Since these are built-in rather than external plugins, we can optimize data flow internally, sharing analysis data efficiently across the system without redundant processing. This eliminates the need for users to rely on external analysis plugins, provides consistent analysis capabilities across all projects, and enables tighter integration with the mixing and mastering workflow.
+
+### Customizable View Layouts and User Modes
+**Tag:** Aura / UX / Workflow  
+**Priority:** P2  
+**Status:** proposed  
+Enable customizable view layouts with the ability to enable or disable features within the main view, allowing users to create and save custom "modes" optimized for different use cases. Users should be able to build modes for writing, recording, mixing, mastering, and other workflows, showing or hiding specific UI elements, panels, and tools as needed. These modes can be saved, shared, and quickly switched between, reducing visual clutter and focusing the interface on the task at hand. This empowers users to create personalized workspace configurations that match their workflow preferences and the specific demands of each production phase.
+
