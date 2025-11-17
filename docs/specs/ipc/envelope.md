@@ -110,11 +110,11 @@ Every normal IPC message is a single JSON object with this shape:
   "origin": "aura|pulse|signal|composer",
   "target": "aura|pulse|signal|composer",
 
-  "domain": "project|transport|track|clip|lane|channel|processor|parameter|automation|routing|mixer|ui|engine|cohort|...",
+  "domain": "project|transport|track|clip|lane|channel|node|parameter|automation|routing|mixer|ui|engine|cohort|...",
 
   "kind": "command|event|snapshot|response|error",
 
-  "type": "project.open|project.snapshot|transport.play|track.create|processor.add|...",
+  "type": "project.open|project.snapshot|transport.play|track.create|node.add|...",
 
   "priority": "realtime|high|normal|low",
 
@@ -168,7 +168,7 @@ Every normal IPC message is a single JSON object with this shape:
 
   - `"project"`, `"transport"`,  
   - `"track"`, `"clip"`, `"lane"`, `"channel"`,  
-  - `"processor"`, `"parameter"`, `"automation"`,  
+  - `"node"`, `"parameter"`, `"automation"`,  
   - `"routing"`, `"mixer"`,  
   - `"ui"`,  
   - `"engine"`, `"cohort"`.
@@ -191,7 +191,7 @@ Every normal IPC message is a single JSON object with this shape:
   - `"project.open"`, `"project.snapshot"`,  
   - `"transport.play"`, `"transport.stateChanged"`,  
   - `"track.create"`, `"clip.split"`,  
-  - `"processor.add"`, `"parameter.setValue"`,  
+  - `"node.add"`, `"parameter.setValue"`,  
   - `"engine.cohortAssigned"`.
 
   Each domain spec enumerates the valid types and their payloads.
@@ -428,7 +428,7 @@ Standalone engine errors (e.g. plugin crashes) may be emitted as events:
   "type": "engine.pluginCrashed",
   "priority": "realtime",
   "payload": {
-    "processorId": "track.3.channel.proc.2",
+    "nodeId": "track.3.channel.node.2",
     "pluginIdentity": {
       "vendor": "ExampleVendor",
       "name": "ExamplePlugin",
@@ -548,8 +548,8 @@ Pulse will respond by:
   "payload": {
     "graphVersion": 12,
     "assignments": [
-      { "processorId": "track.3.channel.proc.1", "cohort": "live" },
-      { "processorId": "track.4.channel.proc.2", "cohort": "anticipative" }
+      { "nodeId": "track.3.channel.node.1", "cohort": "live" },
+      { "nodeId": "track.4.channel.node.2", "cohort": "anticipative" }
     ]
   },
   "error": null

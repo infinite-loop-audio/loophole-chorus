@@ -22,7 +22,7 @@ rebalance tracks.
   - [3.2 Anticipative Cohort](#32-anticipative-cohort)  
 - [4. Cohort Assignment (Pulse Responsibility)](#4-cohort-assignment-pulse-responsibility)  
   - [4.1 Determining Liveness](#41-determining-liveness)  
-  - [4.2 Deterministic vs Non-Deterministic Processors](#42-deterministic-vs-non-deterministic-processors)  
+  - [4.2 Deterministic vs Non-Deterministic Nodes](#42-deterministic-vs-non-deterministic-nodes)  
   - [4.3 Dependency Closure](#43-dependency-closure)  
   - [4.4 User Overrides](#44-user-overrides)  
 - [5. Execution Domains (Signal Responsibility)](#5-execution-domains-signal-responsibility)  
@@ -63,7 +63,7 @@ This design allows Loophole to:
 - handle much larger mixes than conventional DAWs,  
 - keep MIDI instruments responsive even under high CPU load,  
 - provide seamless “freeze-like” performance without manual freezing,  
-- dynamically reassign processors as the user interacts.
+- dynamically reassign nodes as the user interacts.
 
 ---
 
@@ -92,30 +92,30 @@ Processing Cohorts enable:
 
 ### 3.1 Live Cohort
 
-Processors must be in the Live Cohort if they:
+Nodes must be in the Live Cohort if they:
 
 - depend on live audio input,  
 - depend on live MIDI input,  
-- feed a live processor via sends or group tracks,  
+- feed a live node via sends or group tracks,  
 - have their plugin UI open,  
 - contain non-deterministic DSP (randomised, chaotic, external input dependent),  
-- have user-marked “Force Live”.
+- have user-marked "Force Live".
 
-Live processors:
+Live nodes:
 - run at the audio callback rate,  
 - use short buffers (64–128 samples),  
 - always respond instantly to gestures from Aura.
 
 ### 3.2 Anticipative Cohort
 
-Processors may be in the Anticipative Cohort if they:
+Nodes may be in the Anticipative Cohort if they:
 
 - are deterministic,  
 - have no live inputs,  
-- do not feed any live processor,  
-- are explicitly marked “Prefer Pre-Render” by the user.
+- do not feed any live node,  
+- are explicitly marked "Prefer Pre-Render" by the user.
 
-Anticipative processors:
+Anticipative nodes:
 - run on worker threads,  
 - use large buffers (hundreds of ms to several seconds),  
 - render into future timeline buffers (render horizon).
@@ -131,33 +131,33 @@ Pulse owns every decision regarding cohort membership. Signal must never guess.
 Pulse inspects:
 
 - track state (record-arm, monitoring),  
-- processor metadata,  
+- node metadata,  
 - routing structure,  
 - open UI windows (reported by Aura),  
 - user preferences.
 
-### 4.2 Deterministic vs Non-Deterministic Processors
+### 4.2 Deterministic vs Non-Deterministic Nodes
 
-Non-deterministic processors (e.g., analogue-modelled randomness, certain saturators):  
+Non-deterministic nodes (e.g., analogue-modelled randomness, certain saturators):  
 → automatically live.
 
-Deterministic processors:  
+Deterministic nodes:  
 → safe for anticipative rendering.
 
 Composer may enrich this metadata, but Pulse is the authority.
 
 ### 4.3 Dependency Closure
 
-If a processor is live, then:
+If a node is live, then:
 
-- all **downstream** processors must also be live.  
+- all **downstream** nodes must also be live.  
 - any **upstream node that provides live data** must be live.
 
 This is a directed graph reachability rule.
 
 ### 4.4 User Overrides
 
-Users may force a processor or track to:
+Users may force a node or track to:
 
 - **Live only**,  
 - **Prefer anticipative**,  
@@ -175,7 +175,7 @@ Signal runs both cohorts simultaneously.
 
 Handles:
 
-- all Live Cohort processors,  
+- all Live Cohort nodes,  
 - gesture updates,  
 - incoming MIDI and audio input,  
 - sample-accurate parameter application.
@@ -186,7 +186,7 @@ Runs in the audio callback thread.
 
 Handles:
 
-- all Anticipative Cohort processors,  
+- all Anticipative Cohort nodes,  
 - automation and tempo-aware pre-render,  
 - multi-second blocks.
 
@@ -207,7 +207,7 @@ Anticipative engine ensures all its outputs exist for every timestamp ≤ render
 
 ### 5.4 Buffer Integration
 
-Live processors read anticipative outputs via:
+Live nodes read anticipative outputs via:
 
 - timeline-aligned circular buffers,  
 - guaranteed sample alignment,  
@@ -236,7 +236,7 @@ Occurs when:
 - live gesture occurs,  
 - routing changes introduce live dependency.
 
-Pulse sends a cohort update; Signal prepares the processor in the live chain.
+Pulse sends a cohort update; Signal prepares the node in the live chain.
 
 ### 6.3 Crossfades and Safety
 
@@ -259,9 +259,9 @@ When switching from anticipative to live:
 ## 8. Interaction with Tracks, Channels and Lanes
 
 - Track flags influence cohort selection.  
-- LaneStream processors inherit cohort membership from the Channel they belong to.  
+- LaneStream nodes inherit cohort membership from the Channel they belong to.  
 - Audio Lanes pre-rendered in the anticipative domain behave similarly to track freezing.  
-- Processor order changes may require temporary rebalancing of cohort membership.
+- Node order changes may require temporary rebalancing of cohort membership.
 
 ---
 
@@ -305,7 +305,7 @@ User does not need to understand the engine internals for normal workflows.
 
 If anticipative engine falls behind:
 
-- Signal automatically promotes affected processors to the live cohort,  
+- Signal automatically promotes affected nodes to the live cohort,  
 - Pulse is notified,  
 - CPU load indication is shown in Aura,  
 - anticipative lead time is temporarily reduced.
@@ -313,7 +313,7 @@ If anticipative engine falls behind:
 If live engine overloads:
 
 - Aura warns the user,  
-- Pulse may demote some processors to anticipative mode if safe,  
+- Pulse may demote some nodes to anticipative mode if safe,  
 - background rendering may be throttled.
 
 ---
@@ -324,7 +324,7 @@ Potential future enhancements include:
 
 - adaptive machine-learned cohort prediction,  
 - multi-engine distributed anticipative rendering,  
-- GPU-based anticipative processors,  
+- GPU-based anticipative nodes,  
 - per-Clip anticipative snapshots,  
 - dynamic in-editor freeze visualisation,  
 - multi-device anticipative clustering.

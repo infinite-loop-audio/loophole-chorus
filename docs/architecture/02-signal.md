@@ -20,7 +20,7 @@ or structural inference. Pulse constructs the engine graph; Signal executes it.
 - [4. Engine Graph](#4-engine-graph)
   - [4.1 Graph Structure](#41-graph-structure)
   - [4.2 Nodes](#42-nodes)
-  - [4.3 Processor Order](#43-processor-order)
+  - [4.3 Node Order](#43-node-order)
   - [4.4 LaneStreams](#44-lanestreams)
   - [4.5 Graph Updates](#45-graph-updates)
 - [5. Plugin Hosting](#5-plugin-hosting)
@@ -74,7 +74,7 @@ Signal handles:
    Loading, initialising and running instrument and effect plugins.
 
 2. **Real-time DSP**
-   Executing processors sample-accurately.
+   Executing nodes sample-accurately.
 
 3. **Parameter updates**
    Applying automation and gestures at audio-rate.
@@ -86,7 +86,7 @@ Signal handles:
    Capturing and rendering audio to hardware.
 
 6. **Engine graph execution**
-   Running the processor chain constructed by Pulse.
+   Running the node graph constructed by Pulse.
 
 Signal does *not* manage routing rules, editing operations, or metadata resolution.
 
@@ -125,7 +125,7 @@ All IPC messages from Pulse are processed outside the audio thread.
 
 ### 4.1 Graph Structure
 
-Pulse sends Signal a linear processor chain. Signal does not build or modify the
+Pulse sends Signal a linear node graph. Signal does not build or modify the
 graph; it only prepares and executes it.
 
 ### 4.2 Nodes
@@ -138,9 +138,9 @@ Node types include:
 - **Utility DSP** (gain, pan, meters),
 - **Output nodes**.
 
-### 4.3 Processor Order
+### 4.3 Node Order
 
-Order is strictly serial. Signal executes processors in the order defined by Pulse.
+Order is strictly serial. Signal executes nodes in the order defined by Pulse.
 
 ### 4.4 LaneStreams
 
@@ -163,7 +163,7 @@ Pulse may send:
 Signal must:
 
 - commit these changes outside the audio thread,
-- prepare any new processors before activation,
+- prepare any new nodes before activation,
 - swap to the new graph atomically and safely.
 
 ---
@@ -205,7 +205,7 @@ Signal takes no part in UI layout, styling or event management beyond OS-level w
 Pulse registers each parameter with Signal:
 
 - parameter ID,
-- target processor,
+- target node,
 - scaling/normalisation,
 - smoothing behaviour.
 
@@ -275,8 +275,8 @@ Signal ensures:
 
 Signal receives commands for:
 
-- loading/unloading processors,
-- reordering processors,
+- loading/unloading nodes,
+- reordering nodes,
 - adding LaneStreams,
 - removing nodes,
 - updating routing,
@@ -295,7 +295,7 @@ Signal applies them without reinterpreting or validating semantics.
 ### 8.3 High-Rate Control Path
 
 Gesture updates are delivered via a dedicated low-latency channel. Signal applies
-them immediately to plugin processors.
+them immediately to plugin nodes.
 
 ### 8.4 Engine Status Events
 
@@ -312,7 +312,7 @@ Signal emits back to Pulse:
 
 Signal **never** interacts with Composer.
 
-Signal receives already-resolved processor identities, parameter targets and roles
+Signal receives already-resolved node identities, parameter targets and roles
 from Pulse. All metadata interpretation is complete before Signal receives the
 instruction.
 
@@ -341,14 +341,14 @@ and maintain both low-latency real-time responsiveness and maximum CPU efficienc
 ### 11.1 Live Engine
 
 The **Real-Time Engine** runs in the audio callback and executes all LIVE cohort
-processors:
+nodes:
 
 - record-armed tracks,
 - instrument tracks receiving live MIDI,
 - plugins with GUIs open,
-- processors marked non-deterministic,
+- nodes marked non-deterministic,
 - send/return busses feeding live nodes,
-- any downstream processors reachable from the above.
+- any downstream nodes reachable from the above.
 
 The live engine operates at short buffer sizes (64–128 samples) to maintain
 low-latency, sample-accurate processing. It pulls anticipative outputs from timeline
@@ -358,12 +358,12 @@ prioritises stability and responsiveness above all else.
 ### 11.2 Anticipative Engine
 
 The **Anticipative Engine** runs on worker threads and processes ANTICIPATIVE cohort
-processors far ahead of the playhead. These processors are deterministic and have no
+nodes far ahead of the playhead. These nodes are deterministic and have no
 real-time dependency:
 
-- processors that are deterministic,
-- processors not downstream of any live nodes,
-- processors that have no GUI open and are not receiving live input.
+- nodes that are deterministic,
+- nodes not downstream of any live nodes,
+- nodes that have no GUI open and are not receiving live input.
 
 The anticipative engine uses very large buffers (hundreds of ms to several seconds)
 for maximum CPU efficiency. It maintains a **render horizon buffer** representing
@@ -372,11 +372,11 @@ continuous, invisible “background freeze”.
 
 ### 11.3 Render Horizon
 
-The render horizon buffer maintains pre-rendered audio for anticipative processors
+The render horizon buffer maintains pre-rendered audio for anticipative nodes
 ahead of the playhead. Signal:
 
 - maintains a buffer representing playhead position + multiple seconds,
-- continuously renders anticipative processors into this buffer,
+- continuously renders anticipative nodes into this buffer,
 - invalidates portions when live gestures or parameter changes override them,
 - ensures the horizon remains far enough ahead to avoid underruns,
 - synchronises automation, modulation and tempo with Pulse.
@@ -397,10 +397,10 @@ All buffers are pre-allocated; no dynamic allocation occurs during processing.
 
 ### 11.5 Cohort Transitions
 
-When a processor changes cohort assignment (due to routing changes, GUI open/close,
+When a node changes cohort assignment (due to routing changes, GUI open/close,
 arming state, or user override), Signal must handle the transition smoothly:
 
-- **Preparing target domain**: Signal prepares the processor state in the target
+- **Preparing target domain**: Signal prepares the node state in the target
   domain (live or anticipative) before activation.
 
 - **Crossfading**: Signal crossfades between anticipative and live audio where

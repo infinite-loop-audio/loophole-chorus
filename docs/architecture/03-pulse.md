@@ -22,9 +22,9 @@ non-real-time state.
   - [4.1 Editing Transactions](#41-editing-transactions)
   - [4.2 Undo/Redo](#42-undoredo)
   - [4.3 Conflict and Overlap Rules](#43-conflict-and-overlap-rules)
-- [5. Channels and Processor Graphs](#5-channels-and-processor-graphs)
+- [5. Channels and Node Graphs](#5-channels-and-node-graphs)
   - [5.1 Channel Lifecycle](#51-channel-lifecycle)
-  - [5.2 Processor Chain Construction](#52-processor-chain-construction)
+  - [5.2 Node Graph Construction](#52-node-graph-construction)
   - [5.3 LaneStream Nodes](#53-lanestream-nodes)
   - [5.4 Graph Stability Constraints](#54-graph-stability-constraints)
 - [6. Parameter Model](#6-parameter-model)
@@ -86,7 +86,7 @@ Pulse is responsible for:
 2. **Editing and validation**
    Applying edit operations, merging, resolving conflicts, enforcing rules.
 
-3. **Channel and processor graph construction**
+3. **Channel and node graph construction**
    Producing the real-time-safe representation that Signal executes.
 
 4. **Parameter identity, aliasing, mapping and automation**
@@ -109,7 +109,7 @@ The project model consists of:
 
 - Tracks and nested Tracks,
 - Clips and Lanes,
-- Channels and processor chains,
+- Channels and node graphs,
 - Parameters, automation, routing,
 - Global Lanes (tempo, groove, etc.),
 - Media references.
@@ -120,7 +120,7 @@ Pulse enforces invariants such as:
 
 - Clip time ranges must not be inverted,
 - Lanes must be valid for Clip type and location,
-- Processor chain must remain stable and linear,
+- Node graph must remain stable and linear,
 - Routing must resolve to valid Channel targets,
 - Parameter identities must remain globally unique.
 
@@ -163,23 +163,23 @@ Pulse defines deterministic conflict resolution rules for:
 - overlapping Clips,
 - lane routing collisions,
 - parameter mapping conflicts,
-- processor reordering,
+- node reordering,
 - nested Track inheritance.
 
 Aura is not permitted to invent or assume rules; Pulse defines them.
 
 ---
 
-## 5. Channels and Processor Graphs
+## 5. Channels and Node Graphs
 
 ### 5.1 Channel Lifecycle
 
 A Track may have zero or one Channel. Pulse creates Channels lazily, on demand,
 when Clips require audio or instrument processing.
 
-### 5.2 Processor Chain Construction
+### 5.2 Node Graph Construction
 
-Pulse constructs the processor chain:
+Pulse constructs the node graph:
 
 - serial DSP nodes,
 - instrument nodes,
@@ -187,7 +187,7 @@ Pulse constructs the processor chain:
 - sends/returns (future),
 - channel gain, pan and metering nodes.
 
-Pulse ensures the chain is:
+Pulse ensures the graph is:
 
 - stable,
 - real-time safe,
@@ -201,16 +201,16 @@ LaneStreams represent audio from Lanes of Clips. Pulse:
 - creates them on first use,
 - routes audio Lanes to them,
 - allows user-defined splitting (additional LaneStreams),
-- inserts them at the top of the processor chain by default.
+- inserts them at the top of the node graph by default.
 
 ### 5.4 Graph Stability Constraints
 
 Pulse guarantees:
 
 - no mid-playback structural changes,
-- no implicit processor insertion or removal,
+- no implicit node insertion or removal,
 - stable ordering unless explicitly edited,
-- deterministic processor IDs.
+- deterministic node IDs.
 
 Signal receives graph updates only when necessary, and always in compact,
 incremental form.
@@ -224,7 +224,7 @@ incremental form.
 Pulse maintains canonical IDs for all parameters:
 
 - track/channel parameters,
-- processor parameters,
+- node parameters,
 - automation targets,
 - global parameters.
 
@@ -311,7 +311,7 @@ Signal has zero awareness of Composer.
 Pulse sends Signal:
 
 - Channel creation/destruction,
-- processor chain updates,
+- node graph updates,
 - routing changes,
 - parameter registration.
 
@@ -348,13 +348,13 @@ Rebasing is:
 
 ### 9.1 State Projection
 
-Pulse emits UI-ready projections (“snapshots”) that describe:
+Pulse emits UI-ready projections ("snapshots") that describe:
 
 - tracks,
 - clips,
 - lanes,
 - automation,
-- processors,
+- nodes,
 - parameters,
 - routing.
 
@@ -389,7 +389,7 @@ Pulse serialises:
 - clips and lanes,
 - routing,
 - parameters,
-- processor chains,
+- node graphs,
 - media references,
 - Composer metadata cache,
 - alias tables.
@@ -413,67 +413,67 @@ Saved projects must:
 
 ## 11. Processing Cohort Assignment and Engine Policies
 
-Pulse is responsible for analysing the processor graph and assigning each processor
+Pulse is responsible for analysing the node graph and assigning each node
 to either the **LIVE** or **ANTICIPATIVE** processing cohort. Pulse owns the policy
 for cohort assignment and ensures Signal never receives an invalid cohort
 configuration.
 
 ### 11.1 Graph Analysis
 
-Pulse analyses the processor graph to determine cohort assignments when:
+Pulse analyses the node graph to determine cohort assignments when:
 
 - playback starts,
 - routing changes,
 - plugin UIs open or close,
 - tracks are armed or unarmed,
-- processors change deterministic status,
+- nodes change deterministic status,
 - user overrides are applied.
 
 The analysis must be efficient and deterministic, producing consistent results for
 identical graph states.
 
-### 11.2 Deterministic vs Non-Deterministic Processors
+### 11.2 Deterministic vs Non-Deterministic Nodes
 
-Pulse determines whether a processor is deterministic based on:
+Pulse determines whether a node is deterministic based on:
 
-- processor type and characteristics,
+- node type and characteristics,
 - plugin metadata from Composer,
-- explicit processor flags,
+- explicit node flags,
 - historical behaviour (if tracked).
 
-**Non-deterministic processors** include:
+**Non-deterministic nodes** include:
 
-- processors with GUIs open (user interaction may affect processing),
-- processors marked as non-deterministic by plugin metadata,
-- processors that have exhibited non-deterministic behaviour.
+- nodes with GUIs open (user interaction may affect processing),
+- nodes marked as non-deterministic by plugin metadata,
+- nodes that have exhibited non-deterministic behaviour.
 
-Non-deterministic processors are always assigned to the LIVE cohort.
+Non-deterministic nodes are always assigned to the LIVE cohort.
 
-**Deterministic processors** can be assigned to the ANTICIPATIVE cohort if they meet
+**Deterministic nodes** can be assigned to the ANTICIPATIVE cohort if they meet
 other criteria (not downstream of live nodes, no real-time dependencies).
 
 ### 11.3 Routing and Dependency Closure
 
-Pulse propagates “liveness” via dependency closure:
+Pulse propagates "liveness" via dependency closure:
 
-- processors requiring immediate processing (armed tracks, live MIDI, open GUIs) are
+- nodes requiring immediate processing (armed tracks, live MIDI, open GUIs) are
   marked as LIVE,
 - everything downstream of a LIVE node becomes LIVE (dependency closure),
-- send/return busses feeding LIVE nodes cause their source processors to become LIVE,
+- send/return busses feeding LIVE nodes cause their source nodes to become LIVE,
 - the entire signal path from any LIVE source to the output is marked LIVE.
 
-Pulse performs a transitive closure analysis to ensure all processors reachable from
+Pulse performs a transitive closure analysis to ensure all nodes reachable from
 any LIVE source are correctly assigned to the LIVE cohort.
 
 ### 11.4 User Overrides
 
 Pulse supports user overrides for cohort assignment:
 
-- **Force Live**: User may force a processor to always run in the LIVE cohort,
-  regardless of other factors. This may be used for processors that need immediate
+- **Force Live**: User may force a node to always run in the LIVE cohort,
+  regardless of other factors. This may be used for nodes that need immediate
   response or for debugging purposes.
 
-- **Prefer Pre-Render**: User may prefer a processor to run in the ANTICIPATIVE
+- **Prefer Pre-Render**: User may prefer a node to run in the ANTICIPATIVE
   cohort if possible, maximising CPU efficiency. This override is advisory; Pulse
   still assigns LIVE if required by dependency closure or non-determinism.
 
@@ -481,7 +481,7 @@ Overrides are persisted in the project state and respected during graph analysis
 
 ### 11.5 Cohort Assignment Property
 
-Each processor in the engine graph has a property:
+Each node in the engine graph has a property:
 
 - `processingCohort: live | anticipative`
 
@@ -490,7 +490,7 @@ This property is:
 - assigned by Pulse during graph analysis,
 - included in graph instructions sent to Signal,
 - updated dynamically when graph state changes,
-- validated to ensure consistency (e.g., no anticipative processor downstream of a
+- validated to ensure consistency (e.g., no anticipative node downstream of a
   live one).
 
 ### 11.6 Dynamic Cohort Updates
@@ -504,18 +504,18 @@ When cohort assignments change, Pulse:
 - sends cohort update messages to Signal.
 
 Pulse must handle cohort transitions gracefully, ensuring Signal can transition
-processors between domains without audio glitches or discontinuities.
+nodes between domains without audio glitches or discontinuities.
 
 ### 11.7 Signal Coordination
 
 Pulse sends cohort assignment information to Signal via:
 
-- processor creation/update messages (include `processingCohort` property),
+- node creation/update messages (include `processingCohort` property),
 - explicit cohort update messages (when cohorts change without other structural
   changes),
-- full graph rebase messages (include cohort assignments for all processors).
+- full graph rebase messages (include cohort assignments for all nodes).
 
-Pulse ensures Signal always has a complete, valid view of processor cohort
+Pulse ensures Signal always has a complete, valid view of node cohort
 assignments before playback begins or during transitions.
 
 ---

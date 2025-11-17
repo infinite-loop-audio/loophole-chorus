@@ -73,7 +73,7 @@ new state.
 Aura is responsible for:
 
 1. **Rendering**
-   Visualising Tracks, Clips, Lanes, Channels, processors, automation and
+   Visualising Tracks, Clips, Lanes, Channels, nodes, automation and
    parameters.
 
 2. **User Interaction**
@@ -150,9 +150,9 @@ Aura sends high-level intents such as:
 - “split clip at time X”,
 - “create audio lane”,
 - “move clip to track N”,
-- “add instrument processor”,
-- “set parameter X to value Y”,
-- “route lane to processor Z”.
+- "add instrument node",
+- "set parameter X to value Y",
+- "route lane to node Z".
 
 Pulse validates and executes (or rejects) these intents.
 
@@ -236,7 +236,7 @@ Because Clips define Lanes, Aura dynamically allocates editors based on Clip con
 Aura renders:
 
 - Channels (when attached to Tracks),
-- processors in order,
+- nodes in order,
 - LaneStream nodes,
 - inserts, sends (future),
 - meters and gain/pan.
@@ -263,7 +263,7 @@ Aura shows plugin lists based on:
 - metadata (possibly Composer-enhanced),
 - user history.
 
-Pulse provides the available processor list; Aura never queries Signal.
+Pulse provides the available node list; Aura never queries Signal.
 
 ---
 

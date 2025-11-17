@@ -377,8 +377,8 @@ Project integrity is always preserved.
 ## 10. Deterministic Behaviour Telemetry and Inference
 
 Composer gathers aggregated telemetry about plugin **determinism vs randomness**
-and uses statistical inference to classify processors as **deterministic-safe** or
-**non-deterministic**. This metadata informs Pulse’s Processing Cohort assignment
+and uses statistical inference to classify nodes as **deterministic-safe** or
+**non-deterministic**. This metadata informs Pulse's Processing Cohort assignment
 decisions, enabling safe anticipative rendering while preserving live performance
 for non-deterministic plugins.
 
@@ -392,7 +392,7 @@ Composer receives anonymous aggregate telemetry about:
 - responsiveness to transport seeking,
 - stability across versions and formats (CLAP vs VST3 vs AU),
 - frequency of cohort switching in Signal triggered by plugin behaviour,
-- user overrides marking a processor “Force Live” or “Prefer Pre-Render”.
+- user overrides marking a node "Force Live" or "Prefer Pre-Render".
 
 Composer does **not** receive any audio — only behavioural signatures. These
 signals are aggregated across many Loophole instances to build statistical
@@ -427,14 +427,14 @@ Pulse receives:
 
 Pulse consults Composer metadata when determining:
 
-- which processors can be moved to the Anticipative Cohort,
+- which nodes can be moved to the Anticipative Cohort,
 - which must remain Live,
 - when replacing a plugin with another instance or alternative format,
 - when deciding if automation on that plugin is safe for anticipative execution.
 
 Composer never makes decisions itself; it only provides metadata. Pulse combines
-Composer’s suggestions with local heuristics, user overrides, and real-time
-observation to assign processors to cohorts.
+Composer's suggestions with local heuristics, user overrides, and real-time
+observation to assign nodes to cohorts.
 
 ### 10.4 Privacy and Safety Boundaries
 

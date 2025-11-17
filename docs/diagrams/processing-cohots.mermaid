@@ -3,12 +3,12 @@ flowchart LR
     subgraph LIVE["Live Cohort<br>(Low Latency, Real-Time Thread)"]
         L1[Record-Armed Tracks]
         L2[Plugins with UI Open]
-        L3[Non-Deterministic Processors]
+        L3[Non-Deterministic Nodes]
         L4[Downstream of Live]
     end
 
     subgraph ANTICIPATIVE["Anticipative Cohort<br>(High-Latency, Worker Threads)"]
-        A1[Deterministic Processors]
+        A1[Deterministic Nodes]
         A2[Inactive Instruments]
         A3[Background FX]
     end

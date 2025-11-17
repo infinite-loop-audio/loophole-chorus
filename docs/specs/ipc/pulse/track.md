@@ -47,7 +47,7 @@ Clips and Lanes, and may optionally own a Channel for DSP processing.
 
 Pulse validates and applies all Track operations, updates the project model,
 and emits events notifying Aura of the resulting changes. Pulse may trigger
-operations in other domains (Channel, Lane, Processor, Routing) when Track
+operations in other domains (Channel, Lane, Node, Routing) when Track
 state changes require them.
 
 Tracks are identified by stable `trackId` values. Hierarchy is maintained using
@@ -151,7 +151,7 @@ Pulse stores this hint and may trigger a cohort re-evaluation.
 Attach or detach a Channel from a Track:
 
 - When enabling and no Channel exists, Pulse creates a Channel and initial
-  LaneStream processors.
+  LaneStream nodes.
 - When disabling, Pulse removes or deactivates the Channel according to
   project rules.
 
@@ -258,8 +258,8 @@ Processing policy hints directly feed into the Processing Cohorts system:
 
 Pulse determines whether Track-level changes require:
 
-- reassignment of processors between Live and Anticipative cohorts,
+- reassignment of nodes between Live and Anticipative cohorts,
 - invalidation of anticipative buffers,
-- or further updates in the Channel/Processor domains.
+- or further updates in the Channel/Node domains.
 
 Aura is not involved in cohort decisions.

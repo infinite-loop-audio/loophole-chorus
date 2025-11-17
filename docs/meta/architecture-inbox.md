@@ -27,12 +27,12 @@ considered. Include cross-references if relevant.
 
 ## Entries
 
-### Processor Determinism Classification
+### Node Determinism Classification
 **Tag:** Composer / Signal / Pulse  
 **Priority:** P1  
 **Status:** incorporated  
 Composer should collect behavioural telemetry to determine whether a plugin
-is deterministic or non-deterministic. This allows Pulse to safely place processors
+is deterministic or non-deterministic. This allows Pulse to safely place nodes
 into the anticipative cohort and Signal to avoid unpredictable behaviour in the
 background engine.
 
@@ -40,7 +40,7 @@ background engine.
 **Tag:** Aura / UX  
 **Priority:** P3  
 **Status:** proposed  
-Aura may display a small indicator showing whether a track or processor is running
+Aura may display a small indicator showing whether a track or node is running
 in the live or anticipative domain. Useful for debugging performance and improving
 user intuition around engine behaviour.
 
@@ -52,7 +52,7 @@ Add a dedicated IPC side-channel for ultra-fast parameter gestures (e.g., fast k
 movements), to avoid JSON overhead during continuous control. Pulse should still
 validate and route gestures but not block real-time flow.
 
-### Processor Identity Aliasing
+### Node Identity Aliasing
 **Tag:** Pulse / Composer  
 **Priority:** P2  
 **Status:** proposed  
@@ -90,13 +90,13 @@ Enable gesture-based tool selection in editors (e.g., piano roll) by holding an 
 **Tag:** Composer / Aura / UX  
 **Priority:** P2  
 **Status:** proposed  
-Implement processing contexts that detect track characteristics (e.g., drums, vocals, bass) and prioritize relevant plugin categories when loading FX. For example, a drum track would prioritize Drum category plugins, followed by Compressors, Shapers, etc. Reduces cognitive load and speeds up workflow by surfacing contextually relevant processors first.
+Implement processing contexts that detect track characteristics (e.g., drums, vocals, bass) and prioritize relevant plugin categories when loading FX. For example, a drum track would prioritize Drum category plugins, followed by Compressors, Shapers, etc. Reduces cognitive load and speeds up workflow by surfacing contextually relevant nodes first.
 
 ### Visual Plugin Browser
 **Tag:** Composer / Aura / UX  
 **Priority:** P2  
 **Status:** proposed  
-Transform plugin/processor browsing into a visual experience with interface thumbnail captures, intelligently-picked conceptual colors (matching the plugin's "feel" rather than static collection colors), thematic icons from a wide selection (potentially auto-applied), routing diagrams (e.g., multi-out configurations), determinism indicators, and plugin stability metrics. Enables faster visual recognition and selection of processors.
+Transform plugin/node browsing into a visual experience with interface thumbnail captures, intelligently-picked conceptual colors (matching the plugin's "feel" rather than static collection colors), thematic icons from a wide selection (potentially auto-applied), routing diagrams (e.g., multi-out configurations), determinism indicators, and plugin stability metrics. Enables faster visual recognition and selection of nodes.
 
 ### Fine-Grained Track Nesting Controls
 **Tag:** Aura / UX / Workflow  
@@ -162,13 +162,13 @@ Concept to explore: implement headroom knobs on each channel allowing seamless p
 **Tag:** Aura / UX / Pulse / Signal / Workflow  
 **Priority:** P2  
 **Status:** proposed  
-Offer users a visual guide on effects plugins showing how much gain each plugin is adding or subtracting, displayed directly within the processor chain view. This eliminates the need for external tools or manual level checking, providing immediate feedback on gain changes at each processing stage. The indicator should show both input and output levels with a clear visual comparison (e.g., before/after meters, gain delta display, or color-coded indicators). Potentially allow users to apply an automatic gain adjustment to compensate for plugin gain changes, maintaining consistent levels throughout the processing chain and simplifying gain staging workflows.
+Offer users a visual guide on effects plugins showing how much gain each plugin is adding or subtracting, displayed directly within the node graph view. This eliminates the need for external tools or manual level checking, providing immediate feedback on gain changes at each processing stage. The indicator should show both input and output levels with a clear visual comparison (e.g., before/after meters, gain delta display, or color-coded indicators). Potentially allow users to apply an automatic gain adjustment to compensate for plugin gain changes, maintaining consistent levels throughout the processing graph and simplifying gain staging workflows.
 
 ### Modulation System
 **Tag:** Pulse / Aura / Signal / DSP / Workflow  
 **Priority:** P2  
 **Status:** proposed  
-Implement a modulation system similar to Bitwig's approach, with modulation generators (LFOs, envelopes, step sequencers, etc.) that can be routed to any parameter on any processor, instrument, or console channel. This provides powerful real-time control and automation capabilities, enabling complex parameter modulation without requiring traditional automation lanes. The system should support multiple modulation sources per parameter, with visual feedback showing modulation routing and active modulations. This enables creative sound design workflows and dynamic parameter control that goes beyond static automation curves.
+Implement a modulation system similar to Bitwig's approach, with modulation generators (LFOs, envelopes, step sequencers, etc.) that can be routed to any parameter on any node, instrument, or console channel. This provides powerful real-time control and automation capabilities, enabling complex parameter modulation without requiring traditional automation lanes. The system should support multiple modulation sources per parameter, with visual feedback showing modulation routing and active modulations. This enables creative sound design workflows and dynamic parameter control that goes beyond static automation curves.
 
 ### Built-In Professional Analysis Tools
 **Tag:** Pulse / Aura / Signal / DSP / Workflow  

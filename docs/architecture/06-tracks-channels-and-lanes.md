@@ -48,7 +48,7 @@ A Channel is an engine-level construct representing audio signal processing. Cha
 
 A Channel contains:
 
-- zero or more processor nodes (plugins or DSP blocks),
+- zero or more nodes (plugins or DSP blocks),
 - zero or more LaneStream nodes (derived from Lanes),
 - routing metadata,
 - parameter states,
@@ -60,33 +60,33 @@ Channels never directly reference Tracks or Clips; they receive resolved graph i
 
 ---
 
-# 4. Processors
+# 4. Nodes
 
-Processors are plugins or DSP units inside a Channel. They MAY include:
+Nodes are plugins or DSP units inside a Channel. They MAY include:
 
 - virtual instruments,
 - audio effects,
-- MIDI processors,
+- MIDI nodes,
 - utility or analysis nodes.
 
-Processors sit in a linear chain with strict ordering. A processor MAY consume one or more LaneStreams as input. Serial mixing of LaneStreams is permitted and handled within the processor chain.
+Nodes sit in a linear graph with strict ordering. A node MAY consume one or more LaneStreams as input. Serial mixing of LaneStreams is permitted and handled within the node graph.
 
-Pulse is responsible for constructing and updating processor chains. Signal performs real-time execution.
+Pulse is responsible for constructing and updating node graphs. Signal performs real-time execution.
 
 ---
 
 # 5. Interaction with Composer (Metadata Only)
 
-Tracks, Lanes and Channels do not depend directly on Composer, but Pulse MAY use Composer metadata when resolving processor identities and parameter meanings during Track and Channel construction.
+Tracks, Lanes and Channels do not depend directly on Composer, but Pulse MAY use Composer metadata when resolving node identities and parameter meanings during Track and Channel construction.
 
 Composer provides:
 
 - normalised plugin identity across formats and versions,
 - logical (family-level) parameter identifiers,
 - semantic roles (e.g. `filter.cutoff`, `fx.mix`, `amp.attack`),
-- mapping suggestions when processors are replaced or updated.
+- mapping suggestions when nodes are replaced or updated.
 
-This metadata influences how Pulse interprets processor and parameter structures but does NOT alter the Track, Lane or Channel architecture. Signal remains unaware of Composer entirely; it receives only finalised processor and parameter instructions from Pulse.
+This metadata influences how Pulse interprets node and parameter structures but does NOT alter the Track, Lane or Channel architecture. Signal remains unaware of Composer entirely; it receives only finalised node and parameter instructions from Pulse.
 
 ---
 
@@ -102,7 +102,7 @@ Lanes are typed content streams inside Clips. Every Clip contains one or more La
 - device control (future),
 - global-only control lanes (e.g. tempo or groove lanes outside Tracks).
 
-Lanes define the content, but not the DSP. Audio-producing Lanes route to LaneStreams inside a Channel. MIDI Lanes route to instruments defined in the Channel’s processor list. Automation Lanes affect parameters in Pulse which translate into parameter updates for Signal.
+Lanes define the content, but not the DSP. Audio-producing Lanes route to LaneStreams inside a Channel. MIDI Lanes route to instruments defined in the Channel's node graph. Automation Lanes affect parameters in Pulse which translate into parameter updates for Signal.
 
 A Track does not define Lanes directly. Clips define Lanes. Tracks constrain where Clips appear.
 
@@ -118,7 +118,7 @@ Default behaviour:
 - Additional audio Lanes route to the same LaneStream unless the user explicitly splits them.
 - MIDI Lanes route to instruments selected via the UI.
 
-LaneStreams appear in the processor chain and MAY be reordered relative to other processors.
+LaneStreams appear in the node graph and MAY be reordered relative to other nodes.
 
 Signal executes LaneStreams as part of its processing graph.
 
@@ -151,7 +151,7 @@ There is no dedicated “Group Track” type. Routing determines whether a Track
 Automation exists as Lanes within Clips. Each automation Lane refers to:
 
 - a parameter (identified through Pulse),
-- a target processor (resolved by Pulse),
+- a target node (resolved by Pulse),
 - time-varying values.
 
 Automation MAY target:
@@ -187,9 +187,9 @@ Tracks cannot host global lanes.
 # 11. Summary
 
 - Tracks contain Clips and define structure.
-- Channels contain processors and define audio processing.
+- Channels contain nodes and define audio processing.
 - Lanes define Clip content.
-- LaneStreams bridge Lanes to Channel processors.
+- LaneStreams bridge Lanes to Channel nodes.
 - Nesting Tracks provides powerful structural organisation.
 - Composer influences metadata and mapping, not architecture.
 - Pulse resolves everything into a deterministic engine graph for Signal.

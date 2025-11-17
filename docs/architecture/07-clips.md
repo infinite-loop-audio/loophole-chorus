@@ -180,7 +180,7 @@ Audio lanes must route to a LaneStream node in the Track’s Channel chain.
 Default behaviour:
 
 - When a Track first receives audio in any Clip, Pulse ensures that the
-  Channel has a LaneStream node at the top of its processor chain.
+  Channel has a LaneStream node at the top of its node graph.
 - The first audio Lane added to a Clip routes to this LaneStream node by
   default.
 - If a second audio Lane is added to that Clip, it also routes to the same
@@ -194,7 +194,7 @@ Default behaviour:
 
 ### 4.4 Per-Clip Lane Routing (MIDI)
 
-MIDI lanes route to **instrument processors** in the Channel chain.
+MIDI lanes route to **instrument nodes** in the Channel graph.
 
 Default behaviour:
 
@@ -211,11 +211,11 @@ Aura exposes:
 
 This mirrors the audio lane behaviour:
 
-- adding MIDI content does not create a new processor by itself, but the UI
+- adding MIDI content does not create a new node by itself, but the UI
   provides a discoverable path to create and route a new instrument.
 - users can build sophisticated MIDI processing chains (MIDI FX before
   instruments, multiple instruments per Track, etc.) while retaining a clear
-  serial processor model.
+  serial node graph model.
 
 ---
 
@@ -241,13 +241,13 @@ MIDI Lanes contain:
 - pitch and modulation curves,
 - fold/hide channel routing rules.
 
-They may feed one or multiple instrument processors.
+They may feed one or multiple instrument nodes.
 
 ### 5.3 Automation Lanes
 
 Automation Lanes contain curves targeting:
 
-- parameters of processors on the Track’s Channel,
+- parameters of nodes on the Track's Channel,
 - parameters of other Channels (mounted automation),
 - potential device controls (future).
 
@@ -312,16 +312,16 @@ Track’s Channel, and therefore implicitly disables all Clips.
 At runtime, Pulse continuously computes:
 
 - which Clip Lanes are active at the current playhead,
-- which LaneStreams or instrument processors they should feed,
+- which LaneStreams or instrument nodes they should feed,
 - what automation values apply at that moment.
 
 ### 7.2 Lane → Channel Routing
 
-Pulse builds a stable Channel processor chain. Clip Lanes do *not* mutate the
-processor chain; instead:
+Pulse builds a stable Channel node graph. Clip Lanes do *not* mutate the
+node graph; instead:
 
 - audio Lanes are mapped to the configured LaneStream slots,
-- MIDI Lanes are mapped to instrument processors,
+- MIDI Lanes are mapped to instrument nodes,
 - automation Lanes generate parameter control signals.
 
 ### 7.3 State Updates
@@ -384,7 +384,7 @@ The Clip model is intentionally flexible. Future extensions may include:
 - multi-take Clip containers,
 - comp lanes inside a Clip,
 - per-clip routing to subgroup Channels,
-- per-clip Lane processors,
+- per-clip Lane nodes,
 - Clip-level expressions or modulation sources.
 
 These will integrate cleanly with the existing Clip → Lane → Channel model.

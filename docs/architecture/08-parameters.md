@@ -2,7 +2,7 @@
 
 This document defines how parameters are represented, identified, mapped,
 automated and resolved across the Loophole system. Parameters are central to
-automation, modulation, mixing, processor control and UI interactions. The model
+automation, modulation, mixing, node control and UI interactions. The model
 must support stability across plugin formats and versions, and provide resilience
 in the face of plugin updates or replacements.
 
@@ -73,18 +73,18 @@ plugin format or vendor naming.
 All parameters use **fully qualified IDs** constructed from:
 
 ```
-entityType.entityId.processorId.parameterId
+entityType.entityId.nodeId.parameterId
 ```
 
 Examples:
 
 ```
 track.12.channel.gain
-track.5.processor.7.cutoff
+track.5.node.7.cutoff
 clip.19.lane.3.automation
 ```
 
-Plugin parameters use processor-scoped parameter IDs.
+Plugin parameters use node-scoped parameter IDs.
 
 Qualified IDs guarantee uniqueness even under:
 
@@ -108,7 +108,7 @@ Parameter IDs MUST remain stable:
 
 - across saves,
 - across undo/redo,
-- across simple processor insertions/removals,
+- across simple node insertions/removals,
 - across plugin format switches,
 - across plugin updates (where mapping is possible).
 
@@ -270,7 +270,7 @@ When switching between VST3, CLAP or AU:
 
 ### 7.3 Plugin Replacement
 
-When the user replaces a processor:
+When the user replaces a node:
 
 - Pulse uses semantic roles and Composer metadata to suggest likely equivalents,
 - user can confirm or override mappings,

@@ -11,7 +11,7 @@ or Clip. Each Lane:
 - has a `laneType` (MIDI, audio, automation, video, device, etc.),
 - may appear in one or more Clips,
 - may carry content (handled by the corresponding Lane-type domain),
-- may be routed to a LaneStream processor in the Track’s Channel,
+- may be routed to a LaneStream node in the Track's Channel,
 - appears in a Clip in a user-defined order for editing.
 
 Pulse owns all Lane state. Aura expresses editing intent only.
@@ -48,7 +48,7 @@ Lanes:
 - belong logically to a Track,
 - are referenced by Clips,
 - may or may not carry content at a given Clip position,
-- may route to one or more LaneStream processors in the Track’s Channel,
+- may route to one or more LaneStream nodes in the Track's Channel,
 - may specify presentation properties (colour, name, collapsed state).
 
 The Lane domain governs the existence, identity, presentation and routing of
@@ -120,18 +120,18 @@ Payload fields include:
 
 ### 3.3 Routing and LaneStream Association
 
-Tracks may have multiple LaneStream processors in their Channel. Lanes specify
+Tracks may have multiple LaneStream nodes in their Channel. Lanes specify
 which LaneStream receives their output.
 
 **`lane.setLaneStream`**  
-Assign the Lane’s output to a specific LaneStream processor.
+Assign the Lane's output to a specific LaneStream node.
 
 Fields:
 
 - `laneId`,
 - `laneStreamId` (nullable to unset routing).
 
-Pulse updates routing and may issue Channel/Processor domain updates.
+Pulse updates routing and may issue Channel/Node domain updates.
 
 **`lane.setSendLevel`**  
 Set the mix level or weighting when a Lane outputs to a LaneStream.
@@ -208,12 +208,12 @@ Collapsed/expanded state updated.
 ### 4.3 Routing Events
 
 **`lane.laneStreamChanged`**  
-The Lane’s associated LaneStream processor has changed.
+The Lane's associated LaneStream node has changed.
 
 **`lane.sendLevelChanged`**  
 Mixing or routing weight updated.
 
-Pulse may dispatch additional Channel or Processor domain events if the Lane’s
+Pulse may dispatch additional Channel or Node domain events if the Lane's
 routing change requires Channel graph updates.
 
 ---

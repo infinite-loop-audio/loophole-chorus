@@ -197,7 +197,7 @@ anticipative buffers:
 
 - **Cohort decisions** are made entirely in Pulse and sent to Signal as:
   - graph updates
-  - processor annotations
+  - node annotations
 - **Project load operations** (`project.open`, `project.new`) trigger:
   - fresh cohort assignment in Pulse
   - graph rebuild instructions to Signal
