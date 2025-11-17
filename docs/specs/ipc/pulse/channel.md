@@ -279,7 +279,7 @@ However, Channel changes may:
 - invalidate anticipative buffers,
 - trigger cohort reassignment via Pulse → Signal updates.
 
-Cohort behaviour is governed by the Processing Cohorts architecture document.
+Cohort behaviour is governed by the [Processing Cohorts](../architecture/10-processing-cohorts-and-anticipative-rendering.md) architecture document.
 
 Aura never interacts with cohorts directly; Channel events may trigger UI cues
 (e.g. meter resets, graph rebuild animations).

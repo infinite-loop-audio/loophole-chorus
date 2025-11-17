@@ -15,7 +15,7 @@ Nodes may represent:
 - utility nodes (latency compensators, channel mergers/splitters).
 
 Nodes are ordered within a Channel, form part of the larger real-time/anticipative
-cohort model, and own **parameters** defined in the Parameter domain.
+processing cohort (PC) model, and own **parameters** defined in the Parameter domain.
 
 Pulse is the authoritative owner of Node identity, structure, ordering and metadata.
 
@@ -51,7 +51,7 @@ Nodes form the processing chain of a Channel. Each Node:
 - has parameters (defined in the Parameter domain),
 - may host plugin UI state (via the UI domain),
 - participates in Pulse → Signal graph construction,
-- may be assigned to the Live or Anticipative cohort.
+- may be assigned to the live or anticipative cohort.
 
 For an architectural overview of how Nodes participate in the mixer and
 console model, see
@@ -273,5 +273,5 @@ Node changes may, however:
 - invalidate anticipative render buffers,
 - trigger graph rebuilds in Signal.
 
-Cohort semantics are described in the Processing Cohorts architecture document.  
+Cohort semantics are described in the [Processing Cohorts](../architecture/10-processing-cohorts-and-anticipative-rendering.md) architecture document.  
 Pulse makes all cohort decisions; Aura simply reflects state visually where needed.

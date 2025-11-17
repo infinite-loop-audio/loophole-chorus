@@ -382,7 +382,7 @@ The Engine Diagnostics domain relates to:
   Diagnostics focuses on their impact on engine performance.
 
 - **Processing Cohorts**  
-  Cohort definitions and behaviour are described in architecture docs; this
+  Processing cohort (PC) definitions and behaviour are described in architecture docs; this
   domain reports their runtime status and performance.
 
 - **Automation and Gesture**  

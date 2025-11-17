@@ -12,7 +12,7 @@ A Track may:
 - own a Channel (DSP processing chain),
 - contain Clips and Lanes,
 - propagate user-facing flags (mute, solo, arm, monitor),
-- define processing policy hints for cohort assignment.
+- define processing policy hints for processing cohort (PC) assignment.
 
 Pulse is always the **source of truth** for Track structure and Track metadata.
 Aura never mutates Track data directly.
@@ -142,7 +142,7 @@ Unspecified flags remain unchanged. Pulse applies the update and emits a
 Set processing policy hints influencing cohort assignment. The `mode` field is:
 
 - `auto` – Pulse decides based on routing and metadata,
-- `forceLive` – request Live cohort where safe,
+- `forceLive` – request live cohort where safe,
 - `preferAnticipative` – request anticipative rendering where safe.
 
 Pulse stores this hint and may trigger a cohort re-evaluation.
@@ -285,12 +285,12 @@ Track domain operations are **never** processed on the audio thread. They may,
 however, trigger changes that lead to Signal graph rebuilds or cohort updates
 (e.g. changing Track flags or processing policy).
 
-Processing policy hints directly feed into the Processing Cohorts system:
+Processing policy hints directly feed into the processing cohort system:
 [@chorus:/docs/architecture/10-processing-cohorts-and-anticipative-rendering.md](../../architecture/10-processing-cohorts-and-anticipative-rendering.md)
 
 Pulse determines whether Track-level changes require:
 
-- reassignment of nodes between Live and Anticipative cohorts,
+- reassignment of nodes between live and anticipative cohorts,
 - invalidation of anticipative buffers,
 - or further updates in the Channel/Node domains.
 

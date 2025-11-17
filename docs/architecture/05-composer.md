@@ -510,7 +510,7 @@ Project integrity is always preserved.
 
 Composer gathers aggregated telemetry about plugin **determinism vs randomness**
 and uses statistical inference to classify nodes as **deterministic-safe** or
-**non-deterministic**. This metadata informs Pulse's Processing Cohort assignment
+**non-deterministic**. This metadata informs Pulse's processing cohort (PC) assignment
 decisions, enabling safe anticipative rendering while preserving live performance
 for non-deterministic plugins.
 
@@ -559,8 +559,8 @@ Pulse receives:
 
 Pulse consults Composer metadata when determining:
 
-- which nodes can be moved to the Anticipative Cohort,
-- which must remain Live,
+- which nodes can be moved to the anticipative cohort,
+- which must remain live,
 - when replacing a plugin with another instance or alternative format,
 - when deciding if automation on that plugin is safe for anticipative execution.
 

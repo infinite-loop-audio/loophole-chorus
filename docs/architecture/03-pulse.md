@@ -414,7 +414,7 @@ Saved projects must:
 ## 11. Processing Cohort Assignment and Engine Policies
 
 Pulse is responsible for analysing the node graph and assigning each node
-to either the **LIVE** or **ANTICIPATIVE** processing cohort. Pulse owns the policy
+to either the **live** or **anticipative** processing cohort (PC). Pulse owns the policy
 for cohort assignment and ensures Signal never receives an invalid cohort
 configuration.
 

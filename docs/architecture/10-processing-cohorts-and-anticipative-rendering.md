@@ -1,7 +1,7 @@
 # Processing Cohorts and Anticipative Rendering
 
-This document defines the architecture for Loophole’s dual-domain audio
-processing system: **Processing Cohorts**. Processing Cohorts allow the engine to
+This document defines the architecture for Loophole's dual-domain audio
+processing system: **processing cohorts (PC)**. Processing cohorts allow the engine to
 simultaneously deliver extremely low-latency interaction for live performance
 while performing heavy DSP on large buffers in the background. This enables
 Loophole to scale to projects that would otherwise exceed real-time CPU limits.
@@ -48,12 +48,12 @@ rebalance tracks.
 
 Loophole separates DSP work into two parallel processing domains:
 
-1. **Live Cohort**  
+1. **Live cohort**  
    - extremely low latency  
    - sample-accurate response to user input  
    - required for recording, playing instruments, manipulating parameters live  
 
-2. **Anticipative Cohort**  
+2. **Anticipative cohort**  
    - processed ahead of the playhead  
    - uses very large buffer sizes  
    - can effectively pre-render entire sections of the project in background  
@@ -69,7 +69,7 @@ This design allows Loophole to:
 
 ## 2. Goals
 
-Processing Cohorts enable:
+Processing cohorts enable:
 
 1. **Scalability**  
    Heavy projects can run smoothly by pushing safe portions into anticipative rendering.
@@ -92,7 +92,7 @@ Processing Cohorts enable:
 
 ### 3.1 Live Cohort
 
-Nodes must be in the Live Cohort if they:
+Nodes must be in the live cohort if they:
 
 - depend on live audio input,  
 - depend on live MIDI input,  
@@ -108,7 +108,7 @@ Live nodes:
 
 ### 3.2 Anticipative Cohort
 
-Nodes may be in the Anticipative Cohort if they:
+Nodes may be in the anticipative cohort if they:
 
 - are deterministic,  
 - have no live inputs,  
@@ -175,7 +175,7 @@ Signal runs both cohorts simultaneously.
 
 Handles:
 
-- all Live Cohort nodes,  
+- all live cohort nodes,  
 - gesture updates,  
 - incoming MIDI and audio input,  
 - sample-accurate parameter application.
@@ -186,7 +186,7 @@ Runs in the audio callback thread.
 
 Handles:
 
-- all Anticipative Cohort nodes,  
+- all anticipative cohort nodes,  
 - automation and tempo-aware pre-render,  
 - multi-second blocks.
 

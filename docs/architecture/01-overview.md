@@ -207,11 +207,11 @@ Composer MAY be unavailable; in that case Pulse MUST fall back to local metadata
 
 ## 5.6 Processing Cohorts and Anticipative Rendering
 
-Loophole employs a dual-engine DSP architecture that separates processing into two cohorts: **LIVE** and **ANTICIPATIVE**. This design enables extremely low-latency interaction for live performance whilst simultaneously performing heavy DSP on large buffers in the background, allowing Loophole to scale to projects that would otherwise exceed real-time CPU limits.
+Loophole employs a dual-engine DSP architecture that separates processing into two processing cohorts (PC): **live** and **anticipative**. This design enables extremely low-latency interaction for live performance whilst simultaneously performing heavy DSP on large buffers in the background, allowing Loophole to scale to projects that would otherwise exceed real-time CPU limits.
 
-The **Live Cohort** handles nodes that require sample-accurate response to user input, live audio/MIDI input, or contain non-deterministic DSP. These nodes run at the audio callback rate with short buffers (64–128 samples) and always respond instantly to gestures.
+The **live cohort** handles nodes that require sample-accurate response to user input, live audio/MIDI input, or contain non-deterministic DSP. These nodes run at the audio callback rate with short buffers (64–128 samples) and always respond instantly to gestures.
 
-The **Anticipative Cohort** processes deterministic nodes ahead of the playhead using very large buffers (hundreds of milliseconds to several seconds). Signal maintains a render horizon that stays ahead of the playhead, effectively pre-rendering entire sections of the project in the background.
+The **anticipative cohort** processes deterministic nodes ahead of the playhead using very large buffers (hundreds of milliseconds to several seconds). Signal maintains a render horizon that stays ahead of the playhead, effectively pre-rendering entire sections of the project in the background.
 
 Pulse owns all cohort assignment decisions, determining membership based on liveness requirements, deterministic behaviour metadata (from Composer), routing dependencies, and user preferences. Signal executes these assignments using dual schedulers: a real-time engine for the live cohort and an anticipative engine running on worker threads. The system dynamically switches nodes between cohorts as the user interacts (e.g., opening plugin UIs, arming tracks), with graph-driven dependency closure ensuring correct propagation of liveness requirements.
 

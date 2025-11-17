@@ -11,7 +11,7 @@ It covers commands and events for managing:
 - clip-relative timebases.
 
 Pulse owns the authoritative timebase model.  
-Signal uses it to schedule audio, automation and cohorts.  
+Signal uses it to schedule audio, automation and processing cohorts (PC).  
 Aura visualises it and provides editing tools (tempo lanes, signature markers).
 
 ---

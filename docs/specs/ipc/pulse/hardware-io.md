@@ -211,7 +211,7 @@ Pulse exposes:
 - effective clock source (where known),
 - reported input/output/round-trip latency estimates.
 
-Automation, cohort scheduling and anticipative rendering may use this
+Automation, processing cohort (PC) scheduling and anticipative rendering may use this
 information to compensate for hardware latency where appropriate.
 
 ### 2.5 Machine Identity

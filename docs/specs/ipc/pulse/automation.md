@@ -59,7 +59,7 @@ Pulse:
 
 - stores and evaluates automation,
 - resolves precedence between automation, direct parameter changes and gestures,
-- coordinates with Processing Cohorts and anticipative rendering.
+- coordinates with processing cohorts (PC) and anticipative rendering.
 
 For conceptual background see:
 
@@ -448,8 +448,7 @@ Pulse is responsible for:
 - invalidating anticipative renders when automation changes affect the
   anticipative window.
 
-Cohort details and anticipative behaviour are described in the Processing
-Cohorts architecture document. The Automation domain provides the time-based
+Cohort details and anticipative behaviour are described in the [Processing Cohorts](../architecture/10-processing-cohorts-and-anticipative-rendering.md) architecture document. The Automation domain provides the time-based
 control data; cohort logic determines when and how those changes affect
 rendered audio.
 

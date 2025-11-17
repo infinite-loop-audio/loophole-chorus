@@ -474,7 +474,7 @@ than Recording configuration itself; Recording snapshots focus on configuration.
 
 ## 6. Realtime and Cohort Considerations
 
-Recording interacts closely with realtime and cohort logic:
+Recording interacts closely with realtime and processing cohort (PC) logic:
 
 - Armed Lanes typically belong to the **live cohort** or must at least have
   live monitoring paths, even if their downstream processing can be

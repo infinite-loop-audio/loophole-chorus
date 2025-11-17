@@ -121,7 +121,7 @@ include (non-exhaustively):
 - various routing and utility Nodes.
 
 Nodes own parameters (Parameter domain) and are assigned to cohorts in the
-Processing Cohorts architecture.
+[Processing Cohorts](./10-processing-cohorts-and-anticipative-rendering.md) architecture.
 
 For details, see the
 [Pulse Node Domain Specification](../specs/ipc/pulse/node.md).

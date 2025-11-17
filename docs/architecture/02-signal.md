@@ -334,13 +334,13 @@ but none of these form part of the project state.
 
 ## 11. Processing Cohorts and Anticipative Rendering
 
-Loophole’s engine supports two processing domains: **LIVE** and **ANTICIPATIVE**.
+Loophole's engine supports two processing domains: **live** and **anticipative** processing cohorts (PC).
 Signal runs two complementary processing engines to handle these cohorts efficiently
 and maintain both low-latency real-time responsiveness and maximum CPU efficiency.
 
 ### 11.1 Live Engine
 
-The **Real-Time Engine** runs in the audio callback and executes all LIVE cohort
+The **Real-Time Engine** runs in the audio callback and executes all live cohort
 nodes:
 
 - record-armed tracks,

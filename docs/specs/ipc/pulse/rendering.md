@@ -150,10 +150,10 @@ Pulse validates and normalises ranges before sending to Signal.
 
 ### 2.5 Rendering Cohorts
 
-Rendering uses cohorts differently:
+Rendering uses processing cohorts (PC) differently:
 
 - offline renders may temporarily convert Nodes to **offline cohorts**,
-- live-cohort Nodes that require real-time behaviour may need to be replaced
+- live cohort Nodes that require real-time behaviour may need to be replaced
   with offline-safe equivalents,
 - anticipative cohorts may expand render horizon aggressively,
 - rendering may run with a modified automation schedule.

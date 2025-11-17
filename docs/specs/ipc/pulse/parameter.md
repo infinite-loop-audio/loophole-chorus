@@ -359,8 +359,8 @@ snapshot definition and emits `parameter.valueChanged` and/or
 
 ## 7. Realtime and Cohort Considerations
 
-Parameter changes affect Nodes that are assigned to cohorts (Live vs
-Anticipative). Pulse is responsible for:
+Parameter changes affect Nodes that are assigned to cohorts (live vs
+anticipative). Pulse is responsible for:
 
 - dispatching parameter changes to Signal threads in a realtime-safe manner,
 - integrating gesture updates with cohort-managed nodes,
@@ -369,7 +369,7 @@ Anticipative). Pulse is responsible for:
 The Parameter domain itself is not directly executed on the audio thread, but
 its commands and events must be compatible with realtime-safe propagation.
 
-Cohort semantics are defined in the Processing Cohorts architecture document.
+Cohort semantics are defined in the [Processing Cohorts](../architecture/10-processing-cohorts-and-anticipative-rendering.md) architecture document.
 
 ---
 
