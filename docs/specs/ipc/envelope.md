@@ -586,3 +586,4 @@ its live/anticipative execution plans accordingly.
 
 Aura treats this as the authoritative view of the project model (or
 view-specific subset), discarding any conflicting local assumptions.
+

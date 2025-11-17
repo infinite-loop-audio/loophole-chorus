@@ -139,20 +139,25 @@ The following structure is recommended (and expected) as the directory grows:
 ```
 @chorus:/docs/specs/
   ipc/
+    envelope.md
+    overview.md
+    semantics.md
+    pulse/
+      project.md
+      track.md
+      clip.md
+      lane.md
+      transport.md
     signal/
       commands.schema.json
       telemetry.schema.json
       handshake.schema.json
-    pulse/
-      project.snapshot.schema.json
-      change-operations.schema.json
   data/
     plugin-descriptor.schema.json
     track.schema.json
     routing.schema.json
     automation.schema.json
   guidelines/
-    ipc-semantics.md
     versioning.md
     realtime-safety.md
 ```

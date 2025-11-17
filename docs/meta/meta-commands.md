@@ -207,7 +207,7 @@ Agents MUST NOT:
 ```json
 {
   "op": "rename_heading",
-  "target": "docs/specs/ipc-semantics.md",
+  "target": "docs/specs/ipc/semantics.md",
   "section": "## Timing",
   "content": "## Message Timing Model"
 }
