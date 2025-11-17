@@ -53,7 +53,11 @@ Nodes form the processing chain of a Channel. Each Node:
 - participates in Pulse → Signal graph construction,
 - may be assigned to the Live or Anticipative cohort.
 
-Aura manipulates Nodes at the level of the user’s timeline/mixer editing intent;
+For an architectural overview of how Nodes participate in the mixer and
+console model, see
+[Mixing Model and Console Architecture](../../architecture/11-mixing-console.md).
+
+Aura manipulates Nodes at the level of the user's timeline/mixer editing intent;
 Pulse owns the authoritative DSP graph and enforces constraints.
 
 ---
@@ -68,11 +72,14 @@ Pulse recognises a core set of Node types:
 - **PluginNode**  
   Wraps a plugin instance (VST, CLAP, AU) for instrument or effect processing.
 
-- **GainNode / PanNode / FaderNode / MixerNode**  
-  Built-in mixing utilities. The Channel fader and pan are realised as FaderNode and PanNode within the Channel’s Node graph, enabling pre/post-fader send behaviour to be defined purely by Node graph topology.
+- **FaderNode / PanNode**  
+  Built-in Nodes that implement the Channel fader and pan. FaderNode and PanNode are explicitly realised within the Channel's Node graph, enabling pre/post-fader send behaviour to be defined purely by Node graph topology.
+
+- **GainNode / MixerNode**  
+  Built-in mixing utilities for gain adjustment and channel merging/splitting.
 
 - **SendNode**  
-  Taps the Channel signal at a specific point in the Node graph and sends a copy to a target Channel. The position of the SendNode in the Node list defines pre/post-fader and pre/post-other-processing behaviour.
+  Taps the Channel signal at its position in the Node list and routes a copy to a target Channel. The position of the SendNode relative to other Nodes (particularly FaderNode) defines pre/post-fader and pre/post-other-processing behaviour.
 
 - **ReturnNode**  
   Utility Node for FX return or specialised merge paths, if required by future designs.

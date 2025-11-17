@@ -53,6 +53,9 @@ Channel. A Channel is responsible for:
 - emitting metering and analysis data,
 - integrating with cohort assignment decisions.
 
+The overall mixing model and console semantics are described in
+[Mixing Model and Console Architecture](../../architecture/11-mixing-console.md).
+
 Track-owned Channels are created when Tracks request them (Track domain's
 `track.setChannelEnabled` command).  
 Other Channels (busses, sends, returns, master, I/O, etc.) are defined at the
@@ -66,18 +69,27 @@ Each Channel has:
 
 - a stable `channelId`,
 - an optional `trackId` for Track-owned Channels,
-- an optional `role` field for special Channels such as `"master"`, `"bus"`,
-  `"fx"`, `"send"`, `"return"`, `"io"`, etc.,
+- an optional `role` field for special Channels such as `"track"`, `"master"`,
+  `"bus"`, `"fx"`, `"send"`, `"return"`, `"monitor"`, `"io"`, etc.,
 - an ordered list of `nodeId`s representing the Node graph,
 - input configuration (Track input sources, audio/MIDI),
 - output configuration (main output, bus routing, sidechain sends),
 - fader state (gain, pan, balance),
 - meter configuration (peak, RMS, LUFS, analysis parameters).
 
+Channel roles influence routing and UI presentation, but all Channels use the
+same underlying fader model: FaderNode and PanNode in the Node graph. There are
+no special "VCA Channels" at IPC level; VCA-style control behaviour is
+expressed via parameter/control groups in the Parameter domain.
+
 The Channel domain governs channel-level configuration.  
 Node operations are handled in the Node domain.
 
-Sends are materialised as SendNodes within the Channel’s Node graph. A SendNode taps the signal at its position in the Node list and routes a copy to a target Channel, allowing pre/post-fader behaviour and arbitrary tap points purely via graph topology.
+Sends are materialised as SendNodes within the Channel's Node graph. A SendNode taps the signal at its position in the Node list and routes a copy to a target Channel, allowing pre/post-fader behaviour and arbitrary tap points purely via graph topology.
+
+MIDI CC levels (e.g. CC7, CC10, CC11) are handled as parameters and via
+Lane/Parameter domains, not as separate mixer fader types. The Channel domain
+deals with audio-level faders (FaderNodes), not MIDI CC-specific faders.
 
 ---
 

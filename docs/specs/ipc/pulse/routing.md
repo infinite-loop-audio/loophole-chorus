@@ -43,9 +43,12 @@ Routing in Loophole is defined as a **project-level graph**:
 
 - most Channels are Track-owned and represent Track signal paths,
 - some Channels are standalone (busses, FX returns, master, I/O Channels),
-- send connections between Channels are realised by SendNodes in the source Channel’s Node graph,
+- send connections between Channels are realised by SendNodes in the source Channel's Node graph,
 - sidechains provide secondary inputs to Nodes,
 - the master (or master chain) terminates the audible signal path.
+
+The overall mixing and console architecture is described in
+[Mixing Model and Console Architecture](../../architecture/11-mixing-console.md).
 
 Routing commands express user intent around how Channels connect to each other
 and to hardware. Pulse validates and applies these changes, then emits events
@@ -70,7 +73,7 @@ Key concepts in this domain:
   One or more designated Channels forming the final output chain.
 
 - **Send**  
-  A connection from a source Channel to a target Channel (e.g. bus, FX Channel) realised by a SendNode in the source Channel’s Node graph. The Routing domain describes the relationship between Channels and provides high-level controls; the actual send tap point and behaviour are determined by the SendNode’s position in the source Channel’s Node list.
+  A connection from a source Channel to a target Channel (e.g. bus, FX Channel) realised by a SendNode in the source Channel's Node graph. The Routing domain describes the relationship between Channels and provides high-level controls; the actual send tap point and pre/post-fader behaviour are determined by the SendNode's position in the source Channel's Node list relative to the FaderNode, not via separate routing flags.
 
 - **Sidechain**  
   A routing from a source Channel (or bus) into a Node’s sidechain input.
@@ -80,6 +83,9 @@ Key concepts in this domain:
 
 The Routing domain does not define the internal structure of Channels or Nodes.
 Those are handled by their respective domains.
+
+VCA-style control behaviour is expressed via parameter/control groups in the
+Parameter domain, rather than as dedicated routing constructs.
 
 ---
 
@@ -132,7 +138,7 @@ Create a send from a source Channel to a target Channel. Fields include:
 - pre/post-fader mode (optional, defaults to post-fader),
 - initial level and mute state.
 
-Pulse creates a SendNode in the source Channel’s Node graph at an appropriate position (e.g. post-fader by default, or pre-fader if specified) and wires its target Channel. Pulse allocates a `sendId` for routing-level tracking.
+Pulse creates a SendNode in the source Channel's Node graph at an appropriate position (post-fader by default, or pre-fader if specified) relative to the FaderNode, and wires its target Channel. Pulse allocates a `sendId` for routing-level tracking. Pre/post behaviour is a consequence of SendNode placement relative to FaderNode in the Node graph, not a separate routing flag.
 
 **`routing.removeSend`**  
 Remove a send identified by `sendId`. Pulse removes the corresponding SendNode from the source Channel’s Node graph.
@@ -141,7 +147,7 @@ Remove a send identified by `sendId`. Pulse removes the corresponding SendNode f
 Update a send’s level or pan. This command proxies to the underlying SendNode’s parameters.
 
 **`routing.setSendMode`**  
-Change a send’s mode (e.g. pre/post-fader). Pulse moves the SendNode to the appropriate position in the source Channel’s Node list (before or after the FaderNode).
+Change a send's mode (e.g. pre/post-fader). Pulse moves the SendNode to the appropriate position in the source Channel's Node list (before or after the FaderNode). This topology-based approach defines pre/post behaviour rather than using separate routing flags.
 
 **`routing.setSendMuted`**  
 Mute or unmute a send. This command proxies to the underlying SendNode’s enabled state or mute parameter.
