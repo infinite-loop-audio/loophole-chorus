@@ -50,7 +50,8 @@ non-real-time state.
   - [10.1 Primary Project File](#101-primary-project-file)
   - [10.2 Draft/Autosave Storage](#102-draftautosave-storage)
   - [10.3 Deterministic Serialisation](#103-deterministic-serialisation)
-- [11. Future Extensions](#11-future-extensions)
+- [11. Processing Cohort Assignment and Engine Policies](#11-processing-cohort-assignment-and-engine-policies)
+- [12. Future Extensions](#12-future-extensions)
 
 ---
 
@@ -410,7 +411,116 @@ Saved projects must:
 
 ---
 
-## 11. Future Extensions
+## 11. Processing Cohort Assignment and Engine Policies
+
+Pulse is responsible for analysing the processor graph and assigning each processor
+to either the **LIVE** or **ANTICIPATIVE** processing cohort. Pulse owns the policy
+for cohort assignment and ensures Signal never receives an invalid cohort
+configuration.
+
+### 11.1 Graph Analysis
+
+Pulse analyses the processor graph to determine cohort assignments when:
+
+- playback starts,
+- routing changes,
+- plugin UIs open or close,
+- tracks are armed or unarmed,
+- processors change deterministic status,
+- user overrides are applied.
+
+The analysis must be efficient and deterministic, producing consistent results for
+identical graph states.
+
+### 11.2 Deterministic vs Non-Deterministic Processors
+
+Pulse determines whether a processor is deterministic based on:
+
+- processor type and characteristics,
+- plugin metadata from Composer,
+- explicit processor flags,
+- historical behaviour (if tracked).
+
+**Non-deterministic processors** include:
+
+- processors with GUIs open (user interaction may affect processing),
+- processors marked as non-deterministic by plugin metadata,
+- processors that have exhibited non-deterministic behaviour.
+
+Non-deterministic processors are always assigned to the LIVE cohort.
+
+**Deterministic processors** can be assigned to the ANTICIPATIVE cohort if they meet
+other criteria (not downstream of live nodes, no real-time dependencies).
+
+### 11.3 Routing and Dependency Closure
+
+Pulse propagates “liveness” via dependency closure:
+
+- processors requiring immediate processing (armed tracks, live MIDI, open GUIs) are
+  marked as LIVE,
+- everything downstream of a LIVE node becomes LIVE (dependency closure),
+- send/return busses feeding LIVE nodes cause their source processors to become LIVE,
+- the entire signal path from any LIVE source to the output is marked LIVE.
+
+Pulse performs a transitive closure analysis to ensure all processors reachable from
+any LIVE source are correctly assigned to the LIVE cohort.
+
+### 11.4 User Overrides
+
+Pulse supports user overrides for cohort assignment:
+
+- **Force Live**: User may force a processor to always run in the LIVE cohort,
+  regardless of other factors. This may be used for processors that need immediate
+  response or for debugging purposes.
+
+- **Prefer Pre-Render**: User may prefer a processor to run in the ANTICIPATIVE
+  cohort if possible, maximising CPU efficiency. This override is advisory; Pulse
+  still assigns LIVE if required by dependency closure or non-determinism.
+
+Overrides are persisted in the project state and respected during graph analysis.
+
+### 11.5 Cohort Assignment Property
+
+Each processor in the engine graph has a property:
+
+- `processingCohort: live | anticipative`
+
+This property is:
+
+- assigned by Pulse during graph analysis,
+- included in graph instructions sent to Signal,
+- updated dynamically when graph state changes,
+- validated to ensure consistency (e.g., no anticipative processor downstream of a
+  live one).
+
+### 11.6 Dynamic Cohort Updates
+
+When cohort assignments change, Pulse:
+
+- reanalyses the affected portions of the graph,
+- determines new cohort assignments,
+- constructs updated graph instructions for Signal,
+- ensures the transition is valid (no invalid intermediate states),
+- sends cohort update messages to Signal.
+
+Pulse must handle cohort transitions gracefully, ensuring Signal can transition
+processors between domains without audio glitches or discontinuities.
+
+### 11.7 Signal Coordination
+
+Pulse sends cohort assignment information to Signal via:
+
+- processor creation/update messages (include `processingCohort` property),
+- explicit cohort update messages (when cohorts change without other structural
+  changes),
+- full graph rebase messages (include cohort assignments for all processors).
+
+Pulse ensures Signal always has a complete, valid view of processor cohort
+assignments before playback begins or during transitions.
+
+---
+
+## 12. Future Extensions
 
 Pulse is designed for long-term extensibility. Possible future additions include:
 

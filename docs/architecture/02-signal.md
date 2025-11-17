@@ -43,7 +43,8 @@ or structural inference. Pulse constructs the engine graph; Signal executes it.
   - [8.4 Engine Status Events](#84-engine-status-events)
 - [9. Interaction with Composer](#9-interaction-with-composer)
 - [10. Persistence](#10-persistence)
-- [11. Future Extensions](#11-future-extensions)
+- [11. Processing Cohorts and Anticipative Rendering](#11-processing-cohorts-and-anticipative-rendering)
+- [12. Future Extensions](#12-future-extensions)
 
 ---
 
@@ -331,7 +332,110 @@ but none of these form part of the project state.
 
 ---
 
-## 11. Future Extensions
+## 11. Processing Cohorts and Anticipative Rendering
+
+Loophole’s engine supports two processing domains: **LIVE** and **ANTICIPATIVE**.
+Signal runs two complementary processing engines to handle these cohorts efficiently
+and maintain both low-latency real-time responsiveness and maximum CPU efficiency.
+
+### 11.1 Live Engine
+
+The **Real-Time Engine** runs in the audio callback and executes all LIVE cohort
+processors:
+
+- record-armed tracks,
+- instrument tracks receiving live MIDI,
+- plugins with GUIs open,
+- processors marked non-deterministic,
+- send/return busses feeding live nodes,
+- any downstream processors reachable from the above.
+
+The live engine operates at short buffer sizes (64–128 samples) to maintain
+low-latency, sample-accurate processing. It pulls anticipative outputs from timeline
+buffers where required, applies gesture updates and real-time automation, and
+prioritises stability and responsiveness above all else.
+
+### 11.2 Anticipative Engine
+
+The **Anticipative Engine** runs on worker threads and processes ANTICIPATIVE cohort
+processors far ahead of the playhead. These processors are deterministic and have no
+real-time dependency:
+
+- processors that are deterministic,
+- processors not downstream of any live nodes,
+- processors that have no GUI open and are not receiving live input.
+
+The anticipative engine uses very large buffers (hundreds of ms to several seconds)
+for maximum CPU efficiency. It maintains a **render horizon buffer** representing
+multiple seconds ahead of the current playhead position, effectively functioning like
+continuous, invisible “background freeze”.
+
+### 11.3 Render Horizon
+
+The render horizon buffer maintains pre-rendered audio for anticipative processors
+ahead of the playhead. Signal:
+
+- maintains a buffer representing playhead position + multiple seconds,
+- continuously renders anticipative processors into this buffer,
+- invalidates portions when live gestures or parameter changes override them,
+- ensures the horizon remains far enough ahead to avoid underruns,
+- synchronises automation, modulation and tempo with Pulse.
+
+The render horizon must be managed carefully to balance memory usage with the need
+for sufficient lookahead.
+
+### 11.4 Buffer Model
+
+Signal maintains separate buffer pools:
+
+- **Real-time buffers** (small, frequently recycled for live processing),
+- **Anticipative buffers** (large blocks optimised for batch processing),
+- **Timeline buffers** (read-only, pre-rendered anticipative audio),
+- **Crossfade buffers** (temporary buffers used during cohort transitions).
+
+All buffers are pre-allocated; no dynamic allocation occurs during processing.
+
+### 11.5 Cohort Transitions
+
+When a processor changes cohort assignment (due to routing changes, GUI open/close,
+arming state, or user override), Signal must handle the transition smoothly:
+
+- **Preparing target domain**: Signal prepares the processor state in the target
+  domain (live or anticipative) before activation.
+
+- **Crossfading**: Signal crossfades between anticipative and live audio where
+  required to avoid clicks or discontinuities.
+
+- **Buffer invalidation**: Signal invalidates anticipative buffers when live gestures
+  override them, forcing re-render of affected regions.
+
+- **Domain synchronisation**: Signal ensures no gap or glitch occurs when switching
+  domains, maintaining sample-accurate timing throughout.
+
+- **Graph updates**: Signal receives updated graph instructions from Pulse reflecting
+  new cohort assignments and commits them atomically.
+
+### 11.6 Thread Responsibilities
+
+Signal’s threading model supports both domains:
+
+- **Audio thread**: Executes live engine processing, pulls from timeline buffers,
+  applies gestures and real-time automation. Must never block, allocate, or perform
+  non-deterministic operations.
+
+- **Worker threads**: Execute anticipative engine processing, render into horizon
+  buffers, process large blocks efficiently. May perform more CPU-intensive
+  operations but must synchronise state with audio thread.
+
+- **Message thread**: Handles IPC from Pulse, processes graph updates, coordinates
+  cohort transitions, manages plugin UI lifecycle.
+
+Signal ensures both domains remain sample-accurate and aligned, with proper
+synchronisation between threads to avoid race conditions or timing drift.
+
+---
+
+## 12. Future Extensions
 
 Signal may evolve to support:
 
