@@ -25,6 +25,7 @@ Aura presents and manages media via the Media Pool model.
   - [2.3 Media Storage Layout](#23-media-storage-layout)  
   - [2.4 Analysis Artefacts](#24-analysis-artefacts)  
   - [2.5 Media Pool and References](#25-media-pool-and-references)  
+  - [2.6 Media Status](#26-media-status)  
 - [3. Commands (Aura → Pulse)](#3-commands-aura--pulse)  
   - [3.1 Media Pool Queries](#31-media-pool-queries)  
   - [3.2 Import and Registration](#32-import-and-registration)  
@@ -147,6 +148,21 @@ The **Media Pool** is the set of all Media Items known to the project.
   - offline (e.g. network drives).
 
 Pulse owns the Media Pool and ensures consistency across changes.
+
+---
+
+### 2.6 Media Status
+
+Each Media Item has a lifecycle status, for example:
+
+- `pending` – reserved as a recording/render target but not yet finalised.
+- `final` – complete and referenced by Clips, renders or other domains.
+- `abandoned` – optional internal state representing media that was reserved
+  but never used.
+
+Only `final` media is considered part of the stable project model. Pending and
+abandoned items are treated as transient and may be cleaned up by maintenance
+routines.
 
 ---
 
@@ -487,6 +503,29 @@ When applying snapshots, Pulse must:
 
 - not delete media items that are still referenced in other snapshots,
 - maintain consistent `mediaId` references.
+
+---
+
+### Pending Media and Project Save/Load
+
+Pending Media Items (`status = pending`) are **not** included in committed
+project snapshots intended for long-term storage:
+
+- `project.save` and `project.saveAs` serialise only `final` media references.
+- Pending items exist only in the live in-memory model and in the draft state.
+
+On project load:
+
+- Pulse does not recreate pending Media Items from the project file.
+- Any stray files on disk created for abandoned recordings or renders may be
+  detected by a maintenance pass and either:
+
+  - offered to the user for recovery (future enhancement), or
+  - cleaned up automatically depending on host settings.
+
+Draft save behaviour (`project.saveDraft`) may persist pending Media Items for
+crash recovery, but these are treated as ephemeral and are not required to be
+restorable across sessions.
 
 ---
 
