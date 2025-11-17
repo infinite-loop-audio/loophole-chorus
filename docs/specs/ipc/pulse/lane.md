@@ -69,6 +69,45 @@ Pulse recognises core Lane types:
 
 Additional types may be defined in future domain expansions.
 
+### Automation Lane Workflow (Informative)
+
+The Automation domain is responsible for expressing *what* should be automated
+and *how* points are edited. The Lane domain is responsible for providing the
+timeline container (an automation lane) that lives alongside other Lanes on a
+Track.
+
+A typical automation lane creation flow is:
+
+1. Aura decides that a parameter should be automated (for example, the user
+   invokes "Show Automation" on a Channel fader or plugin parameter).
+
+2. Aura (or the Automation domain) determines the target `parameterId` and the
+   owning context (Track, Lane, Channel, Node).
+
+3. Pulse ensures that a corresponding automation lane exists on the relevant
+   Track/Lane by:
+
+   - creating a new automation lane entry in the Lane model if none exists,
+
+   - associating it with the target `parameterId`.
+
+4. After the automation lane exists, Automation domain commands and events
+   (adding/updating/removing points) operate on that lane's data.
+
+5. Aura renders the automation lane in the editor using the Lane identity and
+   Automation domain's point data.
+
+The Lane domain does **not** define automation point editing itself; it only
+owns:
+
+- the existence and identity of automation lanes,
+
+- their placement relative to other Lanes on a Track,
+
+- any visual or ordering metadata Aura requires.
+
+Automation data (points, shapes, curves) always lives in the Automation domain.
+
 ---
 
 ## 3. Commands (Aura → Pulse)
