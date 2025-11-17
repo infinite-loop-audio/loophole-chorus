@@ -257,10 +257,33 @@ include:
 - sidechain routes,
 - hardware input/output mappings.
 
+### Snapshot Application
+
+When Aura receives a `project.snapshot` that includes this domain, it MUST treat
+the snapshot as the **authoritative** representation of the current state for
+this domain.
+
+In particular:
+
+- Snapshot data replaces any locally cached state in Aura for this domain.
+
+- Aura MUST discard or reconcile any pending local edits that conflict with the
+  snapshot according to its own UX rules (for example, by cancelling unsent
+  edits, or prompting the user where appropriate).
+
+- Incremental events for this domain (e.g. `*.added`, `*.updated`,
+  `*.removed`) are only applied on top of the last successfully applied
+  snapshot.
+
+Snapshots are **replacements**, not merges. If Aura is unsure whether to trust
+a local view or a snapshot, it must prefer the snapshot.
+
+Pulse is responsible for ensuring that snapshots across all domains are
+internally consistent at the moment they are emitted.
+
 On snapshot application:
 
-- Pulse replaces the current routing graph with the snapshot’s routing graph,
-- Aura discards any conflicting local routing state.
+- Pulse replaces the current routing graph with the snapshot's routing graph.
 
 Routing snapshots do not directly encode Channel or Node structure; those are
 covered by the Channel and Node domains.

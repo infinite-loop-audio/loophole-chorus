@@ -341,8 +341,32 @@ state of those domains within the snapshot.
 Session itself does not define its own separate snapshot data structure;
 it is a projection over other domain states.
 
+### Snapshot Application
+
+When Aura receives a `project.snapshot` that includes this domain, it MUST treat
+the snapshot as the **authoritative** representation of the current state for
+this domain.
+
+In particular:
+
+- Snapshot data replaces any locally cached state in Aura for this domain.
+
+- Aura MUST discard or reconcile any pending local edits that conflict with the
+  snapshot according to its own UX rules (for example, by cancelling unsent
+  edits, or prompting the user where appropriate).
+
+- Incremental events for this domain (e.g. `*.added`, `*.updated`,
+  `*.removed`) are only applied on top of the last successfully applied
+  snapshot.
+
+Snapshots are **replacements**, not merges. If Aura is unsure whether to trust
+a local view or a snapshot, it must prefer the snapshot.
+
+Pulse is responsible for ensuring that snapshots across all domains are
+internally consistent at the moment they are emitted.
+
 Undo/redo snapshot semantics will be defined in the Undo domain and will
-integrate with Session’s reporting fields (`undoAvailable`, etc.).
+integrate with Session's reporting fields (`undoAvailable`, etc.).
 
 ---
 

@@ -405,12 +405,29 @@ Automation is an integral part of project snapshots. Snapshot data includes:
 - automation modes and write-arming state where considered part of project
   state (session vs project settings may be distinguished in future).
 
-On snapshot application:
+### Snapshot Application
 
-- Pulse replaces the current automation data with the snapshot’s data (subject
-  to any defined merge policies),
-- emits `automation.envelopeCreated`, `automation.envelopeDeleted`,
-  `automation.rangeChanged` or equivalent events so Aura can update the UI.
+When Aura receives a `project.snapshot` that includes this domain, it MUST treat
+the snapshot as the **authoritative** representation of the current state for
+this domain.
+
+In particular:
+
+- Snapshot data replaces any locally cached state in Aura for this domain.
+
+- Aura MUST discard or reconcile any pending local edits that conflict with the
+  snapshot according to its own UX rules (for example, by cancelling unsent
+  edits, or prompting the user where appropriate).
+
+- Incremental events for this domain (e.g. `*.added`, `*.updated`,
+  `*.removed`) are only applied on top of the last successfully applied
+  snapshot.
+
+Snapshots are **replacements**, not merges. If Aura is unsure whether to trust
+a local view or a snapshot, it must prefer the snapshot.
+
+Pulse is responsible for ensuring that snapshots across all domains are
+internally consistent at the moment they are emitted.
 
 Snapshots do not change Parameter identity; they operate over the existing set
 of `parameterId`s. Handling of missing or remapped parameters (e.g. due to
