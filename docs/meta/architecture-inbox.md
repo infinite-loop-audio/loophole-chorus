@@ -182,3 +182,9 @@ Provide a full suite of professional-grade analysis tools built directly into th
 **Status:** proposed  
 Enable customizable view layouts with the ability to enable or disable features within the main view, allowing users to create and save custom "modes" optimized for different use cases. Users should be able to build modes for writing, recording, mixing, mastering, and other workflows, showing or hiding specific UI elements, panels, and tools as needed. These modes can be saved, shared, and quickly switched between, reducing visual clutter and focusing the interface on the task at hand. This empowers users to create personalized workspace configurations that match their workflow preferences and the specific demands of each production phase.
 
+### Bounced Track Source Encapsulation and Reopening
+**Tag:** Pulse / Aura / Workflow  
+**Priority:** P2  
+**Status:** proposed  
+Implement a system to encapsulate and hide the original source of "bounced" tracks, extending beyond simple bounce-in-place to include cases where instruments generate source material that is subsequently cut up and processed. The system should maintain institutional support for "reopening" the original source generator even long after tracks have been bounced, enabling users to return to and modify the original source material. This requires tracking source relationships, preserving generator state and parameters, and providing UI mechanisms to access and restore original sources. Enables non-destructive workflows where users can iterate on source material without losing the ability to return to earlier stages of production.
+
