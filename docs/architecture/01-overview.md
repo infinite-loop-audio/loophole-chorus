@@ -106,6 +106,7 @@ Each layer’s responsibilities are defined normatively.
 - Provide telemetry
 - Apply sample-accurate parameter changes
 - Expose an IPC command surface
+- Execute dual-engine DSP architecture with separate schedulers for live and anticipative processing cohorts
 
 **Signal MUST NOT:**
 
@@ -131,6 +132,7 @@ Pulse is the authoritative project-state owner.
 - Deriving RT-safe graph instructions for Signal
 - Integrating Composer metadata (where available)
 - Maintaining parameter aliasing and remapping tables
+- Assigning processors to processing cohorts (live vs anticipative) based on liveness requirements, deterministic behaviour metadata, and dependency closure
 
 Initially Pulse is embedded in Aura; later it MAY run as its own service.
 
@@ -191,6 +193,7 @@ Composer is an external service providing shared plugin and parameter metadata.
 - Suggest mappings between plugin versions and formats
 - Suggest mappings between different plugins based on roles
 - Aggregate anonymised, opt-in user signals for naming, tagging and mapping
+- Provide deterministic-behaviour metadata that indicates whether processors are safe for anticipative rendering or must remain in the live cohort
 
 **Composer MUST NOT:**
 
@@ -198,7 +201,21 @@ Composer is an external service providing shared plugin and parameter metadata.
 - Store or receive audio, Clip contents or detailed arrangement data
 - Communicate directly with Signal or Aura
 
-Composer MAY be unavailable; in that case Pulse MUST fall back to local metadata and heuristics.
+Composer MAY be unavailable; in that case Pulse MUST fall back to local metadata and heuristics. Composer's deterministic-behaviour metadata contributes to Pulse's cohort assignment decisions, enabling safe anticipative rendering of deterministic processors while keeping non-deterministic or live-dependent processors in the live cohort.
+
+---
+
+## 5.6 Processing Cohorts and Anticipative Rendering
+
+Loophole employs a dual-engine DSP architecture that separates processing into two cohorts: **LIVE** and **ANTICIPATIVE**. This design enables extremely low-latency interaction for live performance whilst simultaneously performing heavy DSP on large buffers in the background, allowing Loophole to scale to projects that would otherwise exceed real-time CPU limits.
+
+The **Live Cohort** handles processors that require sample-accurate response to user input, live audio/MIDI input, or contain non-deterministic DSP. These processors run at the audio callback rate with short buffers (64–128 samples) and always respond instantly to gestures.
+
+The **Anticipative Cohort** processes deterministic processors ahead of the playhead using very large buffers (hundreds of milliseconds to several seconds). Signal maintains a render horizon that stays ahead of the playhead, effectively pre-rendering entire sections of the project in the background.
+
+Pulse owns all cohort assignment decisions, determining membership based on liveness requirements, deterministic behaviour metadata (from Composer), routing dependencies, and user preferences. Signal executes these assignments using dual schedulers: a real-time engine for the live cohort and an anticipative engine running on worker threads. The system dynamically switches processors between cohorts as the user interacts (e.g., opening plugin UIs, arming tracks), with graph-driven dependency closure ensuring correct propagation of liveness requirements.
+
+For complete details, see [@chorus:/docs/architecture/10-processing-cohorts-and-anticipative-rendering.md](10-processing-cohorts-and-anticipative-rendering.md).
 
 ---
 
