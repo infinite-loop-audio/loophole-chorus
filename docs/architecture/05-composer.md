@@ -43,7 +43,8 @@ flows, not implementation details or API formats.
 - [7. Sync, Caching and Offline Behaviour](#7-sync-caching-and-offline-behaviour)
 - [8. Privacy and Consent](#8-privacy-and-consent)
 - [9. Failure Modes and Fallbacks](#9-failure-modes-and-fallbacks)
-- [10. Future Extensions](#10-future-extensions)
+- [10. Deterministic Behaviour Telemetry and Inference](#10-deterministic-behaviour-telemetry-and-inference)
+- [11. Future Extensions](#11-future-extensions)
 
 ---
 
@@ -373,7 +374,107 @@ Project integrity is always preserved.
 
 ---
 
-## 10. Future Extensions
+## 10. Deterministic Behaviour Telemetry and Inference
+
+Composer gathers aggregated telemetry about plugin **determinism vs randomness**
+and uses statistical inference to classify processors as **deterministic-safe** or
+**non-deterministic**. This metadata informs Pulse’s Processing Cohort assignment
+decisions, enabling safe anticipative rendering while preserving live performance
+for non-deterministic plugins.
+
+### 10.1 What Composer Learns
+
+Composer receives anonymous aggregate telemetry about:
+
+- whether a plugin appears deterministic or not in real projects,
+- patterns in outputs when fed identical inputs,
+- plugin behaviour under automation sweeps,
+- responsiveness to transport seeking,
+- stability across versions and formats (CLAP vs VST3 vs AU),
+- frequency of cohort switching in Signal triggered by plugin behaviour,
+- user overrides marking a processor “Force Live” or “Prefer Pre-Render”.
+
+Composer does **not** receive any audio — only behavioural signatures. These
+signals are aggregated across many Loophole instances to build statistical
+confidence about plugin behaviour patterns.
+
+### 10.2 How Composer Interprets Data
+
+Composer uses:
+
+- statistical correlation,
+- clustering across similarity classes,
+- confidence scoring,
+- repeated-observation weighting,
+- conflict resolution rules
+
+to determine whether a plugin is **deterministic-safe** or **non-deterministic**.
+
+Composer stores:
+
+- per-plugin-identity classification,
+- classification per version,
+- classification per format.
+
+Pulse receives:
+
+- `deterministic: true/false`,
+- a confidence score (`deterministicConfidence: 0.0–1.0`),
+- any known conditions (e.g., “non-deterministic when a UI is open”, “LFOs not
+  time-locked”, etc.) as `deterministicConditions: string[]`.
+
+### 10.3 How This Informs Processing Cohorts
+
+Pulse consults Composer metadata when determining:
+
+- which processors can be moved to the Anticipative Cohort,
+- which must remain Live,
+- when replacing a plugin with another instance or alternative format,
+- when deciding if automation on that plugin is safe for anticipative execution.
+
+Composer never makes decisions itself; it only provides metadata. Pulse combines
+Composer’s suggestions with local heuristics, user overrides, and real-time
+observation to assign processors to cohorts.
+
+### 10.4 Privacy and Safety Boundaries
+
+Composer:
+
+- receives no project content,
+- receives no identifiers,
+- receives no audio or MIDI data,
+- receives only aggregate behavioural signatures.
+
+All telemetry is anonymised and aggregated before contributing to classification
+models. Individual project details are never transmitted or stored.
+
+### 10.5 Relationship to User Overrides
+
+User actions such as:
+
+- “force live”,
+- “prefer anticipative”,
+- “mark as non-deterministic”,
+
+are logged as *weak telemetry signals* contributing to Composer confidence
+scores. These signals are weighted appropriately but do not override statistical
+patterns from larger observation sets.
+
+### 10.6 Expected Outputs
+
+Composer exposes the following metadata to Pulse:
+
+- `deterministic: boolean` — whether the plugin is classified as deterministic,
+- `deterministicConfidence: 0.0–1.0` — confidence in the classification,
+- `deterministicConditions: string[]` — optional conditions affecting
+  determinism (e.g., “non-deterministic when UI open”).
+
+Pulse uses these values in cohort assignment logic, combining them with local
+observation and user preferences to make final decisions.
+
+---
+
+## 11. Future Extensions
 
 Composer will naturally evolve to support:
 
