@@ -100,6 +100,14 @@ This ScreenSet ID is used to:
 - detect when the display configuration has changed and a different layout
   should be applied.
 
+In addition to the ScreenSet ID, Aura uses a **machine identifier** (for
+example, a hashed or otherwise stable identifier such as MAC address or other
+OS-provided machine ID) to differentiate layout profiles per machine. This
+machine identifier is used only for layout profile differentiation, not as a
+security or DRM mechanism. It allows the same project to maintain distinct
+window arrangements on different machines (e.g. a laptop vs a studio desktop)
+while sharing the same ScreenSet configuration.
+
 ---
 
 ## 3. Window Descriptors
@@ -170,29 +178,47 @@ window:
 
 ### 4.1 Per-ScreenSet Layouts
 
-Aura maintains a collection of **Layout Profiles**, keyed by ScreenSet ID.
+Aura maintains **Layout Profiles** that can be stored both per-project and in
+user/global configuration.
+
+For **project-level layout storage**, profiles are keyed by both the current
+machine identifier and ScreenSet ID: `(machineId, ScreenSetId)`. This allows:
+
+- the same project opened on different machines to have distinct window
+  arrangements,
+- the same machine to maintain multiple layouts for different ScreenSets
+  (e.g. laptop-only vs laptop + external display).
+
+A project can store multiple layout profiles—one per `(machineId, ScreenSetId)`
+combination that has been used with that project.
+
+For **global/user-level layouts**, Aura may maintain layout defaults outside
+the project, keyed by ScreenSet ID, used for new projects or when
+project-specific data is missing.
 
 Each Layout Profile contains:
 
 - a set of Window Descriptors (by window key),
 - any additional docking-specific layout information.
 
-This allows users to have different layouts for:
-
-- laptop-only,
-- laptop + external display,
-- studio desktop with three monitors, etc.
-
 ### 4.2 Selecting a Layout Profile
 
 On startup or whenever the display configuration changes:
 
-1. Aura computes the current ScreenSet ID.
-2. If a layout profile exists for that ScreenSet ID, it is selected.
-3. If not, Aura may:
+1. Aura computes the current ScreenSet ID and machine identifier.
+2. For project-level layouts:
+   - Aura first tries to load a layout profile matching the current
+     `(machineId, ScreenSetId)`.
+   - If none is found, it may try another profile for the same `machineId` with
+     a "closest" ScreenSet, or proceed to global/user defaults.
+3. For global/user-level layouts:
+   - If no project-specific profile is available, Aura checks for a global
+     layout profile for the current ScreenSet ID.
+4. If still no match, Aura may:
 
-   - find the “closest” known ScreenSet (e.g. shares most display IDs), or
-   - fall back to a default layout and create a new profile for this ScreenSet.
+   - find the "closest" known ScreenSet (e.g. shares most display IDs), or
+   - fall back to a factory-default layout and create a new profile for this
+     `(machineId, ScreenSetId)` combination.
 
 ---
 
@@ -302,22 +328,45 @@ Aura then:
 
 ## 8. Persistence
 
-Window layout profiles are primarily **user-specific configuration**, not
-project state. They are persisted in Aura’s configuration storage (outside
-project files).
+Window layout profiles are persisted at two levels:
 
-However, project-specific layout hints (e.g. certain views open by default
-for a particular project) may be stored in project metadata and reconciled
-with user layout settings.
+### Project-Level Persistence
 
-Plugin UI “open/closed” state might be treated either as:
+Each project stores window/layout information keyed by `(machineId, ScreenSetId)`
+in project metadata. This allows:
+
+- the same project to remember different layouts on a laptop, a studio desktop,
+  etc.,
+- each machine to maintain distinct layouts for different ScreenSet
+  configurations used with that project.
+
+When opening a project, Aura first tries to load a layout profile matching the
+current `(machineId, ScreenSetId)`. If none is found, it falls back to:
+
+- another profile for the same `machineId` with a "closest" ScreenSet, or
+- a global/user default for the current ScreenSet, or
+- a factory-default layout.
+
+### User/Global-Level Persistence
+
+Aura maintains generic layout defaults for each ScreenSet in user/global
+configuration (outside project files). These defaults are used:
+
+- for new projects,
+- when project-specific data is missing or unavailable.
+
+Project-specific layout profiles take precedence over global defaults when
+available.
+
+Plugin UI "open/closed" state might be treated either as:
 
 - session-only, or
 - project-level preference, depending on design decisions made in the Plugin
   UI IPC spec.
 
-In all cases, persistent storage must respect ScreenSet IDs to avoid applying
-layouts that belong to incompatible display configurations.
+In all cases, persistent storage must respect ScreenSet IDs (and, for
+project-level storage, machine identifiers) to avoid applying layouts that
+belong to incompatible display configurations or different machines.
 
 ---
 
