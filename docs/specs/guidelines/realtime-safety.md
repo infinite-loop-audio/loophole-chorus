@@ -33,10 +33,16 @@ The following operations MUST NOT occur in RT code:
   - Network access
   - Console logging, file logging
   - Plugin scanning or dynamic loading
+- IPC and JSON processing:
+  - JSON parsing
+  - IPC calls
+  - Message serialisation/deserialisation
 - Non-constant-time algorithms:
   - Hash map insertion/rehashing
   - Tree rebalancing
   - Sorting on unbounded collections
+
+All IPC and JSON handling must occur on non-audio threads.
 
 ---
 
@@ -66,6 +72,18 @@ Non-RT threads MAY:
 - Construct new graphs
 - Prepare plugin instances
 - Compute analysis results on copies of audio data
+
+## 4.1 Cohorts and Safety
+
+The Anticipative Engine runs on worker threads and must respect realtime safety
+boundaries when handing off to the Live Engine. Any cohort transitions must be
+prepared off the audio thread and applied atomically, without blocking or
+allocating in the audio callback.
+
+Cohort assignment decisions are made in Pulse (non-RT) and communicated to
+Signal via graph updates. Signal must apply cohort transitions at RT-safe
+boundaries, ensuring that the Live Engine receives pre-computed, immutable
+structures without any allocation or locking during audio processing.
 
 ---
 

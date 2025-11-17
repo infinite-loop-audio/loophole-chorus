@@ -110,10 +110,22 @@ All IPC documents MUST describe:
 
 ## 4.1 Real-Time vs Non-Real-Time Messaging
 
-- Messages into Signal’s **audio thread** MUST NOT block.
+- Messages into Signal's **audio thread** MUST NOT block.
 - Signal MUST process commands at deterministic points (e.g. between audio
   blocks or via RT-safe queues).
 - Aura and Pulse operate in NRT space and can afford batching/coalescing.
+
+### Real-Time vs Non-Real-Time Semantics
+
+Commands and events for **model changes** (e.g. Track/Clip edits, project
+changes) are non-real-time and may cause:
+
+- cohort re-evaluation
+- graph rebuilds
+- anticipative buffer invalidation
+
+**Gesture streams** and **automation updates** are real-time oriented and must
+be translated by Pulse into real-time-safe, ordered streams toward Signal.
 
 ## 4.2 Ordering Guarantees
 
@@ -136,6 +148,17 @@ Certain messages (e.g. automation updates) MAY include explicit timestamps:
 - Engine frame index
 
 Schemas for such messages MUST clarify how time is represented.
+
+## 4.4 Ordering and Consistency with Cohorts
+
+Snapshot events (`project.snapshot`, etc.) represent authoritative model views
+and may invalidate any previously assumed cohort state. Consumers must treat
+snapshots as complete replacements of prior state.
+
+Certain commands (e.g. `transport.seek`) imply that previously rendered
+anticipative audio must be considered stale, even though the IPC command itself
+is simple. Signal must handle these side effects internally without requiring
+additional IPC messages.
 
 ---
 

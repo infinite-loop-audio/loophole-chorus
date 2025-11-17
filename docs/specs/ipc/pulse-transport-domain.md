@@ -39,6 +39,16 @@ Transport behaviour in Loophole is defined at the model level by Pulse:
 Pulse is responsible for the **semantic meaning** of transport operations, while
 Signal is responsible for real-time execution.
 
+### Routing Roles
+
+The routing model for transport operations is:
+
+- **Aura → Pulse**: sends user transport intents (`transport.play`,
+  `transport.pause`, `transport.seek`, etc.).
+- **Pulse → Signal**: sends derived transport commands with full timing context.
+- **Signal → Pulse**: may send confirmations or engine-status related events but
+  never initiates transport changes.
+
 ---
 
 ## 2. Commands (Aura → Pulse)
@@ -159,3 +169,17 @@ The Transport domain concerns the model-level representation of playback:
 High-resolution transport information (e.g. continuous playhead position and
 timing data) is delivered directly from Signal to Aura via the telemetry plane,
 and is not part of the Pulse Project Protocol.
+
+### Cohort and Anticipative Implications
+
+When transport seeks, loops, or jumps:
+
+- Pulse may instruct Signal to **invalidate anticipative buffers** and rebuild
+  the render horizon.
+- Transport operations are still defined by the existing IPC commands; the new
+  engine architecture changes **how Signal internally responds**, not the IPC
+  shape.
+
+These side effects are handled internally by Signal's dual-engine architecture
+(Anticipative and Live engines) without requiring changes to the transport
+command schemas.

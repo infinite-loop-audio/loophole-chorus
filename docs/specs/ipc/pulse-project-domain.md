@@ -45,6 +45,20 @@ Aura never mutates project data directly and does not read project files.
 All project state visible to Aura is carried through `project.snapshot` and
 related events.
 
+### Routing Model
+
+Pulse is the **only** authority for project state. The routing model for
+project-related operations is:
+
+- **Aura → Pulse**: sends project-related commands (open, save, rename, etc.).
+- **Pulse → Aura**: sends project snapshots and project-related events.
+- **Pulse → Signal**: sends graph rebuild instructions after project load changes.
+- **Signal → Pulse**: may send engine-level status/errors but never initiates
+  project-level changes.
+
+Signal never directly processes project-level commands. All project state
+mutations flow through Pulse.
+
 ---
 
 ## 2. Commands (Aura → Pulse)
@@ -57,6 +71,12 @@ Create a new empty project in memory. No primary storage location is required.
 **`project.open`**
 Open a project from a specified location (path or URI).
 Triggers `project.loaded` followed by `project.snapshot` on success.
+
+On success, `project.open` triggers:
+- model load in Pulse,
+- **fresh cohort assignment**,
+- a new engine graph build for Signal,
+- emission of `project.snapshot` toward Aura.
 
 **`project.close`**
 Close the current project and reset Pulse’s project state.
@@ -119,6 +139,10 @@ Emitted after Pulse has successfully loaded the project into memory following
 `project.open` or `project.new`.
 This event does **not** contain project data.
 
+Following `project.loaded`, Pulse performs fresh cohort assignment and prepares
+graph rebuild instructions for Signal. The subsequent `project.snapshot` event
+carries the complete project state to Aura.
+
 **`project.loadFailed`**
 The project could not be opened due to file I/O, format or version issues.
 
@@ -180,6 +204,10 @@ Emitted after:
 
 This is the **only** event that carries the full project state model.
 Payload includes the full state and the model version number.
+
+`project.snapshot` is the **only** message that carries full project model
+state to Aura. Signal never receives project snapshots; it only receives
+graph/build instructions from Pulse.
 
 ---
 

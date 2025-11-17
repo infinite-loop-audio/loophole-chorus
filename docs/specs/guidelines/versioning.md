@@ -80,6 +80,19 @@ Breaking changes MUST:
 2. Trigger a MAJOR version bump for affected specs.
 3. Include upgrade guidance.
 
+## 4.3 Backwards-Compatible Extensions for Cohorts
+
+New cohort-related metadata or flags may need to be added to existing message
+types over time. Versioning guidelines should encourage:
+
+- optional fields,
+- sensible defaults,
+- feature flags capabilities,
+
+so that older clients/engines can ignore cohort-specific details when
+unsupported. This allows the dual-engine architecture to evolve without breaking
+existing IPC contracts.
+
 ---
 
 # 5. Deprecation
@@ -112,7 +125,22 @@ Compatibility matrices MAY be introduced later to track this.
 
 ---
 
-# 7. Persistence and Migration
+# 7. Envelope-Level Compatibility
+
+IPC envelope versioning must allow:
+
+- new headers indicating cohort-aware behaviour,
+- additional routing hints,
+
+without breaking existing message processing. Envelope extensions should follow
+the same backwards-compatibility principles as message payloads: optional
+fields, sensible defaults, and feature detection capabilities.
+
+(Do not introduce new fields now; just define expectations.)
+
+---
+
+# 8. Persistence and Migration
 
 Project file formats managed by Pulse MUST:
 
@@ -128,7 +156,7 @@ Migrations SHOULD be:
 
 ---
 
-# 8. Documentation Requirements
+# 9. Documentation Requirements
 
 Each spec family SHOULD have:
 
@@ -145,7 +173,7 @@ Example header:
 
 ---
 
-# 9. Process for Making a Breaking Change
+# 10. Process for Making a Breaking Change
 
 1. Raise an ADR describing:
    - Motivation
@@ -159,7 +187,7 @@ Example header:
 
 ---
 
-# 10. Summary
+# 11. Summary
 
 The versioning rules in this document ensure the Loophole ecosystem can evolve
 without chaos. All specifications must respect these guidelines so that

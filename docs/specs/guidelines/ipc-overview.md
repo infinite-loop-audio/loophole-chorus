@@ -128,7 +128,22 @@ plane.
 
 ## 4. Routing Model
 
-### 4.1 Aura to Pulse
+### 4.1 Pulse-Centred Routing
+
+All high-level commands originate from Aura and go to Pulse. Pulse is the
+central router/authority for project state and model changes:
+
+- **Aura → Pulse**: all project-level commands (open, save, track edits, etc.)
+- **Pulse → Aura**: project snapshots and model-change events
+- **Pulse → Signal**: graph rebuild instructions and engine commands
+- **Signal → Pulse**: engine status, errors, and confirmations (never initiates
+  project-level changes)
+- **Signal → Aura**: high-rate telemetry (bypasses Pulse)
+
+Signal and Composer never communicate directly with Aura. Signal and Composer
+never communicate directly with each other. All model state flows through Pulse.
+
+### 4.2 Aura to Pulse
 
 Aura translates user interaction into high-level project intent:
 
@@ -140,7 +155,7 @@ Aura translates user interaction into high-level project intent:
 
 Pulse validates these commands and updates the model.
 
-### 4.2 Pulse to Signal
+### 4.3 Pulse to Signal
 
 Pulse issues real-time-safe engine instructions:
 
@@ -151,7 +166,7 @@ Pulse issues real-time-safe engine instructions:
 
 Pulse is the sole originator of structural changes to the engine graph.
 
-### 4.3 Signal to Pulse
+### 4.4 Signal to Pulse
 
 Signal reports engine and hardware events relevant to the project model:
 
@@ -162,7 +177,7 @@ Signal reports engine and hardware events relevant to the project model:
 
 Pulse updates the model and emits model-change events to Aura.
 
-### 4.4 Signal to Aura
+### 4.5 Signal to Aura
 
 High-rate telemetry bypasses Pulse entirely:
 
@@ -174,7 +189,29 @@ Aura uses this data for visual display.
 
 ---
 
-## 5. Parameter Gestures and Streaming
+## 5. Processing Cohorts and Anticipative Rendering
+
+IPC messages remain domain-based (Project, Transport, Track, etc.), but some
+domains now have **engine-level consequences** for processing cohorts and
+anticipative buffers:
+
+- **Cohort decisions** are made entirely in Pulse and sent to Signal as:
+  - graph updates
+  - processor annotations
+- **Project load operations** (`project.open`, `project.new`) trigger:
+  - fresh cohort assignment in Pulse
+  - graph rebuild instructions to Signal
+- **Transport operations** (seek, loop changes) may trigger:
+  - anticipative buffer invalidation
+  - render horizon rebuilds
+
+The IPC command schemas themselves do not change; the dual-engine architecture
+(Anticipative and Live engines) affects how Signal internally processes these
+commands, not the IPC message structure.
+
+---
+
+## 6. Parameter Gestures and Streaming
 
 Continuous parameter interaction requires a separation between:
 
@@ -215,7 +252,7 @@ ensure consistency.
 
 ---
 
-## 6. Early-Stage Implementation Notes
+## 7. Early-Stage Implementation Notes
 
 Initially, Pulse resides inside Aura. Despite this, Aura must treat Pulse as a
 logical external service:
@@ -231,7 +268,7 @@ adapters without changes to semantics.
 
 ---
 
-## 7. Future Process Separation
+## 8. Future Process Separation
 
 When Pulse becomes a standalone service:
 
