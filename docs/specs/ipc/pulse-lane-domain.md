@@ -1,0 +1,251 @@
+# Pulse Lane Domain Specification
+
+This document defines the Lane domain of the Pulse Project Protocol.  
+It covers the commands issued by Aura to Pulse to create, remove or modify
+Lanes, and the events emitted by Pulse to notify Aura of Lane-level changes.
+
+A Lane represents a **media-bearing or behaviour-bearing stream** within a Track
+or Clip. Each Lane:
+
+- has a stable `laneId`,
+- has a `laneType` (MIDI, audio, automation, video, device, etc.),
+- may appear in one or more Clips,
+- may carry content (handled by the corresponding Lane-type domain),
+- may be routed to a LaneStream processor in the Track’s Channel,
+- appears in a Clip in a user-defined order for editing.
+
+Pulse owns all Lane state. Aura expresses editing intent only.
+
+---
+
+## Contents
+
+- [1. Overview](#1-overview)  
+- [2. Lane Types](#2-lane-types)  
+- [3. Commands (Aura → Pulse)](#3-commands-aura--pulse)  
+  - [3.1 Creation and Removal](#31-creation-and-removal)  
+  - [3.2 Identity and Presentation](#32-identity-and-presentation)  
+  - [3.3 Routing and LaneStream Association](#33-routing-and-lanestream-association)  
+  - [3.4 Structural Attachment](#34-structural-attachment)  
+- [4. Events (Pulse → Aura)](#4-events-pulse--aura)  
+  - [4.1 Structural Events](#41-structural-events)  
+  - [4.2 Identity and Presentation Events](#42-identity-and-presentation-events)  
+  - [4.3 Routing Events](#43-routing-events)  
+- [5. Snapshot Semantics](#5-snapshot-semantics)  
+- [6. Realtime and Cohort Considerations](#6-realtime-and-cohort-considerations)
+
+---
+
+## 1. Overview
+
+A Lane is a typed content container used by Clips to store musical, audio,
+visual or automation data. Tracks may provide default Lanes, but Clips may
+introduce additional Lanes as needed (e.g. layered audio or multi-instrument
+MIDI).
+
+Lanes:
+
+- belong logically to a Track,
+- are referenced by Clips,
+- may or may not carry content at a given Clip position,
+- may route to one or more LaneStream processors in the Track’s Channel,
+- may specify presentation properties (colour, name, collapsed state).
+
+The Lane domain governs the existence, identity, presentation and routing of
+Lanes. Content editing (e.g. MIDI notes, audio regions, automation curves)
+belongs to the Lane-type-specific domains defined elsewhere.
+
+---
+
+## 2. Lane Types
+
+Pulse recognises core Lane types:
+
+- **`midi`** – note data, CCs, channel pressure, etc.
+- **`audio`** – references to audio regions and sample ranges.
+- **`automation`** – parameter automation envelopes.
+- **`video`** – video regions or timeline-referenced frames.
+- **`device`** – device interaction/event data for hardware or control surfaces.
+
+Additional types may be defined in future domain expansions.
+
+---
+
+## 3. Commands (Aura → Pulse)
+
+Aura issues Lane commands in response to user intent. Pulse applies the
+commands, updates the project model and emits events.
+
+### 3.1 Creation and Removal
+
+**`lane.create`**  
+Create a new Lane on a Track.
+
+Payload fields include:
+
+- `trackId`,
+- `laneType`,
+- optional presentation metadata (colour, name),
+- optional initial routing hints.
+
+Pulse allocates a stable `laneId`.
+
+**`lane.delete`**  
+Remove an existing Lane. Pulse ensures:
+
+- the Lane is detached from all Clips,
+- routing references are resolved,
+- dependent content (MIDI, audio, automation) is handled by the Lane-type domain.
+
+---
+
+### 3.2 Identity and Presentation
+
+**`lane.rename`**  
+Change the Lane’s user-visible name.
+
+**`lane.setColour`**  
+Assign or clear a Lane-specific colour. This is presentation metadata; Pulse
+stores it and Aura interprets it visually.
+
+**`lane.setCollapsed`**  
+Set whether a Lane should appear collapsed in editing views.
+
+Payload fields include:
+
+- `laneId`,
+- `collapsed` (boolean).
+
+---
+
+### 3.3 Routing and LaneStream Association
+
+Tracks may have multiple LaneStream processors in their Channel. Lanes specify
+which LaneStream receives their output.
+
+**`lane.setLaneStream`**  
+Assign the Lane’s output to a specific LaneStream processor.
+
+Fields:
+
+- `laneId`,
+- `laneStreamId` (nullable to unset routing).
+
+Pulse updates routing and may issue Channel/Processor domain updates.
+
+**`lane.setSendLevel`**  
+Set the mix level or weighting when a Lane outputs to a LaneStream.
+
+This applies primarily to audio or video Lanes.
+
+---
+
+### 3.4 Structural Attachment
+
+Lanes may be attached to or detached from Clips.
+
+**`lane.attachToClip`**  
+Attach a Lane to a Clip. Payload:
+
+- `laneId`,
+- `clipId`.
+
+**`lane.detachFromClip`**  
+Detach a Lane from a Clip. Pulse ensures content visibility rules are applied.
+
+**`lane.reorderInClip`**  
+Reorder Lanes within a Clip’s editor-facing lane list.
+
+Payload:
+
+- `clipId`,
+- `laneIds` (ordered list).
+
+---
+
+## 4. Events (Pulse → Aura)
+
+Pulse emits Lane events after valid command application or when Lane state
+changes due to higher-level operations (e.g. Clip or Track snapshot loads).
+
+### 4.1 Structural Events
+
+**`lane.created`**  
+A new Lane has been created. Includes:
+
+- `laneId`,
+- `trackId`,
+- `laneType`,
+- initial presentation metadata.
+
+**`lane.deleted`**  
+Indicates a Lane has been removed.
+
+**`lane.attachedToClip`**  
+Lane now appears within the Clip.
+
+**`lane.detachedFromClip`**  
+Lane removed from the Clip’s lane list.
+
+**`lane.reorderedInClip`**  
+Presentation ordering changed for a Clip.
+
+---
+
+### 4.2 Identity and Presentation Events
+
+**`lane.renamed`**  
+The Lane’s name has been updated.
+
+**`lane.colourChanged`**  
+Colour metadata updated.
+
+**`lane.collapsedChanged`**  
+Collapsed/expanded state updated.
+
+---
+
+### 4.3 Routing Events
+
+**`lane.laneStreamChanged`**  
+The Lane’s associated LaneStream processor has changed.
+
+**`lane.sendLevelChanged`**  
+Mixing or routing weight updated.
+
+Pulse may dispatch additional Channel or Processor domain events if the Lane’s
+routing change requires Channel graph updates.
+
+---
+
+## 5. Snapshot Semantics
+
+Lane information is included in project-level snapshots, grouped under their
+own section or as part of Track/Clip snapshot data.
+
+Lane snapshot entries include:
+
+- identity (`laneId`),
+- `trackId`,
+- `laneType`,
+- presentation metadata (`name`, `colour`, `collapsed`),
+- routing (`laneStreamId`, send levels),
+- list of Clips to which the Lane is attached (ordered),
+- any additional static metadata required by the Lane-type domain.
+
+Pulse provides the authoritative representation; Aura discards conflicting local
+state when a snapshot is received.
+
+---
+
+## 6. Realtime and Cohort Considerations
+
+Lane operations are non-realtime. They may cause:
+
+- Channel graph changes (e.g. creation or removal of LaneStreams),
+- reassignment of routing paths,
+- impacts on cohort selection if routing affects determinism assumptions.
+
+No Lane domain operation occurs on the audio thread.  
+Pulse ensures routing and Channel changes are committed safely before issuing
+Pulse → Signal updates in other domains.
