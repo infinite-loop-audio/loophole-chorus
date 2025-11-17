@@ -64,7 +64,7 @@ automation operates on.
 
 For the broader conceptual model, see
 [Parameters Architecture](../../architecture/08-parameters.md) and
-[Mixing Model and Console Architecture](../../architecture/11-mixing-model-and-console-architecture.md).
+[Mixing Model and Console Architecture](../../architecture/11-mixing-console.md).
 
 ---
 

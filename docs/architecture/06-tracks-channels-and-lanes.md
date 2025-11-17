@@ -39,11 +39,16 @@ Tracks do not perform audio processing. They describe structure only.
 
 # 3. Channels
 
-A Channel is an engine-level construct representing audio signal processing. Channels:
+A Channel is an engine-level construct representing audio signal processing. Channels have a dual nature:
 
-- live exclusively in Signal,
-- are referenced by Pulse,
-- have no direct representation in Aura other than visualisation,
+- **Channel Model (Pulse)**: Pulse owns Channel structure, configuration, node ordering, and routing metadata. Pulse constructs Channel definitions and sends them to Signal as graph instructions.
+- **Channel Runtime (Signal)**: Signal owns Channel execution, real-time processing, parameter application, and automation staging. Signal instantiates Channels from Pulse's instructions and executes them in real-time.
+
+Channels:
+
+- are configured by Pulse (model layer),
+- are executed by Signal (engine layer),
+- are visualised by Aura (UI layer),
 - belong optionally to a Track.
 
 A Channel contains:
@@ -56,7 +61,7 @@ A Channel contains:
 
 Channels MUST be real-time safe. They perform no dynamic allocation during processing, no locking, and no non-deterministic operations.
 
-Channels never directly reference Tracks or Clips; they receive resolved graph instructions from Pulse.
+Channels never directly reference Tracks or Clips; they receive resolved graph instructions from Pulse. Pulse sends Channel configuration to Signal, which instantiates and executes the Channel runtime.
 
 ---
 
@@ -110,17 +115,17 @@ A Track does not define Lanes directly. Clips define Lanes. Tracks constrain whe
 
 # 7. LaneStreams
 
-A LaneStream is a Channel processor node created by Pulse to receive audio from a Clip’s audio-producing Lanes. One Track MAY have one or multiple LaneStreams depending on how Clips are configured.
+A LaneStreamNode (also referred to as "LaneStream" for brevity) is a first-class Node type in the Channel's node graph. LaneStreamNodes are created by Pulse to receive audio from Clip audio-producing Lanes. One Track MAY have one or multiple LaneStreamNodes depending on how Clips are configured.
 
 Default behaviour:
 
-- The first audio Lane creates the first LaneStream.
-- Additional audio Lanes route to the same LaneStream unless the user explicitly splits them.
-- MIDI Lanes route to instruments selected via the UI.
+- The first audio Lane triggers creation of the first LaneStreamNode.
+- Additional audio Lanes route to the same LaneStreamNode unless the user explicitly splits them.
+- MIDI Lanes route to instrument nodes selected via the UI.
 
-LaneStreams appear in the node graph and MAY be reordered relative to other nodes.
+LaneStreamNodes appear in the node graph and MAY be reordered relative to other nodes, subject to constraints defined by Pulse.
 
-Signal executes LaneStreams as part of its processing graph.
+Signal executes LaneStreamNodes as part of its processing graph. For details on LaneStreamNode as a Node type, see [Nodes Architecture](./09-nodes.md).
 
 ---
 

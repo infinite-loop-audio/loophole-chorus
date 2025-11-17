@@ -120,16 +120,16 @@ Payload fields include:
 
 ### 3.3 Routing and LaneStream Association
 
-Tracks may have multiple LaneStream nodes in their Channel. Lanes specify
-which LaneStream receives their output.
+Tracks may have multiple LaneStreamNodes in their Channel. Lanes specify
+which LaneStreamNode receives their output.
 
 **`lane.setLaneStream`**  
-Assign the Lane's output to a specific LaneStream node.
+Assign the Lane's output to a specific LaneStreamNode.
 
 Fields:
 
 - `laneId`,
-- `laneStreamId` (nullable to unset routing).
+- `laneStreamId` (nullable to unset routing). This `laneStreamId` refers to the `nodeId` of a LaneStreamNode in the Channel's node graph. See the Node domain specification for LaneStreamNode details.
 
 Pulse updates routing and may issue Channel/Node domain updates.
 

@@ -121,8 +121,8 @@ lane-level concerns:
 
 A Clip in Pulse includes:
 
-- `id` — unique identifier,
-- `hostTrackId`,
+- `clipId` — unique identifier (stable across saves and edits),
+- `trackId` (also referred to as `hostTrackId` in some contexts),
 - `start`, `end`,
 - `lanes[]` — ordered, typed collection of Lanes,
 - optional:

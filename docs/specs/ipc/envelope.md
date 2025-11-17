@@ -166,12 +166,15 @@ Every normal IPC message is a single JSON object with this shape:
 - `domain` (string)  
   Domain namespace for the message. Initial domains include:
 
-  - `"project"`, `"transport"`,  
+  - `"project"`, `"transport"`, `"timebase"`,  
   - `"track"`, `"clip"`, `"lane"`, `"channel"`,  
   - `"node"`, `"parameter"`, `"automation"`,  
   - `"routing"`, `"mixer"`,  
-  - `"ui"`,  
-  - `"engine"`, `"cohort"`.
+  - `"media"`, `"recording"`, `"rendering"`,  
+  - `"gesture"`, `"metering"`,  
+  - `"ui"`, `"pluginUi"`,  
+  - `"engine"`, `"cohort"`, `"session"`,  
+  - `"history"`, `"hardwareIo"`, `"engineDiagnostics"`, `"projectMetadata"`.
 
   Domain-specific documents define the available types and payloads within each
   domain.
