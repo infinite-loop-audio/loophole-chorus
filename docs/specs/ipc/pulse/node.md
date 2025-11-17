@@ -11,7 +11,7 @@ Nodes may represent:
 - plugin-based processors (VST, CLAP, AU wrappers),
 - built-in DSP units (filters, mixers, gain, analysers),
 - LaneStream nodes (rendering output of Clip Lanes),
-- routing nodes (sends, returns, sidechain joiners),
+- routing nodes (SendNodes, ReturnNodes, sidechain joiners),
 - utility nodes (latency compensators, channel mergers/splitters).
 
 Nodes are ordered within a Channel, form part of the larger real-time/anticipative
@@ -68,11 +68,17 @@ Pulse recognises a core set of Node types:
 - **PluginNode**  
   Wraps a plugin instance (VST, CLAP, AU) for instrument or effect processing.
 
-- **GainNode / PanNode / MixerNode**  
-  Built-in mixing utilities.
+- **GainNode / PanNode / FaderNode / MixerNode**  
+  Built-in mixing utilities. The Channel fader and pan are realised as FaderNode and PanNode within the Channel’s Node graph, enabling pre/post-fader send behaviour to be defined purely by Node graph topology.
+
+- **SendNode**  
+  Taps the Channel signal at a specific point in the Node graph and sends a copy to a target Channel. The position of the SendNode in the Node list defines pre/post-fader and pre/post-other-processing behaviour.
+
+- **ReturnNode**  
+  Utility Node for FX return or specialised merge paths, if required by future designs.
 
 - **RoutingNode**  
-  Handles sends, returns, merges and splits.
+  Handles merges and splits (non-send routing).
 
 - **AnalyzerNode**  
   Provides metering, spectral analysis and other diagnostic outputs.

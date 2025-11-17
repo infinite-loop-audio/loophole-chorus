@@ -43,7 +43,7 @@ Routing in Loophole is defined as a **project-level graph**:
 
 - most Channels are Track-owned and represent Track signal paths,
 - some Channels are standalone (busses, FX returns, master, I/O Channels),
-- sends and returns connect Channels for parallel processing,
+- send connections between Channels are realised by SendNodes in the source Channel’s Node graph,
 - sidechains provide secondary inputs to Nodes,
 - the master (or master chain) terminates the audible signal path.
 
@@ -70,11 +70,7 @@ Key concepts in this domain:
   One or more designated Channels forming the final output chain.
 
 - **Send**  
-  A connection from a source Channel to a target Channel with:
-  - level,
-  - pan (optional),
-  - pre/post-fader mode,
-  - mute/bypass.
+  A connection from a source Channel to a target Channel (e.g. bus, FX Channel) realised by a SendNode in the source Channel’s Node graph. The Routing domain describes the relationship between Channels and provides high-level controls; the actual send tap point and behaviour are determined by the SendNode’s position in the source Channel’s Node list.
 
 - **Sidechain**  
   A routing from a source Channel (or bus) into a Node’s sidechain input.
@@ -126,29 +122,31 @@ routing-graph level.
 
 ### 3.3 Sends and Returns
 
-Sends represent additional connections from one Channel to another.
+Sends represent additional connections from one Channel to another, realised in the DSP graph as SendNodes within the source Channel’s Node graph.
 
 **`routing.addSend`**  
 Create a send from a source Channel to a target Channel. Fields include:
 
 - source channel,
 - target channel,
-- pre/post-fader mode,
+- pre/post-fader mode (optional, defaults to post-fader),
 - initial level and mute state.
 
-Pulse allocates a `sendId`.
+Pulse creates a SendNode in the source Channel’s Node graph at an appropriate position (e.g. post-fader by default, or pre-fader if specified) and wires its target Channel. Pulse allocates a `sendId` for routing-level tracking.
 
 **`routing.removeSend`**  
-Remove a send identified by `sendId`.
+Remove a send identified by `sendId`. Pulse removes the corresponding SendNode from the source Channel’s Node graph.
 
 **`routing.setSendLevel`**  
-Update a send’s level or pan.
+Update a send’s level or pan. This command proxies to the underlying SendNode’s parameters.
 
 **`routing.setSendMode`**  
-Change a send’s mode (e.g. pre/post-fader).
+Change a send’s mode (e.g. pre/post-fader). Pulse moves the SendNode to the appropriate position in the source Channel’s Node list (before or after the FaderNode).
 
 **`routing.setSendMuted`**  
-Mute or unmute a send.
+Mute or unmute a send. This command proxies to the underlying SendNode’s enabled state or mute parameter.
+
+Note: Advanced users or tools can manipulate SendNodes directly via the Node domain to position them at arbitrary points in the Channel graph (e.g. between specific plugin nodes) for more precise control.
 
 ---
 
@@ -205,14 +203,16 @@ The project master Channel configuration has changed.
 
 ### 4.2 Send and Return Events
 
+Send events describe the lifecycle and configuration of send routes whose concrete implementation is SendNodes in the source Channel’s Node graph.
+
 **`routing.sendAdded`**  
-A send has been created between Channels.
+A send has been created between Channels. This event indicates that a SendNode has been created in the source Channel’s Node graph and configured to target the specified Channel.
 
 **`routing.sendRemoved`**  
-A send has been removed.
+A send has been removed. This event indicates that the corresponding SendNode has been removed from the source Channel’s Node graph.
 
 **`routing.sendUpdated`**  
-Send configuration changed (level, mode, mute, pan).
+Send configuration changed (level, mode, mute, pan). These changes are reflected in the underlying SendNode’s parameters or position in the Node graph.
 
 ---
 
@@ -247,7 +247,7 @@ include:
 - bus Channels and their roles,
 - master Channel designation,
 - Channel output targets,
-- sends (source, target, parameters),
+- sends (source, target, parameters) — these reflect the existence of SendNodes in the source Channels’ Node graphs,
 - sidechain routes,
 - hardware input/output mappings.
 

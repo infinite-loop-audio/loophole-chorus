@@ -77,6 +77,8 @@ Each Channel has:
 The Channel domain governs channel-level configuration.  
 Node operations are handled in the Node domain.
 
+Sends are materialised as SendNodes within the Channel’s Node graph. A SendNode taps the signal at its position in the Node list and routes a copy to a target Channel, allowing pre/post-fader behaviour and arbitrary tap points purely via graph topology.
+
 ---
 
 ## 3. Commands (Aura → Pulse)
@@ -155,7 +157,7 @@ Configure meter behaviour:
 
 **`channel.resetGraph`**  
 Remove all user-added Nodes and restore the Channel to its default minimal
-configuration (LaneStreamNodes + fader/pan node).
+configuration (LaneStreamNodes + FaderNode/PanNode).
 
 Pulse then emits:
 
