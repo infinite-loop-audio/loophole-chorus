@@ -98,3 +98,21 @@ Implement processing contexts that detect track characteristics (e.g., drums, vo
 **Status:** proposed  
 Transform plugin/processor browsing into a visual experience with interface thumbnail captures, intelligently-picked conceptual colors (matching the plugin's "feel" rather than static collection colors), thematic icons from a wide selection (potentially auto-applied), routing diagrams (e.g., multi-out configurations), determinism indicators, and plugin stability metrics. Enables faster visual recognition and selection of processors.
 
+### Fine-Grained Track Nesting Controls
+**Tag:** Aura / UX / Workflow  
+**Priority:** P2  
+**Status:** proposed  
+Design extensive UI elements for fine-grained control of track nesting and folder organization. Existing DAW implementations make it awkward to move tracks between folders, into nested structures, or adjust nesting levels. Aura should provide intuitive drag-and-drop, keyboard shortcuts, and visual feedback for reorganizing track hierarchies without disrupting workflow.
+
+### Extensible Action and Shortcut Configuration
+**Tag:** Aura / UX / Workflow  
+**Priority:** P2  
+**Status:** proposed  
+Implement fully extensible and customizable keyboard, action, and macro shortcut configuration system. Support mapping any control signature (mouse, keyboard, MIDI controller, etc.) to any action with simple conflict resolution. Allow multiple gestures to map to a single action, with gestures contextual to the active window. Enable in-place action discovery with optional hover tooltips and easy in-place assignment of shortcuts. Empowers users to create personalized workflows and adapt the interface to their preferred input methods.
+
+### Predictable UI Layout and Window Management
+**Tag:** Aura / UX / Workflow  
+**Priority:** P2  
+**Status:** proposed  
+Design Aura's UI layout to be visually similar to other DAWs but with a much more predictable interaction model. Main arrangement windows contain the full sequence, with an optional clip launcher interface able to replace or partially cover it (similar to Studio One 7). Clip/lane editors, mixer, media library, etc. should have easy shortcuts by default and replace the whole internal window space for focused editing work. A secondary level of editor window can be attached in-place where appropriate for smaller editing facilities, similar to Bitwig/Ableton's bottom strip. This layered approach provides both full-screen focus and contextual secondary tools without disrupting the primary workflow.
+
