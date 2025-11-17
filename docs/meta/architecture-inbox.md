@@ -79,3 +79,22 @@ enabling per-clip experimentation with audio or MIDI layering.
 **Priority:** P2  
 **Status:** proposed  
 Use SQLite (or similar SQL database) for storage of project data and settings/config that don't require optimised data streams (e.g., excluding raw audio samples). Requires a general database for Composer sync and settings, plus investigation into whether project files should be or contain SQLite databases. Need to evaluate constraints and limitations of this approach.
+
+### Gesture-Based Tool Selection
+**Tag:** Aura / UX  
+**Priority:** P3  
+**Status:** proposed  
+Enable gesture-based tool selection in editors (e.g., piano roll) by holding an action key and performing mouse gestures to switch modes. Maintain keyboard shortcut fallbacks (e.g., number keys) for traditional workflows. Improves workflow fluidity for users who prefer gesture-based interaction.
+
+### Context-Aware Plugin Suggestions
+**Tag:** Composer / Aura / UX  
+**Priority:** P2  
+**Status:** proposed  
+Implement processing contexts that detect track characteristics (e.g., drums, vocals, bass) and prioritize relevant plugin categories when loading FX. For example, a drum track would prioritize Drum category plugins, followed by Compressors, Shapers, etc. Reduces cognitive load and speeds up workflow by surfacing contextually relevant processors first.
+
+### Visual Plugin Browser
+**Tag:** Composer / Aura / UX  
+**Priority:** P2  
+**Status:** proposed  
+Transform plugin/processor browsing into a visual experience with interface thumbnail captures, intelligently-picked conceptual colors (matching the plugin's "feel" rather than static collection colors), thematic icons from a wide selection (potentially auto-applied), routing diagrams (e.g., multi-out configurations), determinism indicators, and plugin stability metrics. Enables faster visual recognition and selection of processors.
+
