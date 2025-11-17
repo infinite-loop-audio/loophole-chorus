@@ -31,42 +31,52 @@ flows, not implementation details or API formats.
   - [4.3 Semantic Roles](#43-semantic-roles)
   - [4.4 Plugin Categories and Tags](#44-plugin-categories-and-tags)
   - [4.5 User Actions as Signals](#45-user-actions-as-signals)
+  - [4.6 Hardware Device Identity](#46-hardware-device-identity)
+  - [4.7 Hardware Capability Fingerprints](#47-hardware-capability-fingerprints)
 - [5. Client Integration (Pulse and Aura)](#5-client-integration-pulse-and-aura)
   - [5.1 Pulse Knowledge Layer](#51-pulse-knowledge-layer)
   - [5.2 Interaction with Parameter Aliasing](#52-interaction-with-parameter-aliasing)
   - [5.3 Interaction with Aura](#53-interaction-with-aura)
+  - [5.4 Interaction with Hardware I/O](#54-interaction-with-hardware-io)
 - [6. Use Cases](#6-use-cases)
   - [6.1 Plugin Version Updates](#61-plugin-version-updates)
   - [6.2 Switching Plugin Formats](#62-switching-plugin-formats)
   - [6.3 Plugin Replacement and Meaning-Based Mapping](#63-plugin-replacement-and-meaning-based-mapping)
   - [6.4 Plugin Organisation and Browsing](#64-plugin-organisation-and-browsing)
+  - [6.5 Hardware Device Recognition and Role Mapping](#65-hardware-device-recognition-and-role-mapping)
+  - [6.6 Cross-Machine Hardware Fallback](#66-cross-machine-hardware-fallback)
 - [7. Sync, Caching and Offline Behaviour](#7-sync-caching-and-offline-behaviour)
 - [8. Privacy and Consent](#8-privacy-and-consent)
 - [9. Failure Modes and Fallbacks](#9-failure-modes-and-fallbacks)
 - [10. Deterministic Behaviour Telemetry and Inference](#10-deterministic-behaviour-telemetry-and-inference)
-- [11. Future Extensions](#11-future-extensions)
+  - [10.7 Hardware Profile Telemetry](#107-hardware-profile-telemetry)
+- [11. Hardware Knowledge API](#11-hardware-knowledge-api)
+- [12. Future Extensions](#12-future-extensions)
 
 ---
 
 ## 1. Overview
 
-Composer is Loophole’s shared knowledge metadata service. It maintains a
+Composer is Loophole's shared knowledge metadata service. It maintains a
 continuously improving model of:
 
 - plugins (their identities, formats and versions),
 - parameters (their names, types, ranges, roles and groupings),
 - relationships between plugins (mapping across versions and formats),
 - semantic equivalences across different plugins,
-- plugin categories and user-driven classification.
+- plugin categories and user-driven classification,
+- hardware devices (their identities, capabilities, and typical role mappings).
 
-Composer is optional but enhances Loophole’s resilience and ergonomics. When
+Composer is optional but enhances Loophole's resilience and ergonomics. When
 available, it supports:
 
 - smarter automation remapping,
 - robust project loading after plugin updates,
 - automatic tagging and organisation of plugin collections,
 - semantic mapping when replacing plugins,
-- better UX in browsing, categorisation and preset behaviour.
+- better UX in browsing, categorisation and preset behaviour,
+- intelligent hardware device recognition and role mapping suggestions,
+- fallback recommendations when projects are opened on different hardware.
 
 Composer suggestions are non-authoritative. Pulse combines them with local
 aliasing, heuristics and user preferences to choose the final mapping.
@@ -79,10 +89,13 @@ Composer aims to:
 
 - prevent loss of automation and parameter state when plugins change,
 - reduce friction in plugin organisation and discovery,
-- allow semantic operations across plugins (e.g. “map cutoff to cutoff”),
+- allow semantic operations across plugins (e.g. "map cutoff to cutoff"),
 - provide a shared ecosystem of metadata continuously improved by user input,
 - support long-term sustainability for projects spanning multiple plugin
-  versions and formats.
+  versions and formats,
+- assist with hardware device recognition and role mapping across different
+  machines and hardware configurations,
+- provide intelligent fallback suggestions when hardware changes.
 
 Composer must:
 
@@ -90,7 +103,10 @@ Composer must:
 - have no access to project media or arrangement data,
 - work entirely from plugin and parameter metadata,
 - protect privacy and operate on anonymised signals,
-- function gracefully offline with local caching.
+- function gracefully offline with local caching,
+- provide hardware recommendations without enforcing mappings,
+- maintain global/community-level hardware knowledge separate from
+  machine-specific configurations.
 
 ---
 
@@ -137,6 +153,24 @@ Composer is responsible for maintaining and serving:
 - plugin substitutions.
 
 All collected anonymously and combined probabilistically.
+
+### **Hardware Device Metadata**
+- device identity and stable capability fingerprints:
+  - vendor, family, model,
+  - driver/API type (ASIO/CoreAudio/WASAPI/ALSA/etc.),
+  - number of inputs/outputs,
+  - typical grouping (stereo pairs, phones outs, ADAT banks),
+- common community-preferred role mappings:
+  - "outputs 1–2 = main monitors",
+  - "outputs 7–8 = headphone out",
+  - "ADAT 1–8 = preamp expansion",
+- compatible replacements between devices with similar I/O footprints
+  (e.g. "Ultralite AVB → Ultralite Mk5 → RME Babyface → Built-In Output"),
+- alias templates for hardware devices:
+  - e.g. `interface.studioMain`, `interface.laptopDefault`, etc.
+
+Composer does NOT need a full DSP profile; high-level capability knowledge is
+sufficient.
 
 ---
 
@@ -218,6 +252,44 @@ Loophole instances may (optionally) report anonymised signals such as:
 Composer aggregates these signals statistically to refine metadata and mapping
 confidence.
 
+### 4.6 Hardware Device Identity
+
+Composer identifies hardware devices using:
+
+- **Device Family**
+  A logical grouping representing devices with similar capabilities and I/O
+  footprints.
+  Example: `motu.ultralite`, `rme.babyface`, `focusrite.scarlett`.
+
+- **Device Variant**
+  A specific model and revision combination.
+  Example: `motu.ultralite.mk5`, `motu.ultralite.avb`.
+
+Variants include:
+- vendor and product names,
+- driver/API type,
+- input/output channel counts,
+- typical channel labelling,
+- known channel groupings (stereo pairs, ADAT banks, etc.).
+
+### 4.7 Hardware Capability Fingerprints
+
+Composer maintains "capability fingerprints" for known devices. Fingerprints
+include:
+
+- channel count (inputs and outputs),
+- typical channel labelling,
+- typical use patterns (based on aggregated usage),
+- known quirks (e.g. "channels 7–8 are phones on RME UFX"),
+- common role mappings observed in the community.
+
+Fingerprints allow Composer to recommend:
+- role mappings when a new device appears,
+- fallback mappings when the original device is missing,
+- compatible device substitutions.
+
+This is optional and heuristic; Pulse/Aura always retain final control.
+
 ---
 
 ## 5. Client Integration (Pulse and Aura)
@@ -232,7 +304,10 @@ Pulse includes a thin integration layer which:
   - plugin descriptions,
   - parameter metadata,
   - mapping suggestions,
-  - categories and tags.
+  - categories and tags,
+  - hardware device profiles,
+  - role mapping suggestions,
+  - fallback recommendations.
 
 Other Pulse systems never talk to Composer directly.
 
@@ -267,6 +342,36 @@ Aura indirectly benefits from Composer through Pulse:
 
 Aura should never depend on live Composer for correctness — cached and local
 metadata must always allow a project to load.
+
+### 5.4 Interaction with Hardware I/O
+
+Composer assists Pulse/Aura in determining hardware device mappings, but does
+not enforce them. Composer can provide:
+
+- **role → alias** suggestions when a new device appears on a machine,
+- **alias → device/channel** default mappings,
+- fallback mappings when:
+  - a project was authored on a different machine,
+  - or with different hardware,
+  - or with a more complex I/O box.
+
+Composer provides recommendations based on:
+- community data,
+- frequency of observed mappings,
+- heuristics based on channel count and grouping.
+
+Pulse/Aura always retain final control. Hardware alias→device mappings remain
+**local per machine**; Composer's knowledge is global/community-level, not
+machine-specific.
+
+Composer only assists in making good guesses:
+- when a project is opened on a new machine,
+- when hardware changes,
+- or when a user plugs in an unfamiliar device.
+
+This separation of concerns ensures that machine-specific hardware
+configurations remain local, whilst Composer provides community-driven
+recommendations to improve the initial mapping experience.
 
 ---
 
@@ -321,6 +426,25 @@ New Loophole install:
 Users can customise freely; their choices are cached and may contribute to
 Composer if they opt in.
 
+### 6.5 Hardware Device Recognition and Role Mapping
+
+When a new hardware device is detected:
+
+- Pulse queries Composer for device identity and capability fingerprint,
+- Composer suggests common role mappings (e.g. "outputs 1–2 = main monitors"),
+- Pulse/Aura present suggestions to the user for confirmation,
+- user choices are cached locally and may contribute to Composer if opted in.
+
+### 6.6 Cross-Machine Hardware Fallback
+
+When a project is opened on a different machine:
+
+- Pulse identifies missing hardware devices referenced by device aliases,
+- Composer suggests compatible replacements based on capability fingerprints,
+- Pulse/Aura present fallback options (e.g. "RME UFX → RME Babyface → Built-In"),
+- user confirms or selects alternative mappings,
+- mappings are stored locally per machine.
+
 ---
 
 ## 7. Sync, Caching and Offline Behaviour
@@ -345,7 +469,12 @@ Shared data is strictly limited to:
 - plugin/parameter IDs,
 - names and tags assigned,
 - mapping decisions (anonymous and aggregated),
-- plugin substitution and remapping choices.
+- plugin substitution and remapping choices,
+- device model identifiers,
+- channel counts and labels,
+- user-applied role mappings (anonymised and aggregated),
+- device alias usage patterns,
+- fallback mapping choices.
 
 Composer never receives:
 - audio,
@@ -353,7 +482,10 @@ Composer never receives:
 - file names,
 - track content,
 - Clip data,
-- user identity.
+- user identity,
+- machine identifiers,
+- device serial numbers,
+- personally identifiable information.
 
 ---
 
@@ -472,18 +604,68 @@ Composer exposes the following metadata to Pulse:
 Pulse uses these values in cohort assignment logic, combining them with local
 observation and user preferences to make final decisions.
 
+### 10.7 Hardware Profile Telemetry
+
+Composer may receive anonymised, opt-in telemetry about hardware devices:
+
+- device model identifiers,
+- channel counts and labels,
+- user-applied role mappings,
+- device alias usage,
+- fallback mapping choices.
+
+Composer aggregates this data to improve:
+- device recognition accuracy,
+- role mapping suggestions,
+- fallback recommendations,
+- capability fingerprint refinement.
+
+Privacy boundaries:
+- No audio data,
+- No per-project content,
+- No personally identifiable information,
+- No machine identifiers,
+- Only aggregated, anonymised patterns.
+
+This telemetry follows the same opt-in model as plugin telemetry and is
+aggregated statistically to improve community-wide recommendations.
+
 ---
 
-## 11. Future Extensions
+## 11. Hardware Knowledge API
+
+Composer exposes conceptual API endpoints (not part of Pulse IPC) for hardware
+device knowledge:
+
+- `suggestRoleMappings(deviceDescriptor)` — suggests common role mappings for a
+  device based on community patterns,
+- `suggestAlias(deviceDescriptor)` — recommends device alias templates (e.g.
+  `interface.studioMain`) based on device characteristics,
+- `suggestFallbackForRole(roleName, deviceCapabilities)` — suggests compatible
+  device/channel mappings when the original device is unavailable,
+- `getDeviceProfile(deviceVendorModel)` — returns capability fingerprint and
+  known characteristics for a device,
+- `matchCapabilities(targetCapabilities)` — finds devices with similar I/O
+  footprints and capabilities.
+
+These are conceptual APIs; actual integration occurs through Pulse's knowledge
+layer, which caches responses and provides fallback behaviour when Composer is
+unavailable.
+
+---
+
+## 12. Future Extensions
 
 Composer will naturally evolve to support:
 
 - vendor-driven metadata ingestion,
 - advanced plugin similarity models,
-- DSP behavioural clustering (e.g. “similar compressors”),
+- DSP behavioural clustering (e.g. "similar compressors"),
 - cross-plugin preset translation,
 - collaborative tag curation,
 - improved semantic parsing for parameter naming,
-- modulation-role discovery.
+- modulation-role discovery,
+- enhanced hardware device compatibility models,
+- driver-specific capability detection.
 
-These features all build on Composer’s core architecture described here.
+These features all build on Composer's core architecture described here.
