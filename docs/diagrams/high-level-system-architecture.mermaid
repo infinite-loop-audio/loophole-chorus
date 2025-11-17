@@ -1,0 +1,39 @@
+flowchart LR
+
+    subgraph AURA["Aura (UI Layer)"]
+        A1[User Input & Editing Intents]
+        A2[Render Timeline]
+        A3[Display Plugin UI Windows]
+    end
+
+    subgraph PULSE["Pulse (Authoritative Model)"]
+        P1[Project Model & State]
+        P2[Graph Builder]
+        P3[Cohort Assignment]
+        P4[Snapshot Engine]
+    end
+
+    subgraph SIGNAL["Signal (DSP Engine)"]
+        S1["Live Engine (Real-Time Thread)"]
+        S2["Anticipative Engine (Worker Threads)"]
+        S3[Plugin Host / Router]
+        S4[Metering & Analysis]
+    end
+
+    subgraph COMPOSER["Composer (Metadata Service)"]
+        C1[Plugin Identity]
+        C2[Parameter Maps]
+        C3[Deterministic Classification]
+    end
+
+    A1 -->|Editing Intents| P1
+    P4 -->|Snapshots| A2
+    A3 -->|Window Handles| SIGNAL
+
+    P2 -->|Graph Updates| SIGNAL
+    P3 -->|Cohort Decisions| SIGNAL
+
+    SIGNAL -->|Status, Failures| PULSE
+
+    SIGNAL -.->|Telemetry| COMPOSER
+    PULSE -.->|Queries| COMPOSER

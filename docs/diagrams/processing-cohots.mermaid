@@ -1,0 +1,30 @@
+flowchart LR
+
+    subgraph LIVE["Live Cohort<br>(Low Latency, Real-Time Thread)"]
+        L1[Record-Armed Tracks]
+        L2[Plugins with UI Open]
+        L3[Non-Deterministic Processors]
+        L4[Downstream of Live]
+    end
+
+    subgraph ANTICIPATIVE["Anticipative Cohort<br>(High-Latency, Worker Threads)"]
+        A1[Deterministic Processors]
+        A2[Inactive Instruments]
+        A3[Background FX]
+    end
+
+    L1 --> L4
+    L2 --> L4
+
+    A1 --> A2
+    A2 --> A3
+
+    subgraph RENDERH["Render Horizon"]
+        H1((Playhead))
+        H2((+1s))
+        H3((+2s))
+        H4((+3s))
+    end
+
+    ANTICIPATIVE -->|Renders Ahead| RENDERH
+    LIVE -->|Consumes Live + Anticipative Buffers| RENDERH

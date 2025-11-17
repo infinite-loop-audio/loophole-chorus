@@ -1,0 +1,30 @@
+flowchart TB
+
+    subgraph TRACK["Track"]
+        T1[Track Metadata]
+
+        subgraph LNS["Lanes"]
+            L1["MIDI Lane(s)"]
+            L2["Audio Lane(s)"]
+            L3["Video Lane(s)"]
+        end
+    end
+
+    subgraph CHANNEL["Channel (DSP Chain)"]
+        C0[Input Router]
+        C1[LaneStream: MIDI]
+        C2[LaneStream: Audio]
+        C3[LaneStream: Video]
+        C4[Instrument Plugins]
+        C5[FX Plugins]
+        C9[Output Router]
+    end
+
+    L1 --> C1
+    L2 --> C2
+    L3 --> C3
+
+    C1 --> C4
+    C4 --> C5
+    C2 --> C5
+    C5 --> C9
