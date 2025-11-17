@@ -45,6 +45,10 @@ The Track domain governs all aspects of Track structure and metadata within
 a project. Tracks are hierarchical entities that may contain other Tracks,
 Clips and Lanes, and may optionally own a Channel for DSP processing.
 
+Track-owned Channels are one class of Channel. Other Channels (busses, sends,
+returns, master, I/O, etc.) are defined at the project/routing level and exist
+independently of Tracks.
+
 Pulse validates and applies all Track operations, updates the project model,
 and emits events notifying Aura of the resulting changes. Pulse may trigger
 operations in other domains (Channel, Lane, Node, Routing) when Track
@@ -148,12 +152,16 @@ Pulse stores this hint and may trigger a cohort re-evaluation.
 ### 2.5 Channel Binding
 
 **`track.setChannelEnabled`**  
-Attach or detach a Channel from a Track:
+Attach or detach a Track-owned Channel from a Track:
 
-- When enabling and no Channel exists, Pulse creates a Channel and initial
-  LaneStream nodes.
-- When disabling, Pulse removes or deactivates the Channel according to
-  project rules.
+- When enabling and no Channel exists, Pulse creates a Track-owned Channel
+  and initial LaneStream nodes.
+- When disabling, Pulse removes or deactivates the Track-owned Channel
+  according to project rules.
+
+This command only affects Channels owned by this Track. Other Channels
+(busses, master, etc.) are managed separately via routing/project-level
+commands.
 
 Pulse emits `track.channelBindingChanged`.
 
@@ -223,9 +231,11 @@ is enforced by Pulse and Signal.
 ### 3.4 Channel Binding Events
 
 **`track.channelBindingChanged`**  
-Emitted when a Channel is attached to or detached from a Track.
+Emitted when a Track-owned Channel is attached to or detached from a Track.
 
 Aura may use this to update mixer visibility or channel strip presentation.
+Note that this event only concerns Track-owned Channels; standalone Channels
+are managed via routing/project-level events.
 
 ---
 

@@ -5,7 +5,7 @@ It covers the commands issued by Aura to Pulse relating to Channel
 configuration and the events emitted by Pulse to notify Aura of Channel-level
 changes.
 
-A **Channel** is the DSP container for a Track. It owns:
+A **Channel** is a DSP processing container. It owns:
 
 - an ordered sequence of Nodes that form its DSP graph,
 - input and output routing,
@@ -14,7 +14,11 @@ A **Channel** is the DSP container for a Track. It owns:
 - default LaneStreamNodes (created when Lanes exist),
 - analysis nodes (if required).
 
-Channels exist only when enabled for a Track.  
+Channels are often created for and associated with Tracks (track-owned Channels),
+but Channels may also be standalone and not bound to any Track, for example:
+master output Channels, bus/FX Channels, send/return Channels, hardware I/O
+Channels, and analysis-only or utility Channels.
+
 Pulse is the authoritative owner of Channel identity, structure and configuration.
 
 ---
@@ -40,18 +44,19 @@ Pulse is the authoritative owner of Channel identity, structure and configuratio
 
 ## 1. Overview
 
-Channels define the DSP context for Tracks. Every Node is owned by exactly one
+Channels define DSP processing contexts. Every Node is owned by exactly one
 Channel. A Channel is responsible for:
 
-- receiving audio/MIDI streams from Lanes,
+- receiving audio/MIDI streams from Lanes (for track-owned Channels),
 - applying the Node graph (plugin nodes, built-in DSP, routing nodes, etc.),
 - producing output streams for the project-wide routing graph,
 - emitting metering and analysis data,
 - integrating with cohort assignment decisions.
 
-Channels are created when Tracks request them (Track domain’s
+Track-owned Channels are created when Tracks request them (Track domain's
 `track.setChannelEnabled` command).  
-Channels do not exist independently of Tracks.
+Other Channels (busses, sends, returns, master, I/O, etc.) are defined at the
+project/routing level and exist independently of Tracks.
 
 ---
 
@@ -60,7 +65,9 @@ Channels do not exist independently of Tracks.
 Each Channel has:
 
 - a stable `channelId`,
-- a reference to its `trackId`,
+- an optional `trackId` for Track-owned Channels,
+- an optional `role` field for special Channels such as `"master"`, `"bus"`,
+  `"fx"`, `"send"`, `"return"`, `"io"`, etc.,
 - an ordered list of `nodeId`s representing the Node graph,
 - input configuration (Track input sources, audio/MIDI),
 - output configuration (main output, bus routing, sidechain sends),
@@ -76,7 +83,10 @@ Node operations are handled in the Node domain.
 
 ### 3.1 Creation and Removal
 
-Channels are created/removed via Track domain commands.  
+Track-owned Channels are created/removed via Track domain commands.  
+Standalone Channels (busses, master, etc.) are created via routing/project-level
+commands (defined in the Routing domain).
+
 The Channel domain receives no direct create/delete commands.
 
 However, Aura may issue Channel-specific operations once a Channel exists.
@@ -159,16 +169,19 @@ Pulse then emits:
 ### 4.1 Structural Events
 
 **`channel.created`**  
-A Channel has been created due to Track enabling.
+A Channel has been created (either due to Track enabling or via routing/project
+configuration).
 
 Includes:
 
 - `channelId`,
-- `trackId`,
+- `trackId` (if track-owned),
+- `role` (if applicable),
 - initial node list.
 
 **`channel.deleted`**  
-The Channel has been removed due to Track disabling.
+The Channel has been removed (either due to Track disabling or routing/project
+configuration changes).
 
 ---
 
@@ -207,7 +220,8 @@ Static meter configuration updated.
 Channel entries in snapshots include:
 
 - identity (`channelId`),
-- associated `trackId`,
+- associated `trackId` (if track-owned),
+- `role` (if applicable),
 - complete ordered list of `nodeId`s,
 - input/output configuration,
 - fader state,
