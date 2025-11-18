@@ -320,7 +320,7 @@ Non-fatal issues that Pulse should surface in Session warnings.
   "event": "engine.warning",
   "code": "engineHighLoad", // example
   "message": "Engine DSP load exceeded 90% on several callbacks.",
-  "data": {
+  "details": {
     "maxLoadPercent": 93.5,
     "durationMs": 2500
   }
@@ -345,7 +345,7 @@ A serious error requiring user attention and potentially engine shutdown.
   "event": "engine.fatalError",
   "code": "deviceLost",
   "message": "The selected audio device became unavailable.",
-  "data": {
+  "details": {
     "deviceId": "CoreAudio:XYZ",
     "recoverable": true
   }
@@ -396,7 +396,7 @@ we assume a generic pattern:
     "code": "invalidConfiguration",
     "message": "Requested sample rate is not supported by any active device.",
     "domain": "engine",
-    "data": {
+    "details": {
       "requestedSampleRate": 123456
     }
   }

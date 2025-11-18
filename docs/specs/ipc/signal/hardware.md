@@ -522,7 +522,7 @@ Non-fatal hardware-related issues.
   "event": "hardware.warning",
   "code": "highLatency",
   "message": "Audio buffer size is high; latency may be noticeable.",
-  "data": {
+  "details": {
     "bufferSize": 2048,
     "sampleRate": 44100
   }
@@ -543,7 +543,7 @@ attention.
   "event": "hardware.error",
   "code": "deviceConfigFailed",
   "message": "Unable to apply requested audio configuration.",
-  "data": {
+  "details": {
     "inputDeviceId": "audio:mac:CoreAudio:XYZ123",
     "outputDeviceId": "audio:mac:CoreAudio:XYZ123"
   }
@@ -575,7 +575,7 @@ Example error:
     "code": "deviceNotFound",
     "message": "Requested audio device was not found.",
     "domain": "hardware",
-    "data": {
+    "details": {
       "deviceId": "audio:mac:CoreAudio:XYZ123"
     }
   }

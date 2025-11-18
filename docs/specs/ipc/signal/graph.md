@@ -427,7 +427,7 @@ correct operation.
     {
       "code": "cycleDetected",
       "message": "Feedback loop detected between channels.",
-      "data": {
+      "details": {
         "channelIds": ["ch:bus:delay", "ch:bus:reverb"]
       }
     }
@@ -456,7 +456,7 @@ Non-fatal graph-level issues.
   "event": "graph.warning",
   "code": "unconnectedChannel",
   "message": "Channel has no outputs and will be silent.",
-  "data": {
+  "details": {
     "channelId": "ch:fx:unused"
   }
 }
@@ -515,7 +515,7 @@ Example error:
     "code": "graphCycle",
     "message": "Adding connection would create a feedback loop.",
     "domain": "graph",
-    "data": {
+    "details": {
       "fromChannelId": "ch:fx:delay",
       "toChannelId": "ch:bus:drums"
     }

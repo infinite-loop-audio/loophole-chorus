@@ -600,7 +600,7 @@ A plugin instance has crashed or misbehaved severely.
   "pluginInstanceId": "pluginInstance:abc123",
   "pluginId": "plugin:vst3:SomeVendor:UnstableFX",
   "message": "Plugin caused an access violation during processing.",
-  "data": {
+  "details": {
     "duringCallback": true
   }
 }
@@ -631,7 +631,7 @@ Non-fatal plugin issues.
   "pluginId": "plugin:vst3:SomeVendor:SlowFX",
   "code": "highCpuUsage",
   "message": "Plugin is consistently using high CPU.",
-  "data": {
+  "details": {
     "averageLoadPercent": 60.0
   }
 }
@@ -658,7 +658,7 @@ Example error:
     "code": "pluginNotFound",
     "message": "No plugin with ID plugin:vst3:FabFilter:ProQ3 was found.",
     "domain": "plugin",
-    "data": {
+    "details": {
       "pluginId": "plugin:vst3:FabFilter:ProQ3"
     }
   }

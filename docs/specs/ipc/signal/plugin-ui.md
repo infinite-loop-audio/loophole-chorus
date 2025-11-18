@@ -73,19 +73,19 @@ Plugin UIs are always attached to a specific **plugin instance**:
 
 This comes from the `signal.plugin` domain.
 
-### 2.2 UI Window ID
+### 2.2 Plugin UI ID
 
-Pulse assigns a **UI Window ID** for each plugin UI it wants to manage:
+Pulse assigns a **Plugin UI ID** for each plugin UI it wants to manage:
 
 ```json
 {
-  "uiWindowId": "ui:plugin:track:42:slot:1"
+  "pluginUiId": "ui:plugin:track:42:slot:1"
 }
 ```
 
-- `uiWindowId` is stable within the Pulse/Aura layout model.
-- Multiple `uiWindowId`s may refer to the same `pluginInstanceId` in unusual
-  cases (e.g. multi-view UIs), though normally there’s a 1:1 mapping.
+- `pluginUiId` is stable within the Pulse/Aura layout model.
+- Multiple `pluginUiId`s may refer to the same `pluginInstanceId` in unusual
+  cases (e.g. multi-view UIs), though normally there's a 1:1 mapping.
 
 ### 2.3 UI Modes
 
@@ -134,7 +134,7 @@ Open a plugin UI for a given plugin instance.
 ```json
 {
   "command": "pluginUI.open",
-  "uiWindowId": "ui:plugin:track:42:slot:1",
+  "pluginUiId": "ui:plugin:track:42:slot:1",
   "pluginInstanceId": "pluginInstance:abc123",
   "mode": "external", // "external" | "embedded"
   "initialRect": {
@@ -168,7 +168,7 @@ For `"embedded"` mode, `hostWindow` must be provided, e.g.:
 ```json
 {
   "replyTo": "pluginUI.open",
-  "uiWindowId": "ui:plugin:track:42:slot:1",
+  "pluginUiId": "ui:plugin:track:42:slot:1",
   "pluginInstanceId": "pluginInstance:abc123",
   "mode": "external",
   "actualRect": {
@@ -211,7 +211,7 @@ Close a plugin UI window.
 ```json
 {
   "command": "pluginUI.close",
-  "uiWindowId": "ui:plugin:track:42:slot:1"
+  "pluginUiId": "ui:plugin:track:42:slot:1"
 }
 ```
 
@@ -235,7 +235,7 @@ Request a move/resize of the plugin UI window.
 ```json
 {
   "command": "pluginUI.setRect",
-  "uiWindowId": "ui:plugin:track:42:slot:1",
+  "pluginUiId": "ui:plugin:track:42:slot:1",
   "rect": {
     "x": 1300,
     "y": 120,
@@ -269,7 +269,7 @@ Show or hide the plugin UI.
 ```json
 {
   "command": "pluginUI.setVisibility",
-  "uiWindowId": "ui:plugin:track:42:slot:1",
+  "pluginUiId": "ui:plugin:track:42:slot:1",
   "visible": true
 }
 ```
@@ -294,7 +294,7 @@ Set Z-order hints for a plugin UI window.
 ```json
 {
   "command": "pluginUI.setZOrderHints",
-  "uiWindowId": "ui:plugin:track:42:slot:1",
+  "pluginUiId": "ui:plugin:track:42:slot:1",
   "options": {
     "alwaysOnTop": false
   }
@@ -318,7 +318,7 @@ Update the host window/surface for an embedded plugin UI.
 ```json
 {
   "command": "pluginUI.updateHostWindow",
-  "uiWindowId": "ui:plugin:track:42:slot:1",
+  "pluginUiId": "ui:plugin:track:42:slot:1",
   "hostWindow": {
     "platform": "macOS",
     "kind": "view",
@@ -346,7 +346,7 @@ Request that the plugin window gains keyboard/mouse focus.
 ```json
 {
   "command": "pluginUI.requestFocus",
-  "uiWindowId": "ui:plugin:track:42:slot:1"
+  "pluginUiId": "ui:plugin:track:42:slot:1"
 }
 ```
 
@@ -369,7 +369,7 @@ Emitted once a plugin UI has been successfully opened and attached.
 ```json
 {
   "event": "pluginUI.opened",
-  "uiWindowId": "ui:plugin:track:42:slot:1",
+  "pluginUiId": "ui:plugin:track:42:slot:1",
   "pluginInstanceId": "pluginInstance:abc123",
   "mode": "external",
   "rect": {
@@ -401,7 +401,7 @@ Emitted when a plugin UI window is closed.
 ```json
 {
   "event": "pluginUI.closed",
-  "uiWindowId": "ui:plugin:track:42:slot:1",
+  "pluginUiId": "ui:plugin:track:42:slot:1",
   "pluginInstanceId": "pluginInstance:abc123",
   "reason": "normal" // "normal" | "pluginClosed" | "error" | "crash"
 }
@@ -433,7 +433,7 @@ Emitted when the plugin UI window’s rect changes:
 ```json
 {
   "event": "pluginUI.rectChanged",
-  "uiWindowId": "ui:plugin:track:42:slot:1",
+  "pluginUiId": "ui:plugin:track:42:slot:1",
   "rect": {
     "x": 1200,
     "y": 110,
@@ -459,7 +459,7 @@ Emitted when the plugin UI becomes visible/hidden.
 ```json
 {
   "event": "pluginUI.visibilityChanged",
-  "uiWindowId": "ui:plugin:track:42:slot:1",
+  "pluginUiId": "ui:plugin:track:42:slot:1",
   "visible": true
 }
 ```
@@ -480,7 +480,7 @@ Plugin requests focus for its UI (e.g. user clicked inside an embedded region).
 ```json
 {
   "event": "pluginUI.focusRequested",
-  "uiWindowId": "ui:plugin:track:42:slot:1"
+  "pluginUiId": "ui:plugin:track:42:slot:1"
 }
 ```
 
@@ -500,11 +500,11 @@ Error relating to plugin UI creation or management.
 ```json
 {
   "event": "pluginUI.error",
-  "uiWindowId": "ui:plugin:track:42:slot:1",
+  "pluginUiId": "ui:plugin:track:42:slot:1",
   "pluginInstanceId": "pluginInstance:abc123",
   "code": "createFailed", // "createFailed" | "attachFailed" | "unsupported" | "other"
   "message": "Plugin does not provide a native UI.",
-  "data": {}
+    "details": {}
 }
 ```
 
@@ -542,7 +542,7 @@ Pulse is responsible for:
 
 Commands can fail synchronously for reasons including:
 
-- unknown `pluginInstanceId` or `uiWindowId`,
+- unknown `pluginInstanceId` or `pluginUiId`,
 - plugin has no UI,
 - platform does not support requested `mode`,
 - invalid or unusable `hostWindow` handle.
@@ -555,7 +555,7 @@ Example error:
     "code": "noPluginUI",
     "message": "The plugin instance does not provide a native UI.",
     "domain": "pluginUI",
-    "data": {
+    "details": {
       "pluginInstanceId": "pluginInstance:abc123"
     }
   }

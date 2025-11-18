@@ -470,7 +470,7 @@ Media could not be opened or decoded.
   "mediaId": "media:pool:1234",
   "reason": "notFound", // "notFound" | "unsupportedFormat" | "decodeError" | "permissionDenied" | "unknown"
   "message": "File not found at given path.",
-  "data": {
+  "details": {
     "path": "/path/to/snare_01.wav"
   }
 }
@@ -495,7 +495,7 @@ spinning up, network mount lag).
   "event": "media.slowRead",
   "mediaId": "media:pool:largeLoop",
   "message": "Read operation is taking unusually long.",
-  "data": {
+  "details": {
     "path": "/path/to/largeLoop.wav",
     "approxDelayMs": 1200
   }
@@ -639,7 +639,7 @@ Example synchronous error:
     "code": "invalidLocation",
     "message": "No usable path or handle provided for media.",
     "domain": "media",
-    "data": {
+    "details": {
       "mediaId": "media:pool:1234"
     }
   }

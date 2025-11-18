@@ -450,7 +450,7 @@ Non-fatal issues related to a gesture session.
   "gestureSessionId": "gesture:pulse:track:42:cutoffDrag",
   "code": "streamBackpressure",
   "message": "Gesture stream is receiving data faster than it can be consumed.",
-  "data": {
+  "details": {
     "droppedPackets": 12
   }
 }
@@ -476,7 +476,7 @@ Serious error causing a session to be unusable.
   "gestureSessionId": "gesture:pulse:track:42:cutoffDrag",
   "code": "invalidTarget",
   "message": "Gesture session target no longer exists.",
-  "data": {
+  "details": {
     "nodeId": "node:track:42:plugin:1"
   }
 }
@@ -509,7 +509,7 @@ Example error:
     "code": "invalidTarget",
     "message": "Node or parameter not found for gesture target.",
     "domain": "gesture",
-    "data": {
+    "details": {
       "nodeId": "node:track:42:plugin:1",
       "parameterId": "param:cutoff"
     }

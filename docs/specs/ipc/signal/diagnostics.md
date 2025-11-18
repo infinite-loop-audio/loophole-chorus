@@ -428,7 +428,7 @@ General non-fatal diagnostic warning.
   "event": "diagnostics.warning",
   "code": "highEngineLoad",
   "message": "Engine CPU load has exceeded 80% over the last 5 seconds.",
-  "data": {
+  "details": {
     "cpuLoadPercent": 82.5
   }
 }
@@ -453,7 +453,7 @@ Serious diagnostics-level error that is not yet a fatal engine crash.
   "event": "diagnostics.error",
   "code": "schedulingOverrun",
   "message": "Scheduling overrun detected in real-time cohort.",
-  "data": {
+  "details": {
     "cohortId": "cohort:rt:master"
   }
 }
@@ -528,7 +528,7 @@ Example error:
     "code": "unsupportedLevel",
     "message": "Diagnostics level 'debug' is not available in this build.",
     "domain": "diagnostics",
-    "data": {
+    "details": {
       "requestedLevel": "debug"
     }
   }

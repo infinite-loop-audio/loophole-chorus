@@ -400,7 +400,7 @@ Example error response:
     "code": "invalidLoopRegion",
     "message": "Loop endSamples must be greater than startSamples.",
     "domain": "transport",
-    "data": {
+    "details": {
       "startSamples": 200000,
       "endSamples": 150000
     }
