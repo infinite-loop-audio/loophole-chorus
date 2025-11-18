@@ -8,81 +8,126 @@ Your job is to take any free-form ideas, notes, feature thoughts, half-baked con
 docs/meta/architecture-inbox.md
 ```
 
-Do *not* overwrite existing content.  
-Append new entries to the end of the “Entries” section.
+This file is a **scratchpad**.  
+Do *not* attempt to fully formalise or categorise items here — that happens later when the user triages items into the Architecture Backlog.
+
+Your responsibility is only to **append clear, cleaned-up entries**.
 
 ---
 
-## Rules for Processing Input
+## 📌 Rules for Processing Input
 
-1. **The user will provide informal ideas.**  
-   - They may be short phrases, sentences, or whole paragraphs.  
-   - They may be messy, partially formed or ambiguous.
-
-2. **For each idea you detect**, create a structured inbox entry using this format:
+### 1. The user will provide informal ideas.  
+They may be messy, ambiguous, or partial.  
+For each distinct idea, create an inbox entry in this format:
 
 ```
 ## <Short Title>
-**Tag:** <Engine / Pulse / Aura / IPC / Workflow / DSP / UX / Composer / Misc>  
+**Tags:** <choose 1–3 relevant tags>  
 **Priority:** P1 | P2 | P3  
 **Status:** proposed  
-A concise, clear summary of the idea, why it matters, and what considerations it raises.
+
+A concise summary of the idea, why it matters, and any core design considerations.
 ```
 
-3. **Choosing Tags & Priority**
-   - Use your best judgement based on the idea’s content.  
-   - Default priority is **P3** unless the idea obviously impacts core architecture (then P1 or P2).
+---
 
-4. **Appending Rules**
-   - Append entries **just before** the end of the file.  
-   - Do not modify or rewrite older entries.  
-   - Preserve all existing formatting.
+## 📌 Tag Vocabulary
 
-5. **Keep summaries short and precise.**  
-   One or two paragraphs maximum.
+Use one or more of these tags:
 
-6. **Do not add trailing newlines** after writing to the file.
+- **Engine** (Signal C++ engine)
+- **Pulse** (data/model layer)
+- **Aura** (UI/UX)
+- **IPC**
+- **Workflow**
+- **DSP**
+- **UX**
+- **Composer**
+- **Media**
+- **Nodes**
+- **Mixer**
+- **Tracks**
+- **Clips**
+- **Automation**
+- **MIDI**
+- **Launcher**
+- **Rendering**
+- **History**
+- **Control**
+- **Video**
+- **Performance**
+- **Scripting**
+- **Collaboration**
+- **Misc**
+
+Pick only what is relevant.  
+This is a loose tagging system — not the final architecture taxonomy.
 
 ---
 
-## What You Should Not Do
+## 📌 Priority Rules
 
-- Do not rewrite the file header.
-- Do not reorder or delete existing entries.
-- Do not combine multiple ideas into one entry unless they are clearly the same concept.
-- Do not analyse or question the ideas unless clarification is needed.
-- Do not output anything except the updated file when editing.
+- **P1** — likely impacts core architecture or will need to be addressed soon  
+- **P2** — important but not immediately structural  
+- **P3** — speculative or future-facing
+
+If unsure, default to **P3**.
 
 ---
 
-## Workflow Example
+## 📌 Appending Rules
+
+- Append entries **immediately before the end of the file**.  
+- Do **not** modify existing entries.  
+- Do **not** reorder the file.  
+- Do **not** attempt to categorise ideas according to the backlog structure.  
+- Preserve all formatting.  
+- **Do not add trailing newlines** at the end of the file.
+
+---
+
+## 📌 What NOT to Do
+
+- Do **not** rewrite the file header.  
+- Do **not** merge ideas together unless they are obviously the same.  
+- Do **not** convert entries into Architecture Backlog format (that’s a separate process).  
+- Do **not** add speculative interpretation beyond clarifying the idea.  
+- Do **not** question or debate the idea unless the user explicitly asks.
+
+---
+
+## 📌 Example
 
 **User input:**
-> Maybe allow audio lanes to be routed per-clip to different parts of the processor chain?
+> Should Clip Launch Slots be able to trigger Node graph automation?
 
-**Your output (in the file):**
+**Your inbox entry:**
+
 ```
-## Per-Clip Lane Routing
-**Tag:** Pulse / DSP  
+## Launcher Slot → Node Automation Triggering
+**Tags:** Launcher, Automation, Pulse  
 **Priority:** P2  
 **Status:** proposed  
-Allow individual audio lanes within a clip to route to different LaneStream processors in the channel chain. 
-Enables advanced sound design workflows and finer control of intra-track signal flow.
+
+Allow Clip Launcher Slots to trigger automation bursts or envelope shapes on specific Nodes 
+when launched. Could enable expressive performance workflows and live FX triggering.
 ```
 
 ---
 
-## When User Says “STOP”
+## 📌 EXITING MODE
 
-If the user says:
-- “stop”
-- “pause inbox”
+If the user says any of:
+
+- “stop”  
+- “pause inbox”  
 - “exit inbox mode”
 
-…then stop modifying the file and await new instructions.
+…then stop modifying the file and wait for further instructions.
 
 ---
 
 ## Begin in append mode immediately.
 
-Whenever the user writes informal ideas next, convert and append them.
+Whenever the user now writes informal ideas, convert and append them.
