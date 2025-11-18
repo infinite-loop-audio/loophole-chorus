@@ -34,16 +34,16 @@ Human-readable titles are provided for clarity, but filenames govern structure.
 - **14-timebase-tempo-and-groove.md** — Timebase, Tempo & Groove Architecture  
 - **15-advanced-clips.md** — Advanced Clips Architecture  
 - **16-editing-and-nondestructive-layers.md** — Editing & Nondestructive Layers Architecture  
-- **17-automation-and-modulation.md** *(planned)*  
-- **18-midi-architecture.md** *(planned)*  
-- **19-comping-architecture.md** *(planned)*
+- **17-automation-and-modulation.md** - Automation & Modulation Architecture  
+- **18-midi-architecture.md** - MIDI Architecture  
+- **19-comping-architecture.md** - Comping Architecture  
 
 ---
 
 ## Creative & Performance Systems (20–23)
 
 - **20-clip-launcher.md** — Clip Launcher Architecture  
-- **21-rendering-and-offline-processing.md** *(planned)*  
+- **21-rendering-and-offline-processing.md** - Rendering & Offline Processing Architecture  
 - **22-control-surfaces.md** *(planned)*  
 - **23-ux-and-visual-layer.md** *(planned)*
 
