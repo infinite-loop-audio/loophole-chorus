@@ -54,7 +54,7 @@ Channel. A Channel is responsible for:
 - integrating with cohort assignment decisions.
 
 The overall mixing model and console semantics are described in
-[Mixing Model and Console Architecture](../../architecture/11-mixing-console.md).
+[Mixer & Channel Architecture](../../architecture/15-mixer-and-channel-architecture.md).
 
 Track-owned Channels are created when Tracks request them (Track domain's
 `track.setChannelEnabled` command).  

@@ -1,4 +1,4 @@
-# Clip Launcher & Scenes Architecture
+# Clip Launcher Architecture
 
 This document defines the architecture for Loophole’s **Clip Launcher**, a
 nonlinear performance and prototyping interface aligned directly with the

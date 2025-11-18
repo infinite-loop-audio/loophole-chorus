@@ -1,13 +1,13 @@
-# Mixing Model and Console Architecture
+# Mixer & Channel Architecture
 
-This document describes Loophole’s mixing model and console architecture.
+This document describes Loophole's mixing model and console architecture.
 It explains how Tracks, Channels, Nodes, routing, and parameters combine to
 form the mixer, and how Loophole deliberately diverges from traditional
 analogue-console DAW designs (Cubase, Pro Tools, etc.).
 
 The key goals are:
 
-- one coherent internal model for all “faders” and “sends”,
+- one coherent internal model for all "faders" and "sends",
 - minimal special cases,
 - a clean separation between **audio graph** and **control relationships**,
 - a console UI that feels familiar but is not constrained by old hardware
@@ -31,7 +31,7 @@ The key goals are:
   - [4.2 Return Behaviour](#42-return-behaviour)  
   - [4.3 Pre/Post Fader as Topology](#43-prepost-fader-as-topology)  
 - [5. MIDI and CC Levels](#5-midi-and-cc-levels)  
-  - [5.1 No “MIDI Faders” in the Mixer](#51-no-midi-faders-in-the-mixer)  
+  - [5.1 No "MIDI Faders" in the Mixer](#51-no-midi-faders-in-the-mixer)  
   - [5.2 MIDI as Parameters and Lanes](#52-midi-as-parameters-and-lanes)  
 - [6. Control Groups and VCA Behaviour](#6-control-groups-and-vca-behaviour)  
   - [6.1 Traditional VCA Faders](#61-traditional-vca-faders)  
@@ -42,19 +42,27 @@ The key goals are:
   - [8.1 Default Mixer View](#81-default-mixer-view)  
   - [8.2 Advanced Graph View](#82-advanced-graph-view)  
 - [9. Relationship to Other Architecture Docs](#9-relationship-to-other-architecture-docs)
+- [10. Routing Architecture](#10-routing-architecture)
+  - [10.1 Overview](#101-overview)
+  - [10.2 Routing Concepts](#102-routing-concepts)
+  - [10.3 Channel-to-Channel Routing](#103-channel-to-channel-routing)
+  - [10.4 Sends and Returns](#104-sends-and-returns)
+  - [10.5 Sidechain Routing](#105-sidechain-routing)
+  - [10.6 Hardware I/O Mapping](#106-hardware-io-mapping)
+  - [10.7 Routing Graph and Project Structure](#107-routing-graph-and-project-structure)
 
 ---
 
 ## 1. Overview
 
-Loophole’s mixer is built on top of:
+Loophole's mixer is built on top of:
 
 - the **Track model** (arrangement structure),
 - the **Channel and Node graph** (DSP structure),
 - the **Routing model** (project-level connections),
 - the **Parameter and Automation model** (control and modulation).
 
-Unlike many DAWs, Loophole does not distinguish “inserts” and “sends” as
+Unlike many DAWs, Loophole does not distinguish "inserts" and "sends" as
 separate console entities. Instead:
 
 - everything in the signal path is a **Node**,
@@ -75,7 +83,7 @@ Tracks are the primary user-facing containers in the arrangement timeline.
 They:
 
 - own Clips and Lanes (see
-  [Tracks, Channels and Lanes](./06-tracks-channels-and-lanes.md)),
+  [Tracks, Lanes & Roles](./11-tracks-lanes-and-roles.md)),
 - may optionally own a Channel (via the Track domain),
 - expose user-level flags (mute, solo, arm, monitor).
 
@@ -132,8 +140,8 @@ For details, see the
 
 ### 3.1 FaderNode
 
-In Loophole, a “fader” is not a special case; it is a built-in **FaderNode**
-in the Channel’s Node graph. The FaderNode:
+In Loophole, a "fader" is not a special case; it is a built-in **FaderNode**
+in the Channel's Node graph. The FaderNode:
 
 - controls the final gain for the Channel (or a defined section of the graph),
 - exposes a primary `gain` parameter,
@@ -141,7 +149,7 @@ in the Channel’s Node graph. The FaderNode:
 - may be modulated by control groups (VCA-style behaviour),
 - sits at a well-defined position in the Node list.
 
-Typically, the FaderNode sits near the end of the Channel’s graph, followed by
+Typically, the FaderNode sits near the end of the Channel's graph, followed by
 any final analysis nodes (meters) and output routing.
 
 ### 3.2 PanNode and Gain Nodes
@@ -172,7 +180,7 @@ All Channels use the same FaderNode concept, regardless of role:
 - monitor Channels,
 - hardware I/O Channels.
 
-There are no separate “types of faders” at engine level.  
+There are no separate "types of faders" at engine level.  
 Differences appear as:
 
 - Channel roles,
@@ -185,7 +193,7 @@ Differences appear as:
 
 ### 4.1 SendNode
 
-A send in Loophole is a **SendNode** in the Channel’s Node graph.
+A send in Loophole is a **SendNode** in the Channel's Node graph.
 
 A SendNode:
 
@@ -203,7 +211,7 @@ the target Channel.
 
 ### 4.2 Return Behaviour
 
-“Returns” in classic DAWs appear as dedicated FX return channels.  
+"Returns" in classic DAWs appear as dedicated FX return channels.  
 In Loophole, returns are simply Channels with appropriate roles and Node graphs.
 
 A typical FX return setup:
@@ -212,24 +220,24 @@ A typical FX return setup:
 - FX bus Channel: contains Nodes implementing the FX chain (PluginNodes,
   GainNodes, FaderNode, etc.), then routes to another Channel (often the master).
 
-If a distinct “return” concept is needed (for example, to model legacy
+If a distinct "return" concept is needed (for example, to model legacy
 hardware workflows), it is expressed via Channel roles and routing, not via a
 separate DSP primitive.
 
 ### 4.3 Pre/Post Fader as Topology
 
-Traditional DAWs expose “pre/post-fader” send switches.  
+Traditional DAWs expose "pre/post-fader" send switches.  
 In Loophole, pre/post behaviour is expressed purely by Node ordering:
 
 - **pre-fader send**: SendNode placed before the FaderNode,
 - **post-fader send**: SendNode placed after the FaderNode.
 
-The same principle extends to “pre/post-compression”, “pre/post-EQ”, etc.:
+The same principle extends to "pre/post-compression", "pre/post-EQ", etc.:
 
 - a SendNode inserted before a Node taps the signal *before* that processing,
 - inserted after, taps it *after*.
 
-High-level UI may still offer a “Pre/Post” toggle, but internally this is
+High-level UI may still offer a "Pre/Post" toggle, but internally this is
 implemented as moving/re-wiring the SendNode in the Node graph, not via
 special-case audio engine flags.
 
@@ -237,9 +245,9 @@ special-case audio engine flags.
 
 ## 5. MIDI and CC Levels
 
-### 5.1 No “MIDI Faders” in the Mixer
+### 5.1 No "MIDI Faders" in the Mixer
 
-Some DAWs (e.g. Cubase) expose “MIDI faders” for MIDI tracks, controlling:
+Some DAWs (e.g. Cubase) expose "MIDI faders" for MIDI tracks, controlling:
 
 - CC7 (MIDI volume),
 - CC10 (MIDI pan),
@@ -247,7 +255,7 @@ Some DAWs (e.g. Cubase) expose “MIDI faders” for MIDI tracks, controlling:
 
 This often leads to confusion, especially when tracks also produce audio.
 
-In Loophole, the mixer does **not** provide separate “MIDI faders”.  
+In Loophole, the mixer does **not** provide separate "MIDI faders".  
 The console focuses on **audio and routing**. MIDI control is modelled as
 parameters and Lane content, not as separate fader types.
 
@@ -259,14 +267,14 @@ MIDI-related levels and controls are handled via:
 - parameter-based CCs (CC7, CC10, CC11, CC1, etc.),
 - Automation targeting those parameters.
 
-If a user wants a “track-level CC7 control”, Aura may expose that as a
+If a user wants a "track-level CC7 control", Aura may expose that as a
 parameter tile in the mixer (not a fader), which:
 
 - sends CC events via the Parameter domain,
 - is routed to instruments as part of their parameter mapping,
 - participates in automation like any other parameter.
 
-The engine does not differentiate “MIDI faders” from other parameters.  
+The engine does not differentiate "MIDI faders" from other parameters.  
 This avoids ambiguous semantics between audio level and MIDI CC level.
 
 ---
@@ -278,7 +286,7 @@ This avoids ambiguous semantics between audio level and MIDI CC level.
 In traditional consoles/DAWs, VCA faders:
 
 - do not carry audio themselves,
-- control the gain of multiple other channels’ faders as a group,
+- control the gain of multiple other channels' faders as a group,
 - allow relative gain changes with a single control.
 
 Users often find VCAs confusing because:
@@ -311,11 +319,11 @@ This design:
 
 In the UI, users might see:
 
-- “Control Groups” or “Mix Groups” rather than “VCAs”,
+- "Control Groups" or "Mix Groups" rather than "VCAs",
 - each group with:
 
   - a name,
-  - a “master” control (slider/rotary),
+  - a "master" control (slider/rotary),
   - a list of member channels/parameters,
   - an automation lane.
 
@@ -333,8 +341,8 @@ Folder tracks can optionally have Channels. This allows:
 
 This replaces concepts such as:
 
-- “folder tracks with faders”,
-- “group channels hard-linked to arrangement folders”.
+- "folder tracks with faders",
+- "group channels hard-linked to arrangement folders".
 
 Users can treat a folder Track with a Channel as a group bus; if no Channel is
 attached, it is purely structural.
@@ -362,12 +370,12 @@ In its default form, the Loophole mixer shows:
     Nodes in the same graph,
   - optional tiles for selected parameters (e.g. filter cutoff, CC controls).
 
-Under the hood, there is no rigid distinction between “inserts” and “sends”.
+Under the hood, there is no rigid distinction between "inserts" and "sends".
 They are both Nodes; the UI simply chooses how to present them.
 
 ### 8.2 Advanced Graph View
 
-An advanced editor may expose the Channel’s Node graph directly:
+An advanced editor may expose the Channel's Node graph directly:
 
 - Nodes as graph elements,
 - FaderNode, PanNode and SendNodes clearly visible,
@@ -385,10 +393,10 @@ need for separate routing editors.
 This document builds on and interacts with:
 
 - [01-overview](./01-overview.md) – high-level architecture overview,  
-- [06-tracks-channels-and-lanes](./06-tracks-channels-and-lanes.md) – structural
+- [11-tracks-lanes-and-roles](./11-tracks-lanes-and-roles.md) – structural
   definitions for Tracks and Channels,
-- [07-clips](./07-clips.md) – how Clips and Lanes feed into Channels,
-- [08-parameters](./08-parameters.md) – parameter identity, types and ownership,
+- [12-clips](./12-clips.md) – how Clips and Lanes feed into Channels,
+- [13-parameters](./13-parameters.md) – parameter identity, types and ownership,
 - [10-processing-cohorts-and-anticipative-rendering](./10-processing-cohorts-and-anticipative-rendering.md) –
   cohort assignment and anticipative rendering.
 
@@ -404,3 +412,150 @@ For IPC-level definitions:
 The mixing model described here is the conceptual foundation those specs are
 intended to follow. Any future changes to Channel or Node behaviour should be
 reflected here first, then propagated to the IPC specifications.
+
+---
+
+## 10. Routing Architecture
+
+### 10.1 Overview
+
+Routing in Loophole is defined as a **project-level graph** that connects:
+
+- Channels to other Channels (busses, FX returns, submixes),
+- Channels to hardware inputs and outputs,
+- Channels to the project master output,
+- Channels (or specific Nodes) to sidechain inputs.
+
+The routing graph is maintained at the project level by Pulse. Signal receives
+a derived DSP routing graph that it realises internally. Routing commands
+express user intent around how Channels connect to each other and to hardware.
+Pulse validates and applies these changes, then emits events reflecting the
+resulting graph state. Pulse also coordinates with the Channel and Node domains
+to ensure the DSP graph in Signal matches the routing model.
+
+### 10.2 Routing Concepts
+
+Key concepts in routing:
+
+- **Channel**  
+  A DSP container with a `channelId`. Channels may be:
+  - Track-owned, or
+  - standalone with a role such as `master`, `bus`, `fx`, `send`, `return`, `io`.
+
+- **Bus**  
+  A standalone Channel used for submixing or FX returns.
+
+- **Master**  
+  One or more designated Channels forming the final output chain.
+
+- **Send**  
+  A connection from a source Channel to a target Channel (e.g. bus, FX Channel)
+  realised by a SendNode in the source Channel's Node graph. The Routing domain
+  describes the relationship between Channels and provides high-level controls;
+  the actual send tap point and pre/post-fader behaviour are determined by the
+  SendNode's position in the source Channel's Node list relative to the
+  FaderNode, not via separate routing flags.
+
+- **Sidechain**  
+  A routing from a source Channel (or bus) into a Node's sidechain input.
+
+- **Hardware I/O Mapping**  
+  Mapping of Channels to physical device inputs and outputs.
+
+The Routing domain does not define the internal structure of Channels or Nodes.
+Those are handled by their respective domains.
+
+VCA-style control behaviour is expressed via parameter/control groups in the
+Parameter domain, rather than as dedicated routing constructs.
+
+### 10.3 Channel-to-Channel Routing
+
+Channels route to other Channels through their primary output target. Typical
+targets include:
+
+- the master Channel,
+- a bus Channel,
+- a hardware output Channel.
+
+This routing is expressed at the routing-graph level and complements
+Channel-level configuration. Pulse ensures that routing changes are translated
+into safe graph updates for Signal, respecting all realtime constraints.
+
+### 10.4 Sends and Returns
+
+Sends represent additional connections from one Channel to another, realised in
+the DSP graph as SendNodes within the source Channel's Node graph.
+
+When a send is created:
+
+- Pulse creates a SendNode in the source Channel's Node graph at an appropriate
+  position (post-fader by default, or pre-fader if specified) relative to the
+  FaderNode,
+- the SendNode wires its target Channel,
+- Pulse allocates a `sendId` for routing-level tracking.
+
+Pre/post behaviour is a consequence of SendNode placement relative to
+FaderNode in the Node graph, not a separate routing flag. Advanced users or
+tools can manipulate SendNodes directly via the Node domain to position them at
+arbitrary points in the Channel graph (e.g. between specific plugin nodes)
+for more precise control.
+
+Returns in classic DAWs appear as dedicated FX return channels. In Loophole,
+returns are simply Channels with appropriate roles and Node graphs. A typical
+FX return setup:
+
+- Source Channel: has one or more SendNodes targeting an FX bus Channel.
+- FX bus Channel: contains Nodes implementing the FX chain (PluginNodes,
+  GainNodes, FaderNode, etc.), then routes to another Channel (often the master).
+
+### 10.5 Sidechain Routing
+
+Sidechain routing can be expressed at routing level, independent of individual
+Channel configuration. Sidechain routes connect a source Channel to a Node's
+sidechain input, allowing:
+
+- dynamic processors (compressors, gates) to respond to external signals,
+- creative routing scenarios where one Channel's audio modulates another's
+  processing.
+
+Pulse configures the underlying routing nodes and coordinates with the Channel
+and Node domains to realise sidechain connections.
+
+### 10.6 Hardware I/O Mapping
+
+Hardware I/O mapping connects Channels to physical device inputs and outputs:
+
+- **Output mapping**: Maps a Channel (typically the master or a bus) to one or
+  more physical output endpoints on the audio device.
+- **Input mapping**: Maps physical input endpoints to Channel or Track inputs.
+
+Pulse ensures that:
+
+- device capabilities are respected,
+- conflicting mappings are handled according to project rules,
+- routing changes do not disrupt realtime audio processing.
+
+### 10.7 Routing Graph and Project Structure
+
+The routing graph is part of the project structure and is included in
+project-level snapshots. Snapshot entries include:
+
+- bus Channels and their roles,
+- master Channel designation,
+- Channel output targets,
+- sends (source, target, parameters) — these reflect the existence of SendNodes
+  in the source Channels' Node graphs,
+- sidechain routes,
+- hardware input/output mappings.
+
+Routing changes are non-realtime operations. They may:
+
+- trigger Channel and Node graph rebuilds,
+- cause cohort reassignment in Signal,
+- invalidate anticipative render buffers where signal flow changes.
+
+Pulse ensures that routing changes are translated into safe graph updates for
+Signal, respecting all realtime constraints. Aura never applies routing
+changes directly to Signal; it only expresses intent via Routing domain
+commands.
+

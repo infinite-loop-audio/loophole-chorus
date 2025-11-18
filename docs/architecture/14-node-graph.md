@@ -1,4 +1,4 @@
-# Nodes Architecture
+# Node Graph Architecture
 
 This document defines the conceptual model for **nodes** in Loophole. It
 covers what a node is, how nodes are identified and owned, how they
@@ -174,7 +174,7 @@ Each node has a stable ID within its Channel:
 
 Node IDs are used in:
 
-- parameter IDs (see [@chorus:/docs/architecture/08-parameters.md](08-parameters.md)),
+- parameter IDs (see [@chorus:/docs/architecture/13-parameters.md](13-parameters.md)),
 - automation targets,
 - routing specifications,
 - graph update messages to Signal.

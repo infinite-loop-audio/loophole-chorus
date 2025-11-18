@@ -55,7 +55,7 @@ Nodes form the processing chain of a Channel. Each Node:
 
 For an architectural overview of how Nodes participate in the mixer and
 console model, see
-[Mixing Model and Console Architecture](../../architecture/11-mixing-console.md).
+[Mixer & Channel Architecture](../../architecture/15-mixer-and-channel-architecture.md).
 
 Aura manipulates Nodes at the level of the user's timeline/mixer editing intent;
 Pulse owns the authoritative DSP graph and enforces constraints.

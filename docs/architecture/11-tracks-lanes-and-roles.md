@@ -1,4 +1,4 @@
-# Tracks, Channels and Lanes
+# Tracks, Lanes & Roles Architecture
 
 This document defines the conceptual structure of Tracks, Channels and Lanes in the Loophole architecture. Tracks provide the user-facing container for timeline editing. Channels represent audio signal flow inside the engine. Lanes represent typed content inside Clips (audio, MIDI, automation, video, etc).
 
@@ -125,7 +125,7 @@ Default behaviour:
 
 LaneStreamNodes appear in the node graph and MAY be reordered relative to other nodes, subject to constraints defined by Pulse.
 
-Signal executes LaneStreamNodes as part of its processing graph. For details on LaneStreamNode as a Node type, see [Nodes Architecture](./09-nodes.md).
+Signal executes LaneStreamNodes as part of its processing graph. For details on LaneStreamNode as a Node type, see [Node Graph Architecture](./14-node-graph.md).
 
 ---
 

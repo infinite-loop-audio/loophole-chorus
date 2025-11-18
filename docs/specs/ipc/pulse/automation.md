@@ -63,8 +63,8 @@ Pulse:
 
 For conceptual background see:
 
-- [Parameters Architecture](../../architecture/08-parameters.md)  
-- [Mixing Model and Console Architecture](../../architecture/11-mixing-console.md)
+- [Parameters Architecture](../../architecture/13-parameters.md)  
+- [Mixer & Channel Architecture](../../architecture/15-mixer-and-channel-architecture.md)
 
 ---
 

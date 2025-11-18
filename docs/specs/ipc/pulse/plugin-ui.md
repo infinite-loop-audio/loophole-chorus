@@ -291,7 +291,7 @@ Plugin windows should not assume that parameter updates occur synchronously.
 
 This domain depends critically on:
 
-**`12-plugin-ui-and-window-layout.md`**, which defines:
+**`27-windowing-and-plugin-ui.md`**, which defines:
 
 - multi-screen awareness,
 - WindowDescriptors,

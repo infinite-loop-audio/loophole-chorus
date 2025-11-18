@@ -63,8 +63,8 @@ domain; the Parameter domain defines the *target* values and control inputs
 automation operates on.
 
 For the broader conceptual model, see
-[Parameters Architecture](../../architecture/08-parameters.md) and
-[Mixing Model and Console Architecture](../../architecture/11-mixing-console.md).
+[Parameters Architecture](../../architecture/13-parameters.md) and
+[Mixer & Channel Architecture](../../architecture/15-mixer-and-channel-architecture.md).
 
 ---
 

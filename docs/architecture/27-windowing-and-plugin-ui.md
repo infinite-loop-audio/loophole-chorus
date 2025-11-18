@@ -1,4 +1,4 @@
-# Plugin UI and Window Layout Architecture
+# Windowing & Plugin UI Architecture
 
 This document describes the architecture for managing plugin UI windows and
 Aura windows in a multi-screen environment. It covers:
@@ -377,7 +377,7 @@ This architecture interacts with:
 - [Aura Architecture](./04-aura.md) – Aura responsibilities and UI scope,
 - [Signal Architecture](./02-signal.md) – Signal’s management of plugin
   instances and native UI,
-- [Tracks, Channels and Lanes](./06-tracks-channels-and-lanes.md) – identity
+- [Tracks, Lanes & Roles](./11-tracks-lanes-and-roles.md) – identity
   of Nodes and context for plugin UIs,
 - Plugin UI IPC spec (`docs/specs/ipc/pulse/plugin-ui.md`) – command and
   event definitions for managing plugin window lifecycle and geometry.

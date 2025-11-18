@@ -1,4 +1,4 @@
-# Media, Library and Discovery Architecture
+# Media Architecture
 
 This document defines the architecture for media management, browsing and
 discovery in Loophole.
