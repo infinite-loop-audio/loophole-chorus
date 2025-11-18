@@ -52,9 +52,9 @@ Human-readable titles are provided for clarity, but filenames govern structure.
 ## External Integration (24–27)
 
 - **24-windowing-and-plugin-ui.md** — Windowing & Plugin UI Architecture  
-- **25-diagnostics-and-performance.md** *(planned)*  
-- **26-scripting-and-extensibility.md** *(planned)*  
-- **27-video-architecture.md** *(planned)*
+- **25-diagnostics-and-performance.md** - Diagnostics & Performance Architecture  
+- **26-scripting-and-extensibility.md** - Scripting & Extensibility Architecture  
+- **27-video-architecture.md** - Video Architecture  
 
 ---
 
