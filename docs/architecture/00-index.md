@@ -60,17 +60,18 @@ Human-readable titles are provided for clarity, but filenames govern structure.
 - **30-scripting-and-extensibility.md** - Scripting & Extensibility Architecture  
 - **31-video-architecture.md** - Video Architecture  
 - **32-plugin-lifecycle-and-sandboxing.md** — Plugin Lifecycle & Sandboxing Architecture  
+- **33-plugin-library-and-browser.md** — Plugin Library & Browser Architecture
 
 ---
 
-## Future Systems (33–38)
+## Future Systems (34–39)
 
-- **33-collaboration-architecture.md** *(future)*  
-- **34-composer-extended-intelligence.md** *(future)*  
-- **35-future-workflow-prototypes.md** *(future)*  
-- **36-experimental-systems.md** *(future)*  
-- **37-ai-assisted-audio-tools.md** — AI-Assisted Audio Tools Architecture  
-- **38-sampler-and-virtual-instruments.md** — Sampler & Virtual Instruments Architecture
+- **34-collaboration-architecture.md** - Collaboration Architecture
+- **35-composer-extended-intelligence.md** - Composer Extended Intelligence Architecture
+- **36-future-workflow-prototypes.md** - Future Workflow Prototypes Architecture
+- **37-experimental-systems.md** - Experimental Systems Architecture
+- **38-ai-assisted-audio-tools.md** — AI-Assisted Audio Tools Architecture  
+- **39-sampler-and-virtual-instruments.md** — Sampler & Virtual Instruments Architecture
 
 ---
 
