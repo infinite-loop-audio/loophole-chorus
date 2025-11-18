@@ -23,11 +23,11 @@ This document builds on:
 
 - `08-tracks-lanes-and-roles.md`  
 - `09-clips.md`  
-- `14-timebase-tempo-and-groove.md`  
-- `15-advanced-clips.md`  
-- `16-editing-and-nondestructive-layers.md`  
-- `17-automation-and-modulation.md`  
-- `18-midi-architecture.md`  
+- `16-timebase-tempo-and-groove.md`  
+- `17-advanced-clips.md`  
+- `18-editing-and-nondestructive-layers.md`  
+- `19-automation-and-modulation.md`  
+- `20-midi-architecture.md`  
 - `11-node-graph.md` (LaneStreams)
 
 Pulse owns the comping model.  
@@ -182,7 +182,7 @@ Take-lane clips retain their own warp maps, but:
 
 ## 6. ARA Integration
 
-ARA (`15-advanced-clips.md`) only applies to the **compiled clip**, not takes.
+ARA (`17-advanced-clips.md`) only applies to the **compiled clip**, not takes.
 
 ### 6.1 ARA + Comp Lanes Interaction
 
@@ -270,7 +270,7 @@ Compilation produces a single **result MIDI lane**:
 
 ## 9. Automation Comping
 
-Automation comping extends `17-automation-and-modulation.md`:
+Automation comping extends `19-automation-and-modulation.md`:
 
 ### 9.1 Automation Take Lanes
 
@@ -334,7 +334,7 @@ Compilation produces one automation envelope:
 
 After comping:
 
-- The result clip’s audio becomes the input to the **ClipEditPipeline** (`16-editing-and-nondestructive-layers.md`).
+- The result clip's audio becomes the input to the **ClipEditPipeline** (`18-editing-and-nondestructive-layers.md`).
 - Edits in ClipEditPipeline do NOT affect take lanes.
 - When comping changes:
   - ghost renders from clip edit pipelines are invalidated,

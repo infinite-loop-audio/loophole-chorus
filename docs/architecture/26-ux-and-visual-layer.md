@@ -13,8 +13,8 @@ It describes:
 - discoverability and guidance,
 - theming, visual density and readability,
 - responsiveness to different screen setups,
-- interaction with windowing & plugin UI architecture (`24-windowing-and-plugin-ui.md`),
-- integration with control surfaces (`21-control-surfaces-and-assistive-hardware.md`).
+- interaction with windowing & plugin UI architecture (`28-windowing-and-plugin-ui.md`),
+- integration with control surfaces (`25-control-surfaces-and-assistive-hardware.md`).
 
 This is not a pixel-perfect design spec, but a **structural UX architecture**:
 it must be stable enough to influence Aura’s code and layout decisions and to
@@ -28,15 +28,15 @@ It builds on:
 - `09-clips.md`
 - `10-parameters.md`
 - `13-media-architecture.md`
-- `14-timebase-tempo-and-groove.md`
-- `15-advanced-clips.md`
-- `16-editing-and-nondestructive-layers.md`
-- `17-automation-and-modulation.md`
-- `18-midi-architecture.md`
-- `19-comping-architecture.md`
-- `20-rendering-and-offline-processing.md`
-- `21-control-surfaces-and-assistive-hardware.md`
-- `24-windowing-and-plugin-ui.md`
+- `16-timebase-tempo-and-groove.md`
+- `17-advanced-clips.md`
+- `18-editing-and-nondestructive-layers.md`
+- `19-automation-and-modulation.md`
+- `20-midi-architecture.md`
+- `21-comping-architecture.md`
+- `24-rendering-and-offline-processing.md`
+- `25-control-surfaces-and-assistive-hardware.md`
+- `28-windowing-and-plugin-ui.md`
 
 ---
 
@@ -93,7 +93,7 @@ Aura provides several **primary workspaces**:
    - MIDI Drum Sequencer
 5. **Mixer View**
 6. **Media & Library View**
-7. **Diagnostics & Performance View** (see `25-diagnostics-and-performance.md` when defined)
+7. **Diagnostics & Performance View** (see `29-diagnostics-and-performance.md` when defined)
 8. **Settings & Profiles**
 
 All workspaces share:
@@ -220,7 +220,7 @@ Key UX features:
      - consolidated vs raw take lanes toggled via a single control.
 
 6. **Launcher Overlay**
-   - Launcher can slide over Arrangement (see `20-clip-launcher.md`),
+   - Launcher can slide over Arrangement (see `23-clip-launcher.md`),
      while vertical track alignment is preserved.
    - Alignment grid and clip handles allow drag-and-drop between
      Arrangement and Launcher.
@@ -446,7 +446,7 @@ Theming engine must support:
 
 ## 11. Windowing & Multiscreen Behaviour
 
-Windowing specifics are in `24-windowing-and-plugin-ui.md`.  
+Windowing specifics are in `28-windowing-and-plugin-ui.md`.  
 This doc emphasises a few UX requirements:
 
 1. **Layout Persistence per Screen Set**
@@ -472,7 +472,7 @@ This doc emphasises a few UX requirements:
 
 ## 12. Control Surface UX Integration
 
-Control surface behaviour (as per `21-control-surfaces-and-assistive-hardware.md`) must be reflected clearly in the UI:
+Control surface behaviour (as per `25-control-surfaces-and-assistive-hardware.md`) must be reflected clearly in the UI:
 
 1. **Indicator of Active Hardware Context**
    - a small HUD or status indicator showing:

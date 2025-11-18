@@ -16,8 +16,8 @@ It builds on:
 - `11-node-graph.md`
 - `12-mixer-and-channel-architecture.md`
 - `13-media-architecture.md`
-- `14-timebase-tempo-and-groove.md`
-- `15-advanced-clips.md`
+- `16-timebase-tempo-and-groove.md`
+- `17-advanced-clips.md`
 
 Pulse owns the editing model and controls when/how operations are materialised
 into rendered assets. Signal executes DSP and provides preview/processing

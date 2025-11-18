@@ -16,10 +16,10 @@ It covers:
 This document builds on:
 
 - `09-clips.md`
-- `14-timebase-tempo-and-groove.md`
-- `15-advanced-clips.md`
-- `16-editing-and-nondestructive-layers.md`
-- `17-automation-and-modulation.md`
+- `16-timebase-tempo-and-groove.md`
+- `17-advanced-clips.md`
+- `18-editing-and-nondestructive-layers.md`
+- `19-automation-and-modulation.md`
 
 Pulse owns all canonical MIDI data.  
 Signal performs sample-accurate scheduling and modulation based on data
@@ -123,7 +123,7 @@ This is a nondestructive transform.
 
 ## 4. MIDI Edit Pipeline
 
-Defined in `16-editing-and-nondestructive-layers.md`, but expanded here.
+Defined in `18-editing-and-nondestructive-layers.md`, but expanded here.
 
 ### 4.1 Structure
 
@@ -188,7 +188,7 @@ During playback, Signal always receives **ghost or flattened MIDI** to guarantee
 
 ## 6. Groove Integration
 
-Groove (`14-timebase-tempo-and-groove.md`) applies to MIDI at:
+Groove (`16-timebase-tempo-and-groove.md`) applies to MIDI at:
 
 - clip level,
 - track level,

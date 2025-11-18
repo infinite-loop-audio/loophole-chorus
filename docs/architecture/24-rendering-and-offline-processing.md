@@ -18,8 +18,8 @@ Rendering interacts deeply with:
 - Signal (sample-domain DSP execution)  
 - Editing pipelines (ClipEditPipeline, MidiEditPipeline)  
 - Node Graph (11-node-graph.md)  
-- Comping (19-comping-architecture.md)  
-- Automation/Modulation (17-automation-and-modulation.md)  
+- Comping (21-comping-architecture.md)  
+- Automation/Modulation (19-automation-and-modulation.md)  
 - Media Architecture (13-media-architecture.md)  
 
 Signal executes all heavy DSP.  
@@ -147,7 +147,7 @@ RenderGraph is:
 
 Pulse converts all musical-time constructs to sample space:
 
-- tempo & timebase (`14-timebase-tempo-and-groove.md`)
+- tempo & timebase (`16-timebase-tempo-and-groove.md`)
 - warp maps  
 - groove offsets  
 - clip offsets  
@@ -204,7 +204,7 @@ Realtime output is produced by:
 
 ## 7. Clip Ghost Rendering
 
-ClipEditPipeline (from `16-editing-and-nondestructive-layers.md`) is resolved by Pulse:
+ClipEditPipeline (from `18-editing-and-nondestructive-layers.md`) is resolved by Pulse:
 
 ### 7.1 Ghost Render Conditions
 

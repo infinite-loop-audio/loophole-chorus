@@ -18,52 +18,59 @@ Human-readable titles are provided for clarity, but filenames govern structure.
 
 ---
 
-## Structural Core (08–13)
+## Structural Core (08–15)
 
 - **08-tracks-lanes-and-roles.md** — Tracks, Lanes & Roles Architecture  
 - **09-clips.md** — Clips Architecture  
 - **10-parameters.md** — Parameters Architecture  
 - **11-node-graph.md** — Node Graph Architecture  
 - **12-mixer-and-channel-architecture.md** — Mixer & Channel Architecture  
-- **13-media-architecture.md** — Media Architecture
+- **13-media-architecture.md** — Media Architecture  
+- **14-channel-routing-and-send-return.md** — Channel Routing & Send/Return Architecture  
+- **15-audio-streaming-and-caching.md** — Audio Streaming & Caching Architecture
 
 ---
 
-## Timeline Core (14–19)
+## Timeline Core (16–22)
 
-- **14-timebase-tempo-and-groove.md** — Timebase, Tempo & Groove Architecture  
-- **15-advanced-clips.md** — Advanced Clips Architecture  
-- **16-editing-and-nondestructive-layers.md** — Editing & Nondestructive Layers Architecture  
-- **17-automation-and-modulation.md** - Automation & Modulation Architecture  
-- **18-midi-architecture.md** - MIDI Architecture  
-- **19-comping-architecture.md** - Comping Architecture  
-
----
-
-## Creative & Performance Systems (20–23)
-
-- **20-clip-launcher.md** — Clip Launcher Architecture  
-- **21-rendering-and-offline-processing.md** - Rendering & Offline Processing Architecture  
-- **21-control-surfaces-and-assistive-hardware.md** Control Surfaces & Assistive Hardware Architecture  
-- **23-ux-and-visual-layer.md** - UX & Visual Layer Architecture  
+- **16-timebase-tempo-and-groove.md** — Timebase, Tempo & Groove Architecture  
+- **17-advanced-clips.md** — Advanced Clips Architecture  
+- **18-editing-and-nondestructive-layers.md** — Editing & Nondestructive Layers Architecture  
+- **19-automation-and-modulation.md** - Automation & Modulation Architecture  
+- **20-midi-architecture.md** - MIDI Architecture  
+- **21-comping-architecture.md** - Comping Architecture  
+- **22-editor-architecture.md** — Unified Editor Architecture  
 
 ---
 
-## External Integration (24–27)
+## Creative & Performance Systems (23–27)
 
-- **24-windowing-and-plugin-ui.md** — Windowing & Plugin UI Architecture  
-- **25-diagnostics-and-performance.md** - Diagnostics & Performance Architecture  
-- **26-scripting-and-extensibility.md** - Scripting & Extensibility Architecture  
-- **27-video-architecture.md** - Video Architecture  
+- **23-clip-launcher.md** — Clip Launcher Architecture  
+- **24-rendering-and-offline-processing.md** - Rendering & Offline Processing Architecture  
+- **25-control-surfaces-and-assistive-hardware.md** Control Surfaces & Assistive Hardware Architecture  
+- **26-ux-and-visual-layer.md** - UX & Visual Layer Architecture  
+- **27-performance-and-live-recording.md** — Performance & Live Recording Architecture  
 
 ---
 
-## Future Systems (28–31)
+## External Integration (28–32)
 
-- **28-collaboration-architecture.md** *(future)*  
-- **29-composer-extended-intelligence.md** *(future)*  
-- **30-future-workflow-prototypes.md** *(future)*  
-- **31-experimental-systems.md** *(future)*
+- **28-windowing-and-plugin-ui.md** — Windowing & Plugin UI Architecture  
+- **29-diagnostics-and-performance.md** - Diagnostics & Performance Architecture  
+- **30-scripting-and-extensibility.md** - Scripting & Extensibility Architecture  
+- **31-video-architecture.md** - Video Architecture  
+- **32-plugin-lifecycle-and-sandboxing.md** — Plugin Lifecycle & Sandboxing Architecture  
+
+---
+
+## Future Systems (33–38)
+
+- **33-collaboration-architecture.md** *(future)*  
+- **34-composer-extended-intelligence.md** *(future)*  
+- **35-future-workflow-prototypes.md** *(future)*  
+- **36-experimental-systems.md** *(future)*  
+- **37-ai-assisted-audio-tools.md** — AI-Assisted Audio Tools Architecture  
+- **38-sampler-and-virtual-instruments.md** — Sampler & Virtual Instruments Architecture
 
 ---
 

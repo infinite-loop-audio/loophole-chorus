@@ -17,9 +17,9 @@ It builds upon:
 - `10-parameters.md`  
 - `11-node-graph.md`  
 - `12-mixer-and-channel-architecture.md`  
-- `14-timebase-tempo-and-groove.md`  
-- `15-advanced-clips.md`  
-- `16-editing-and-nondestructive-layers.md`  
+- `16-timebase-tempo-and-groove.md`  
+- `17-advanced-clips.md`  
+- `18-editing-and-nondestructive-layers.md`  
 
 Pulse owns the canonical automation and modulation graph.  
 Signal executes sample-accurate envelopes and modulations.
@@ -238,7 +238,7 @@ Signal is the **executor of sample-domain signals**.
 
 Clip automation is:
 
-- Stored inside the Clip (see `15-advanced-clips.md`)
+- Stored inside the Clip (see `17-advanced-clips.md`)
 - Follows the clip when moved, duplicated, stretched.
 - Warp markers affect automation timing (automation must warp along with audio/MIDI).
 - Groove and quantisation optionally apply to automation points.
@@ -355,7 +355,7 @@ Rendering maintains deterministic behaviour.
 
 ## 15. Interaction with Editing Layers
 
-Automation and modulation interact with editing layers (see `16-editing-and-nondestructive-layers.md`) as follows:
+Automation and modulation interact with editing layers (see `18-editing-and-nondestructive-layers.md`) as follows:
 
 - Clip pipelines may include *automation-driven* DSP; automation must update ghost renders when changed.
 - Some modulator nodes may be Clip-Safe nodes and part of ClipEditPipeline.

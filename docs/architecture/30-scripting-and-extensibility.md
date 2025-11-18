@@ -19,10 +19,10 @@ This architecture builds on:
 - `05-composer.md`
 - `10-parameters.md`
 - `11-node-graph.md`
-- `14-timebase-tempo-and-groove.md`
-- `17-automation-and-modulation.md`
-- `18-midi-architecture.md`
-- `21-control-surfaces-and-assistive-hardware.md`
+- `16-timebase-tempo-and-groove.md`
+- `19-automation-and-modulation.md`
+- `20-midi-architecture.md`
+- `25-control-surfaces-and-assistive-hardware.md`
 - IPC specifications (Pulse↔Aura↔Signal)
 
 ---

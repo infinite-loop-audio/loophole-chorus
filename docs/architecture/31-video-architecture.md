@@ -11,12 +11,12 @@ This architecture integrates with:
 - `10-parameters.md`
 - `11-node-graph.md`
 - `12-mixer-and-channel-architecture.md`
-- `14-timebase-tempo-and-groove.md`
-- `15-advanced-clips.md`
-- `16-editing-and-nondestructive-layers.md`
-- `20-rendering-and-offline-processing.md`
-- `21-control-surfaces-and-assistive-hardware.md`
-- `23-diagnostics-and-performance.md`  
+- `16-timebase-tempo-and-groove.md`
+- `17-advanced-clips.md`
+- `18-editing-and-nondestructive-layers.md`
+- `24-rendering-and-offline-processing.md`
+- `25-control-surfaces-and-assistive-hardware.md`
+- `29-diagnostics-and-performance.md`  
 - Pulse + Signal + Aura architecture docs  
 - IPC event and command schemes  
 
@@ -301,7 +301,7 @@ Gesture/value-stream control (via hardware) also works normally.
 
 # 8. Diagnostics for Video
 
-From `23-diagnostics-and-performance.md`, video hooks include:
+From `29-diagnostics-and-performance.md`, video hooks include:
 
 - decode time metrics  
 - dropped frames  
