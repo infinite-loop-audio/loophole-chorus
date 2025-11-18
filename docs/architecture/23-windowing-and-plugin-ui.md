@@ -324,6 +324,26 @@ Aura then:
 - updates the Window Descriptor for that plugin window,
 - writes updated layout data back into the current Layout Profile.
 
+### Clip-Scoped Plugin Editors (ARA & Future)
+
+Certain plugin UIs operate in clip context rather than track context.
+When Aura opens an ARA-capable plugin as a clip editor, the UI receives:
+
+- clipId
+
+- laneId
+
+- regionId or groupId
+
+- bounds of the edited section
+
+This enables plugin UIs to present a clip-level editing surface (e.g.
+Melodyne-style), rather than the traditional track-insert view.
+
+Window placement and persistence follow the same rules as normal plugin
+windows, but clip editors may also dock into dedicated editing panels
+within Aura.
+
 ---
 
 ## 8. Persistence

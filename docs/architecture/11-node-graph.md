@@ -115,6 +115,31 @@ Audio effect nodes:
 Effects may also expose sidechain inputs; those are represented as additional
 inputs in the node model.
 
+### ARA-Capable Plugin Nodes
+
+A PluginNode may declare `supportsAra = true`, indicating it can host
+ARA-style clip-oriented editing. Such nodes receive ARA region metadata
+from Pulse, including:
+
+- regionId
+
+- clipId, laneId
+
+- bounds in clip (musical time)
+
+- optional groupId for multi-lane editing
+
+Signal does not manipulate musical-time data; it receives resolved
+sample-accurate region descriptors from Pulse. The backend may realise
+ARA groups as either:
+
+- a single node with multiple audio inputs, or
+
+- multiple nodes internally coordinated by the plugin.
+
+This behaviour is implementation-specific and not part of the Pulse
+contract.
+
 ### 3.3 LaneStreamNode
 
 LaneStreamNode(s) (often shortened to 'LaneStream') are special-purpose nodes that:

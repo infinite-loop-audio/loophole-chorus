@@ -413,6 +413,118 @@ Pulse sends Signal the **fully resolved render graph**.
 
 ---
 
+## External Clip Editors & ARA Integration
+
+### 1. Overview
+
+Loophole supports clip-scoped external editors, including ARA-style
+plugin-powered audio editors (e.g. Melodyne). These editors operate on
+**audio lanes within clips**, and provide deep musical-time editing,
+analysis and transformation beyond what is possible through standard DSP.
+
+An external editor is represented in the model as an **editor binding**
+attached to an audio lane, optionally backed by an ARA-capable PluginNode.
+
+### 2. Editor Bindings
+
+Each Audio Lane may contain one or more editor bindings:
+
+```
+audioLane.editorBindings[]: [
+  {
+    editorId,
+    type: "nativeWaveform" | "spectral" | "ara" | "future",
+    nodeId?,          // present for ARA or plugin-backed editors
+    regionId?,        // ARA region identifier
+    boundsInClip,     // musical-time region of the clip this editor covers
+    active: bool
+  }
+]
+```
+
+Editor bindings allow:
+
+- Standard waveform editing
+
+- Spectral editing (future)
+
+- ARA editing (Melodyne-style)
+
+- Future custom editors
+
+### 3. ARA Regions
+
+For ARA-capable editors, Pulse stores explicit region metadata:
+
+```
+AraRegion {
+  regionId;
+  clipId;
+  laneId;
+  nodeId;        // PluginNode that hosts the ARA plugin
+  boundsInClip;
+  metadata;      // plugin-specific host-managed metadata
+}
+```
+
+ARA regions attach to **stable clip audio**, not raw take lanes.  
+Comping operates upstream. After a comp is committed into a clip lane,
+ARA regions may be created. If the comp changes, Pulse may:
+
+- mark regions invalid, or
+
+- partially resynchronise regions in a later version.
+
+### 4. ARA Groups (Multi-Lane Editing)
+
+Pulse supports optional grouping of AraRegions:
+
+```
+groupId?: string
+```
+
+All regions with the same `groupId` represent a multi-lane ARA session.
+This enables future multi-track ARA editing workflows.
+
+Signal may realise a group either as:
+
+- a single PluginNode with multiple audio inputs, or
+
+- multiple PluginNodes internally coordinated by the plugin.
+
+This is an implementation detail; the model allows both.
+
+### 5. Editor Lifecycle
+
+Core operations:
+
+- Create ARA region for clip/lane
+
+- Activate editor (Aura opens plugin UI with clip context)
+
+- Move region when clip moves
+
+- Split region when clip splits
+
+- Duplicate region for duplicated clips
+
+- Invalidate region when comping changes upstream
+
+- Remove region or remove editor binding
+
+All operations are nondestructive; original audio is untouched.
+
+### 6. Rendering & Playback
+
+Pulse resolves all warp, offset, tempo and stretch behaviour before sending
+sample-accurate region data to Signal. Signal activates the appropriate
+ARA region for the ARA-capable PluginNode at playback time.
+
+Clip-level DSP and Track-level DSP operate after the ARA editor unless
+routing specifies otherwise.
+
+---
+
 ## 15. Summary
 
 The advanced clip architecture defines:
