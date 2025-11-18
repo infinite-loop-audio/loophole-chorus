@@ -1,355 +1,428 @@
-# Development & Collaboration Workflow
+# Implementation Workflow & Tooling
 
-This document defines **how Loophole is implemented**, not what it does.
+This document defines how Loophole is **actually built**:
 
-It describes how:
+- how architecture documents in **Chorus** translate into code in  
+  **Signal, Pulse, Aura and Composer**,
+- how the **human developer**, **ChatGPT** and **Cursor** interact,
+- how changes move from “idea” → “spec” → “implementation” → “tests”,
+- and the conventions that keep the project coherent over time.
 
-- You (the human developer),
-- ChatGPT (architect / reviewer),
-- Cursor (local code + doc editor),
-- Codex CLI (optional bridge to ChatGPT),
-
-work together across the four main repositories:
-
-- `loophole-signal` – C++ / JUCE audio engine
-- `loophole-pulse` – Rust model/server (medium term; may bootstrap in TypeScript)
-- `loophole-aura` – Electron / TypeScript UI
-- `loophole-chorus` – Architecture, specs, IPC, meta
-
-The goal is to keep the workflow **predictable, low-friction and safe**, while
-preserving the “architecture first” philosophy.
+It is the **engineering companion** to the rest of the architecture set.
 
 ---
 
-## 1. Roles
+## 1. Goals & Principles
 
-### 1.1 You (Human Developer)
+The implementation workflow is based on a few core principles:
 
-You are the **product owner and final authority** on:
+1. **Architecture first**  
+   No significant features are implemented without at least a lightweight
+   architecture/spec section in Chorus.
 
-- Musical UX, workflows, and priorities
-- Architectural trade-offs and long-term direction
-- Code style and repo conventions
-- When a spec is “good enough” to implement
+2. **Single source of truth**  
+   Chorus drives design. The other repos (Signal, Pulse, Aura, Composer) follow.
 
-You:
+3. **Clear roles for tools**  
+   Human, ChatGPT and Cursor each have well-defined responsibilities and
+   expectations.
 
-- Decide what to work on next
-- Run builds, tests, and profiling
-- Integrate external tools and libraries
-- Approve / adapt any AI-generated code
+4. **Documentation is live, not legacy**  
+   Specs, IPC and decisions are kept up to date as code evolves.
 
-### 1.2 ChatGPT (Architect / Reviewer)
-
-In this context, ChatGPT acts primarily as:
-
-- **System architect** – shaping high-level design and specs
-- **Specification author** – writing and refining docs in Chorus
-- **Code reviewer / advisor** – suggesting patterns, spotting design issues
-- **Prompt author** – writing “meta prompts” for Cursor and Codex
-
-ChatGPT does **not**:
-
-- Run code, build projects, or access your local filesystem
-- Directly edit your repos (that’s Cursor’s job)
-- Make unilateral breaking changes to architecture without discussion
-
-### 1.3 Cursor (Local Code & Doc Editor)
-
-Cursor is the **hands-on engineer** working on your local checkout:
-
-- Edits code and documentation
-- Applies prompts written here
-- Runs searches and refactors within your repos
-- Keeps cross-references and filenames consistent
-
-You control when Cursor runs tasks and how its suggestions are applied.
-
-### 1.4 Codex CLI (Optional Bridge)
-
-Codex CLI:
-
-- Provides a **terminal-based agent** that can:
-  - Call ChatGPT with repo context
-  - Apply patches to files
-- Is useful if you want direct ChatGPT-driven edits in code, outside Cursor’s UI.
-
-Use it when:
-
-- You want “vibe coding” with ChatGPT deeply inside a repo context.
-- You’re comfortable reviewing patches before committing.
+5. **Safety & determinism first**  
+   Testing and validation are part of the workflow, not an afterthought.
 
 ---
 
-## 2. Core Principles
+## 2. Repositories & Responsibilities
 
-1. **Architecture first, code second**
-   - Any non-trivial feature must first exist in **Chorus** as:
-     - An architecture doc, and/or
-     - An IPC/spec update, and/or
-     - A decision record.
-   - Only then do we implement it in Signal / Pulse / Aura / Composer.
+Loophole consists of five primary repositories:
 
-2. **Chorus is the source of truth**
-   - Runtime repos must follow the contracts defined in `loophole-chorus`.
-   - If reality diverges, we fix the docs *or* consciously log a decision.
+- **Chorus** — `loophole-chorus`  
+  Architecture, decisions, specs, IPC, backlog, meta docs.
 
-3. **Small, focused steps**
-   - Each change (doc or code) should:
-     - Do one clear thing,
-     - Be easy to review,
-     - Not rewrite the world.
+- **Signal** — `loophole-signal`  
+  C++/JUCE audio engine, node graph, plugin hosting, hardware IO.
 
-4. **No silent protocol changes**
-   - Any change to IPC schemas or domain semantics:
-     - Must be reflected in `docs/specs/ipc/**/*`,
-     - Must be checked for cross-repo impact.
+- **Pulse** — `loophole-pulse`  
+  Rust model server, project state, editing, IPC orchestration.
 
-5. **Reports are immutable**
-   - Files in `docs/reports/` are historical:
-     - **Never** edited or regenerated by Cursor or ChatGPT.
-     - New reports always go in `docs/reports/YYYY-MM-DD-HHMMSS-<slug>.md`.
+- **Aura** — `loophole-aura`  
+  Electron/TypeScript UI, editors, media browser, clip launcher, mixer UI.
 
-6. **Quad backticks in this chat**
-   - Whenever ChatGPT emits a whole file, it is wrapped in **quad backticks**,
-     with nested triple-backtick code blocks kept intact for easy copy/paste.
+- **Composer** — `loophole-composer`  
+  Metadata + intelligence service, plugin/media/device intelligence.
+
+Implementation flows **from Chorus outwards**:
+
+1. Architecture/spec agreed in Chorus.  
+2. IPC (if needed) updated in Chorus.  
+3. Code implemented in one or more of Signal / Pulse / Aura / Composer.
 
 ---
 
-## 3. Where Work Happens
+## 3. Actors & Their Roles
 
-### 3.1 Chorus (Architecture & Specs)
+### 3.1 Human Developer
 
-**Types of changes here:**
+You are the **product owner** and **lead engineer**. You:
 
-- New or updated architecture docs (`docs/architecture/*.md`)
-- IPC specifications (`docs/specs/ipc/**/*`)
-- Meta / process docs (`docs/meta/*.md`)
-- Decision records (`docs/decisions/*.md`)
-- Reports (`docs/reports/*.md`)
+- define priorities and direction,
+- write and refine architecture docs,
+- review generated code and specs,
+- run and test the software,
+- make final decisions when trade-offs appear.
 
-**Typical flow:**
+### 3.2 ChatGPT (Architect & Reviewer)
 
-1. **Discuss idea** in ChatGPT:
-   - Architectural impact
-   - Interaction with existing docs
-2. **ChatGPT drafts** the doc/content in this chat (quad-backtick block).
-3. You:
-   - Paste content into the right file (or ask Cursor to),
-   - Or run a Cursor prompt written by ChatGPT to update multiple files.
-4. Optionally:
-   - Run cohesion / consistency passes via a Cursor “review” prompt.
+Within this project, ChatGPT acts primarily as:
 
-Chorus is where we “shape reality” before any code is written.
+- **Architect / Designer**
+  - helps shape architecture docs in Chorus,
+  - identifies gaps/inconsistencies,
+  - drafts spec/IPC/decision documents.
 
----
+- **Reviewer**
+  - suggests refactors,
+  - checks coherence between repos and docs,
+  - proposes test strategies.
 
-### 3.2 Pulse (Rust model / server)
+ChatGPT does **not** directly modify files; it produces **content and prompts**
+that you feed into Cursor (or edit by hand).
 
-Pulse will be:
+### 3.3 Cursor (Implementation Agent)
 
-- The **authoritative model** for projects, tracks, lanes, nodes, parameters.
-- The **single gateway** for Aura ↔ Signal communication.
-- Implemented in **Rust** (with a possible very early TS bootstrap if needed).
+Cursor is:
 
-**Types of tasks:**
+- the **hands** that edit code and docs,
+- the primary tool for:
+  - applying prompts to architecture docs,
+  - writing and refactoring code,
+  - running tests locally (via your editor).
 
-- Implement domain models consistent with `docs/architecture/0X-*.md`
-- Implement IPC handlers matching `docs/specs/ipc/pulse/*.md`
-- Implement persistence and project loading
-- Coordinate with Signal for graph construction and cohorts
+Cursor:
 
-**Typical flow for a feature:**
-
-1. Identify the relevant **architecture doc** and **IPC spec**.
-2. Ask ChatGPT:
-   - For a **high-level implementation sketch** (Rust modules, types, services).
-3. Use Cursor:
-   - To scaffold modules and types,
-   - To implement handlers and tests,
-   - To align names/IDs with specs.
-4. You:
-   - Review and refine code,
-   - Run tests and benchmarks,
-   - Push to GitHub.
-
-We treat Pulse as a **long-lived Rust service**, so correctness and clarity are
-more important than rushing.
+- works within a single repo at a time,
+- must respect repository-specific conventions (see below),
+- must avoid touching old reports unless explicitly told otherwise.
 
 ---
 
-### 3.3 Signal (C++ / JUCE Engine)
+## 4. Branching & Git Workflow
 
-Signal is:
+The recommended branching model for all Loophole repos:
 
-- A **small, high-performance** C++ engine,
-- Focused on audio processing, plugins, cohorts, and real-time safety.
+- `main`
+  - release / stable branch,
+  - tagged for public releases.
 
-**Types of tasks:**
+- `develop`
+  - default working branch,
+  - accumulates features and fixes.
 
-- Implement cohort architecture and processing graphs.
-- Implement IPC handling for `docs/specs/ipc/signal/*.md`.
-- Integrate JUCE plugin hosting, hardware, and media streaming.
-- Implement safety guarantees (sandboxing, isolation, crash recovery).
+- Feature branches
+  - `feature/<short-name>`
+  - created from `develop`,
+  - merged back via PR or equivalent review.
 
-**Typical flow:**
+Basic flow:
 
-1. Start from the relevant Signal architecture doc (`02-signal.md`, cohort doc, etc.).
-2. Ask ChatGPT:
-   - For C++ class sketches,
-   - For threading / real-time-safety advice,
-   - For JUCE integration patterns.
-3. Use Cursor:
-   - To create/modify C++ modules,
-   - To maintain clear separation between audio thread and control thread.
-4. You:
-   - Run builds and plug-in scans,
-   - Test performance and stability,
-   - Make final design adjustments.
+1. Branch from `develop` in the relevant repo(s).
+2. Implement feature guided by Chorus docs.
+3. Run tests and manual checks.
+4. Merge into `develop` once stable.
+5. `develop` is occasionally merged to `main` as release milestones.
 
----
-
-### 3.4 Aura (Electron / TypeScript UI)
-
-Aura handles:
-
-- UI rendering and interaction,
-- Editor views, clip launcher, mixer,
-- Plugin browser, plugin UIs, media library views.
-
-**Types of tasks:**
-
-- Implement React/Vue-style components (within Electron).
-- Implement IPC client for Pulse.
-- Create interactive tools (piano roll, automation editor, media browser).
-- Integrate control surfaces visually.
-
-**Typical flow:**
-
-1. Identify relevant UX/architecture docs:
-   - `26-ux-and-visual-layer.md`
-   - Editor / media / plugin browser docs.
-2. Ask ChatGPT:
-   - For component design,
-   - For state management patterns,
-   - For IPC call flows.
-3. Use Cursor:
-   - To scaffold TS/JS components,
-   - To wire IPC layer.
-4. You:
-   - Refine UX,
-   - Add styling,
-   - Wire real data.
+Chorus generally follows the same pattern, but changes there can be more frequent
+and smaller.
 
 ---
 
-### 3.5 Composer
+## 5. Documentation & File Conventions
 
-Composer is:
+### 5.1 Architecture & Spec Docs
 
-- A **metadata and intelligence** service:
-  - plugin metadata and roles,
-  - parameter mapping,
-  - deterministic vs non-deterministic classification,
-  - hardware device intelligence.
+- Located in `docs/architecture/` (Chorus).
+- Named `NN-topic-name.md` where `NN` is a stable index number.
+- Indexed in `docs/architecture/00-index.md`.
+- Each file has:
+  - a clear purpose,
+  - headings for responsibilities, interactions, and constraints.
 
-Implementation details will follow its architecture doc, but the workflow is the
-same: spec first in Chorus, then data model and API implementation in its own repo.
+**Renumbering** is rare and handled via a dedicated prompt + report.
 
----
+### 5.2 IPC Specs
 
-## 4. Change Lifecycle
+- Located in `docs/specs/ipc/` (Chorus).
+- Separate trees for:
+  - `pulse/`
+  - `signal/`
+- Each domain/file describes:
+  - commands,
+  - events,
+  - payloads,
+  - semantics and safety notes.
 
-### 4.1 From Idea → Arch → IPC → Code
+### 5.3 Meta & Reports
 
-1. **Idea surfaces**
-   - In this chat or in `docs/meta/architecture-inbox.md`.
-2. **Backlog alignment**
-   - If it’s substantial, add/confirm it in `architecture-backlog.md`.
-3. **Architecture doc**
-   - Create or update a doc in `docs/architecture/` to describe the concept.
-4. **IPC / Contract**
-   - Update/add IPC specs in `docs/specs/ipc/**/*` if any cross-process calls are needed.
-5. **Decision record (optional but encouraged)**
-   - For significant or contentious choices, add a `docs/decisions/` entry.
-6. **Implementation**
-   - Use Cursor (and optionally Codex CLI) to implement the feature in the relevant repo.
+- `docs/meta/` holds:
+  - inbox/backlog,
+  - AI workflow docs,
+  - protocol guidelines.
 
-### 4.2 Spec Changes After Code Exists
+- `docs/reports/` holds:
+  - machine-generated reports,
+  - renumbering logs,
+  - cohesion analyses,
+  - refinement reports.
 
-If we need to change a spec **after** code is written:
+**Reports are immutable logs**:
 
-1. Update the architecture and IPC docs **first**.
-2. Mark any breaking change clearly in the docs.
-3. Implement changes in:
+- They must not be edited or deleted,
+- New reports use filenames of the form:
 
-   - Pulse,
-   - Signal,
-   - Aura,
+  - `YYYY-MM-DD-HHMMSS-descriptive-name.md`
 
-   in a controlled sequence (usually Pulse → Signal → Aura).
-4. Consider adding a short report in `docs/reports/` summarising the change.
+Cursor prompts should always include:
 
----
+> “Do not modify any existing files under `docs/reports/`; only add a new report.”
 
-## 5. Working With Cursor
+### 5.4 Quad-Backtick Wrapping
 
-When ChatGPT writes prompts for Cursor, they will:
+When ChatGPT produces a full file for you to copy into a repo, it is wrapped in:
 
-- Be **file-specific** and explicit,
-- Avoid ambiguity about:
-  - which files to change,
-  - which files **not** to touch (especially `docs/reports/`),
-- Ask Cursor to:
-  - summarise all changes in a report file:
-    - `docs/reports/YYYY-MM-DD-HHMMSS-<slug>.md`
+- **quad backticks** around the whole file:
 
-You then:
+````markdown
+# File content…
+````
 
-- Run the prompt in Cursor,
-- Review changes,
-- Commit when satisfied.
+This prevents nested triple-backtick code blocks from breaking.
 
 ---
 
-## 6. Working With Codex CLI
+## 6. Change Types & Recommended Workflow
 
-If/when you use Codex CLI:
+Not all changes follow the same path. There are three main categories:
 
-- Treat it as a **narrow, localised agent**:
-  - For intense refactors in a single repo,
-  - For complex code generation tasks with deep context.
-- Keep Chorus as the **contract authority**:
-  - If Codex proposes changes that deviate from specs,
-  - We reconcile them here and update the docs if needed.
+### 6.1 Architecture-First Feature
+
+Use this for **new features** or **non-trivial changes**.
+
+1. **Idea capture**
+ - Add high-level idea to `architecture-backlog.md` (Chorus meta),
+   or to `architecture-inbox.md` if still fuzzy.
+
+2. **Architecture doc**
+ - Either:
+   - extend an existing doc, or
+   - add a new `NN-topic.md` in `docs/architecture/`.
+ - Use ChatGPT to help design and then a Cursor prompt to apply changes.
+ - Keep the design complete enough that implementation is straightforward.
+
+3. **IPC spec**
+ - If the feature crosses process boundaries, update:
+   - Pulse IPC specs,
+   - Signal IPC specs,
+   as needed.
+ - Use a dedicated Cursor prompt to keep IPC consistent and minimal.
+
+4. **Implementation**
+ - Switch to the relevant repo:
+   - Signal for engine/DSP changes,
+   - Pulse for model/IPC/undo/redo,
+   - Aura for UI/editor changes,
+   - Composer for intelligence/metadata.
+ - Use Cursor to scaffold modules, functions and types guided by the spec.
+
+5. **Tests**
+ - Add unit/integration tests where appropriate
+   (see Section 8).
+
+6. **Manual verification**
+ - Run the app, exercise the feature.
+ - Note any follow-up doc tweaks that emerge.
+
+7. **Finalize**
+ - If the architecture changed meaningfully from the original design,
+   update the corresponding Chorus doc(s) to match reality.
 
 ---
 
-## 7. What To Ask ChatGPT For
+### 6.2 Implementation-First Fix (Small, Local)
 
-Good examples of things to throw at this chat:
+Use this for **small, localised fixes** (e.g. typo, obvious bug, tiny refactor).
 
-- “Draft an architecture doc for X feature.”
-- “Give me a Cursor prompt to refactor Y across all IPC files.”
-- “Sketch the Rust types for the Pulse model representing Z.”
-- “Help me design a JUCE-friendly Signal class layout for this graph.”
-- “Review this architecture doc and suggest missing edge cases.”
-- “Translate this architecture concept into a concrete TS component hierarchy.”
+1. Verify that the change:
+ - does not alter behaviour in a way that conflicts with Chorus.
+2. Implement directly in the relevant repo using Cursor.
+3. Add or adjust tests as needed.
+4. If you notice a mismatch with the architecture/spec, record it in:
+ - `architecture-backlog.md`, or
+ - the appropriate architecture doc as a “Notes / Future cleanup” bullet.
 
-Less ideal:
-
-- Tiny cosmetic changes (better handled directly in Cursor).
-- Repo-specific edits where Cursor already has full context and a good suggestion.
+If a “small fix” reveals a broader architectural gap, escalate to
+architecture-first.
 
 ---
 
-## 8. Summary
+### 6.3 Bug Fixes (Behaviour vs Spec)
 
-- **Chorus** defines reality.  
-- **Pulse, Signal, Aura, Composer** implement it.  
-- **ChatGPT** shapes architecture and specs, writes prompts, and reviews designs.  
-- **Cursor** edits code and docs locally.  
-- **You** steer everything, run the builds, and make the final calls.
+For bugs where behaviour clearly contradicts the spec:
 
-This workflow is designed to minimise rework, keep the system coherent, and let
-you move very fast without sacrificing architectural quality.
+1. Confirm desired behaviour in Chorus docs.
+2. If the doc is ambiguous:
+ - resolve the ambiguity **first** (update Chorus),
+ - then fix implementation.
+3. Implement the fix in the appropriate repo.
+4. Add regression tests.
+5. Optionally add a small note in the doc “Known pitfalls / gotchas”
+ if the bug exposed a subtle edge case.
+
+---
+
+## 7. Using Cursor Effectively
+
+### 7.1 For Documentation Changes (Chorus)
+
+When using Cursor in Chorus:
+
+- Work in **one file or tightly-related set of files at a time**.
+- Prompts should:
+- identify exactly which files to edit,
+- include clear instructions not to touch `docs/reports/`,
+- request a new report file summarising changes.
+
+Pattern:
+
+> - Make these changes to docs X and Y;  
+> - Do not modify existing reports;  
+> - Create a new report at `docs/reports/<timestamp>-…`.
+
+### 7.2 For Code Changes
+
+In Signal/Pulse/Aura/Composer:
+
+- Start from a **clear, minimal prompt**:
+- include relevant architecture snippets (if needed),
+- specify which files are in scope,
+- specify whether tests should be added/updated.
+
+- After Cursor edits:
+- run tests locally,
+- compile/run the app,
+- manually inspect key changes.
+
+### 7.3 Prompt Reuse
+
+For frequently repeated operations (e.g. adding a new IPC domain, renumbering
+docs, updating index), keep reusable prompt templates in:
+
+- `docs/meta/ai-workflow.md`  
+- or a dedicated prompts file if useful.
+
+---
+
+## 8. Testing & Validation Workflow
+
+Testing is split across repos, but guided by the architecture.
+
+### 8.1 Pulse (Rust)
+
+- **Unit tests**
+- core data structures: tracks, clips, lanes, nodes, routing,
+- command handlers and undo/redo,
+- versioning and snapshot logic.
+
+- **IPC tests**
+- round-trip encode/decode for key Pulse IPC messages,
+- compatibility tests for schema evolution.
+
+- **Scenario tests**
+- series of edits applied to a project produce expected final model,
+- load/save cycles preserve project semantics.
+
+### 8.2 Signal (C++/JUCE)
+
+- **Graph tests**
+- node ordering and routing correctness,
+- cohort transitions and anticipative rendering scenarios.
+
+- **Render tests**
+- offline renders compared to golden reference outputs,
+- plugin hosting lifecycle tests.
+
+- **Realtime safety**
+- tests (and static analysis where possible) to ensure:
+  - no heap allocations on the audio thread,
+  - no locks/contention on realtime paths.
+
+### 8.3 Aura (Electron/TS)
+
+- **Unit tests**
+- reducers/stores,
+- IPC handlers,
+- small UI logic components.
+
+- **Integration tests**
+- editor flows (arranger, piano roll, clip launcher) using local harnesses.
+
+- **Manual testing**
+- always part of the flow for UX-heavy changes.
+
+### 8.4 Composer
+
+- **Determinism & reproducibility (where meaningful)**
+- metadata classification tests,
+- replacement mapping stability.
+
+- **Privacy checks**
+- tests that ensure Composer integration never sends forbidden data fields.
+
+---
+
+## 9. Decision Records & Traceability
+
+All major architectural decisions are recorded as decision docs in:
+
+- `docs/decisions/` (Chorus)
+
+When applying a change that **contradicts or supersedes** an existing decision:
+
+1. Update or add a decision document.
+2. Reference it from:
+ - relevant architecture docs,
+ - relevant backlog entries (if appropriate).
+
+This keeps a **narrative history** of the project’s evolution.
+
+---
+
+## 10. Summary
+
+The implementation workflow for Loophole ensures that:
+
+- **Chorus is the design brain**,  
+- **Signal, Pulse, Aura and Composer are the execution limbs**,  
+- **ChatGPT** designs and reviews,  
+- **Cursor** edits and implements,  
+- **You** own direction, integration and final judgement.
+
+By:
+
+- insisting on architecture-first for meaningful changes,
+- using clear, consistent prompting patterns,
+- enforcing immutability of historical reports,
+- and treating testing as an architectural concern,
+
+the project can grow ambitious features without losing coherence or reliability.
+
+This document should be revisited as soon as:
+
+- Pulse’s Rust implementation is underway,
+- the first end-to-end IPC flows are live,
+- and real-world iteration patterns emerge.
+
+At that point, the workflow can be refined with concrete examples and updated
+best practices from actual development experience.
