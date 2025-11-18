@@ -90,6 +90,7 @@ Aura provides several **primary workspaces**:
    - Piano Roll
    - Audio Editor
    - Expression/Automation Editor
+   - MIDI Drum Sequencer
 5. **Mixer View**
 6. **Media & Library View**
 7. **Diagnostics & Performance View** (see `25-diagnostics-and-performance.md` when defined)
@@ -311,6 +312,36 @@ Features:
 - snapping and quantise,
 - lane stacking and grouping,
 - safe overview of multiple parameters without clutter.
+
+### 7.4 MIDI Drum Sequencer
+
+The MIDI Drum Sequencer provides a grid-based view optimised for percussion
+programming and loop-based composition.
+
+Key features:
+
+- a fixed or user-defined list of drum lanes (Kick, Snare, Hi-Hat, Perc, etc.),
+- per-lane note assignment and remapping using track-level or instrument-level definitions,
+- step-sequencer-style grid with:
+  - step resolution options,
+  - velocity and probability lanes,
+  - per-step variations (flam, roll, ratchet),
+  - per-lane articulation controls,
+- loop controls and pattern-length tools independent of clip length,
+- preview-on-hover and audition for rapid workflow,
+- integration with groove and quantisation pipelines,
+- optional "pattern bank" sidebar for storing drum variations,
+- tight integration with pad/grid controllers (Launchpad, Push, etc.), with live LED feedback.
+
+The Drum Sequencer shares the same core MIDI editing model as the Piano Roll
+but offers a specialised workflow for percussive and pattern-driven music.
+
+### Additional Future Editors
+
+Loophole may introduce further specialised editors (e.g., Sampler Editor,
+Pattern/Chord Editor, Device Editor, Video Clip Editor) as the ecosystem
+grows. Each editor will define its own interaction rules while remaining
+consistent with the overall UX architecture laid out in this document.
 
 ---
 

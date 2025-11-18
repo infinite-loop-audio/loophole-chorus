@@ -45,7 +45,7 @@ Human-readable titles are provided for clarity, but filenames govern structure.
 - **20-clip-launcher.md** — Clip Launcher Architecture  
 - **21-rendering-and-offline-processing.md** - Rendering & Offline Processing Architecture  
 - **21-control-surfaces-and-assistive-hardware.md** Control Surfaces & Assistive Hardware Architecture  
-- **23-ux-and-visual-layer.md** *(planned)*
+- **23-ux-and-visual-layer.md** - UX & Visual Layer Architecture  
 
 ---
 
