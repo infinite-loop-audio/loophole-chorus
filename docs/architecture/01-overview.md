@@ -68,7 +68,7 @@ The Loophole ecosystem consists of five repositories:
 | Repo        | Role                          | Language         | Notes                                           |
 |------------|-------------------------------|------------------|------------------------------------------------|
 | **Signal** | Real-time engine              | C++ (JUCE)       | Plugin hosting, audio graph, RT state          |
-| **Pulse**  | Model layer                   | TypeScript       | Project, routing, automation, taxonomy         |
+| **Pulse**  | Model layer                   | Rust             | Project, routing, automation, taxonomy         |
 | **Aura**   | UI layer                      | Electron + TS    | Views, editors, workspace, telemetry           |
 | **Composer** | Knowledge metadata service  | TBD              | Plugin/parameter metadata, roles, mappings     |
 | **Chorus** | Meta repository               | Markdown + JSON  | Specs, ADRs, IPC, meta-protocol                |
@@ -79,11 +79,11 @@ Chorus anchors the architecture; the runtime repos implement it. Composer enrich
 
 # 4. Runtime Components
 
-Loophole’s runtime consists of:
+Loophole's runtime consists of:
 
 - **Signal process** — native audio engine
-- **Aura process** — UI + embedded Pulse
-- **(Future)** Pulse process — isolated model layer
+- **Pulse process** — standalone server process implemented in Rust, owning the authoritative project model, routing topology and IPC orchestration between Aura and Signal
+- **Aura process** — UI layer
 - **Composer service** — external shared metadata service (HTTP, optional)
 - IPC channels between processes defined in `@chorus:/docs/specs/`
 
@@ -119,7 +119,7 @@ Each layer’s responsibilities are defined normatively.
 
 ## 5.2 Pulse (Project and Data Model)
 
-Pulse is the authoritative project-state owner.
+Pulse is the authoritative project-state owner. Pulse is implemented as a **separate server process** in **Rust from the outset**, not as a TypeScript layer within Aura. The earlier idea of Pulse as a TypeScript layer embedded in Aura has been superseded by the decision to run Pulse as its own Rust service from the beginning.
 
 **Primary Responsibilities:**
 
@@ -134,7 +134,7 @@ Pulse is the authoritative project-state owner.
 - Maintaining parameter aliasing and remapping tables
 - Assigning nodes to processing cohorts (live vs anticipative) based on liveness requirements, deterministic behaviour metadata, and dependency closure
 
-Initially Pulse is embedded in Aura; later it MAY run as its own service.
+Pulse communicates with Aura and Signal via IPC, owning the long-lived, authoritative data model.
 
 Pulse MAY query Composer for:
 
@@ -259,7 +259,6 @@ Pulse MUST provide RT-safe immutable graph instructions that Signal can swap ato
 
 The architecture is designed for long-term extensibility:
 
-- Pulse MAY be extracted to its own process
 - Plugin sandboxing MAY be added
 - Telemetry MAY expand to richer analysis formats
 - Remote/UI extensions MAY communicate over network IPC
@@ -269,7 +268,21 @@ Such changes require new ADRs and spec updates.
 
 ---
 
-# 9. Document Conventions
+## 9. Security & Privacy
+
+Loophole's architecture maintains clear trust boundaries:
+
+- **Local IPC**: Signal, Pulse and Aura normally run on the same machine and communicate over local IPC channels. These processes are designed to operate within a trusted local environment.
+
+- **Composer boundary**: Composer is treated as an external intelligence service boundary. No raw audio or user-identifiable data is sent to Composer without explicit user consent. Composer receives only metadata and behavioural signatures, never project content or audio data.
+
+- **Future collaboration**: Collaboration and cloud sync features are planned for future releases and will follow the same privacy-first principles, with explicit user consent and opt-in mechanisms.
+
+- **Data minimisation**: Each component receives only the minimum data necessary for its responsibilities, maintaining clear separation of concerns and minimising attack surface.
+
+---
+
+# 10. Document Conventions
 
 - British English
 - Stable heading structure
@@ -279,7 +292,7 @@ Such changes require new ADRs and spec updates.
 
 ---
 
-# 10. Summary
+# 11. Summary
 
 This document defines the conceptual structure of the Loophole system.
 

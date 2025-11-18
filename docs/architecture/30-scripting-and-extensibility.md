@@ -333,6 +333,25 @@ Scripts cannot:
 
 ---
 
+# 10.1 Security Model & Permissions
+
+Scripts and extensions run in a **sandboxed** environment by design:
+
+- **No implicit access**: Scripts have **no implicit access** to arbitrary filesystem or network APIs. All capabilities must be explicitly requested via the permissions model.
+
+- **Sandboxed execution**: Scripts execute in isolated sandboxes (e.g. V8 isolates or QuickJS contexts) with no access to host system resources unless explicitly granted.
+
+- **Future permission model**: Future plans include:
+  - a permission model where scripts explicitly request capabilities (e.g. `filesystem.read`, `network.request`),
+  - capabilities must be granted by the user or project configuration,
+  - possibly a signing/review mechanism for extensions distributed via Composer.
+
+- **Architectural constraints**: Any loosening of these restrictions will be guarded by explicit architecture decisions. The sandbox model is fundamental to Loophole's security posture and cannot be bypassed without architectural review.
+
+This security model ensures that scripts cannot compromise project integrity, access user data without consent, or interfere with real-time audio processing.
+
+---
+
 # 11. Extensibility Beyond Scripts
 
 Future extensibility mechanisms that plug into this architecture:

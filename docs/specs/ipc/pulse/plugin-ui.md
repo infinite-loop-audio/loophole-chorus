@@ -84,7 +84,14 @@ Aura uses the logical key for:
 - multi-screen profile management,
 - grouping rules (e.g. opening several instances from the same plugin family).
 
-Signal uses the numeric `pluginUiId` to manage native windows.
+### 2.1 Plugin UI ID Semantics
+
+`pluginUiId` is always a **string identifier** in the IPC schema. Examples include:
+
+- `"ui:plugin:track:42:slot:1"`
+- `"ui:plugin:track:abc123:channel:main:node:xyz789"`
+
+Signal is free to map `pluginUiId` to an internal numeric handle **internally** for efficient window management, but that numeric handle never crosses process boundaries. Aura and Pulse must treat `pluginUiId` as an opaque string identifier.
 
 A plugin UI window is always associated with exactly one:
 

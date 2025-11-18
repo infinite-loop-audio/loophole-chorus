@@ -77,8 +77,7 @@ Signal is stateless in terms of project structure; Pulse sends it a resolved and
 incremental engine graph. Aura holds no authoritative state and reflects Pulse’s
 model.
 
-Pulse may initially run inside Aura as a bundled library but is designed for
-process separation without architectural changes.
+Pulse is implemented as a separate server process in Rust from the outset. It communicates with Aura and Signal via IPC, owning the long-lived, authoritative data model.
 
 ---
 
@@ -594,7 +593,35 @@ Pulse persists:
 
 ---
 
-## 13. Future Extensions
+## 13. Testing & Validation
+
+Pulse's architecture includes testing and validation as a core design concern:
+
+- **Model-level unit tests**:
+  - Tracks, clips, lanes, nodes, routing structures,
+  - Edit operations and their effects on model state,
+  - Undo/redo correctness and consistency.
+
+- **IPC contract tests**:
+  - Round-trip tests for key commands and events,
+  - Schema evolution tests ensuring backward compatibility or clear failure modes,
+  - Validation that IPC messages conform to declared schemas.
+
+- **Scenario tests**:
+  - Applying sequences of edits and verifying final project state,
+  - Loading and saving projects and comparing model equality,
+  - Complex editing workflows (e.g. track duplication, clip splitting, routing changes).
+
+- **Integration tests**:
+  - Pulse ↔ Signal coordination (graph updates, parameter streams),
+  - Pulse ↔ Aura coordination (snapshots, editing commands),
+  - Composer integration (metadata fetching, caching, fallback behaviour).
+
+Testing ensures that Pulse's model remains consistent, that IPC contracts are stable, and that project integrity is preserved across all operations.
+
+---
+
+## 14. Future Extensions
 
 Pulse is designed for long-term extensibility. Possible future additions include:
 

@@ -496,7 +496,41 @@ Signal forwards gesture stream data to Pulse and applies gesture-driven paramete
 
 ---
 
-## 13. Future Extensions
+## 13. Testing & Validation
+
+Signal's architecture includes testing and validation as a core design concern:
+
+- **Graph-level tests**:
+  - Verifying node ordering and routing correctness,
+  - Cohort transitions and dependency closure,
+  - Graph stability under structural changes.
+
+- **Render tests**:
+  - Offline renders compared against golden reference outputs,
+  - Ensuring deterministic behaviour where required,
+  - Verifying sample-accurate timing and synchronisation.
+
+- **Realtime safety harness**:
+  - Tests that stress timing and buffer handling,
+  - Verifying no allocations or blocking calls occur on the audio thread,
+  - Validating that all real-time constraints are met under load.
+
+- **Plugin hosting tests**:
+  - Plugin scanning and discovery,
+  - Sandboxing and crash recovery scenarios,
+  - Plugin UI lifecycle and window management,
+  - Parameter application and automation correctness.
+
+- **Hardware I/O tests**:
+  - Device enumeration and discovery,
+  - Input parsing and forwarding correctness,
+  - Output dispatch and feedback intent handling.
+
+Testing ensures that Signal maintains real-time safety, that plugin hosting is robust, and that the engine graph executes correctly under all conditions.
+
+---
+
+## 14. Future Extensions
 
 Signal may evolve to support:
 

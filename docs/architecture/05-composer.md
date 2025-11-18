@@ -525,6 +525,20 @@ Composer never receives:
 
 ---
 
+## 8.1 Security & Privacy Boundaries
+
+Composer operates as an external intelligence service with strict data boundaries:
+
+- **Minimum metadata only**: Composer receives only the minimum metadata and features needed to perform its tasks. By default, Composer does **not** receive raw project audio, only fingerprints, analysis summaries, or behavioural signatures (unless explicitly required for a specific AI workflow and explicitly opted-in by the user).
+
+- **Opt-in telemetry**: All telemetry and metadata sharing is **opt-in** and anonymised. Users must explicitly consent before any data is transmitted to Composer.
+
+- **Advisory role**: Composer never acts on the project directly; it only returns suggestions or metadata via Pulse. Pulse remains the authoritative source of truth and validates all Composer suggestions before applying them.
+
+- **Offline operation**: Projects must load and function correctly without Composer. All Composer data is advisory and cached locally; project integrity never depends on Composer availability.
+
+---
+
 ## 9. Failure Modes and Fallbacks
 
 If Composer is unreachable or returns errors:

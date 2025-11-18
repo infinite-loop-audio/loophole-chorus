@@ -83,7 +83,10 @@ Pulse assigns a **Plugin UI ID** for each plugin UI it wants to manage:
 }
 ```
 
+- `pluginUiId` is always a **string identifier** in the IPC schema.
 - `pluginUiId` is stable within the Pulse/Aura layout model.
+- Signal is free to map `pluginUiId` to an internal numeric handle **internally** for efficient window management, but that numeric handle never crosses process boundaries.
+- Aura and Pulse must treat `pluginUiId` as an opaque string identifier.
 - Multiple `pluginUiId`s may refer to the same `pluginInstanceId` in unusual
   cases (e.g. multi-view UIs), though normally there's a 1:1 mapping.
 

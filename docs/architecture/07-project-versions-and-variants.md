@@ -357,6 +357,28 @@ Pulse is responsible for:
 
 ---
 
+### 5.3 Persistence Strategy (High-Level)
+
+The project model will be persisted in a structured, versioned representation. The exact storage mechanism is **deliberately left open** but will likely be one of:
+
+- a structured on-disk file format,
+- a small embedded database (e.g. SQLite),
+- or a hybrid of the two.
+
+Regardless of the concrete choice, the persistence layer must provide:
+
+- **Atomic writes**: Write-then-rename or equivalent atomic operations to ensure project files are never left in a corrupted state.
+
+- **Crash-safe behaviour**: Recovery of the last known good version if a write is interrupted. Draft files and autosave mechanisms support this requirement.
+
+- **Schema version header**: A clear schema version header at the root of the project data, enabling safe migration and validation on load.
+
+- **Migration path**: When the schema evolves, the persistence layer must support migration from older schema versions to newer ones, with clear error handling for unsupported or corrupted data.
+
+An embedded database such as SQLite is a strong candidate for managing project data and history, but the exact technology will be formalised in a dedicated persistence decision document. The architecture remains flexible to accommodate the most appropriate storage mechanism based on implementation requirements and performance characteristics.
+
+---
+
 ## 6. Interaction with Undo & History
 
 The **Undo & History Architecture** (later document) will define:
