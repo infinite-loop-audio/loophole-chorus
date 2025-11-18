@@ -237,7 +237,7 @@ Aura renders:
 
 - Channels (when attached to Tracks),
 - nodes in order,
-- LaneStream nodes,
+- LaneStreamNode(s) (often shortened to 'LaneStream'),
 - inserts, sends (future),
 - meters and gain/pan.
 

@@ -5,12 +5,12 @@ It covers the commands issued by Aura to Pulse for adding, removing or modifying
 Nodes within a Channel’s DSP graph, and the events emitted by Pulse to notify 
 Aura of Node-level changes.
 
-A **Node** is the fundamental processing unit within a Channel’s DSP graph.  
+A **Node** is the fundamental processing unit within a Channel's DSP graph.  
 Nodes may represent:
 
 - plugin-based processors (VST, CLAP, AU wrappers),
 - built-in DSP units (filters, mixers, gain, analysers),
-- LaneStream nodes (rendering output of Clip Lanes),
+- LaneStreamNode(s) (often shortened to 'LaneStream') (rendering output of Clip Lanes),
 - routing nodes (SendNodes, ReturnNodes, sidechain joiners),
 - utility nodes (latency compensators, channel mergers/splitters).
 
@@ -66,7 +66,7 @@ Pulse owns the authoritative DSP graph and enforces constraints.
 
 Pulse recognises a core set of Node types:
 
-- **LaneStreamNode**  
+- **LaneStreamNode** (often shortened to 'LaneStream')  
   Converts the output of one or more Clip Lanes into an audio/MIDI stream.
 
 - **PluginNode**  

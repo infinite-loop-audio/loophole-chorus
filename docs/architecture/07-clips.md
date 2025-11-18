@@ -82,7 +82,7 @@ Pulse uses the Clip’s time range to:
 
 - determine which Clips are active at any given playhead position,
 - resolve cross-fade, comping and overlap interactions,
-- identify which lanes to feed into LaneStream nodes.
+- identify which lanes to feed into LaneStreamNode(s) (often shortened to 'LaneStream').
 
 Time ranges use project time units (beats or seconds, depending on timebase).
 Tempo Lane changes may affect actual wall-clock duration of beat-based Clips.
@@ -175,22 +175,22 @@ architecture:
 
 ### 4.3 Per-Clip Lane Routing (Audio)
 
-Audio lanes must route to a LaneStream node in the Track’s Channel chain.
+Audio lanes must route to a LaneStreamNode (often shortened to 'LaneStream') in the Track's Channel chain.
 
 Default behaviour:
 
 - When a Track first receives audio in any Clip, Pulse ensures that the
-  Channel has a LaneStream node at the top of its node graph.
-- The first audio Lane added to a Clip routes to this LaneStream node by
+  Channel has a LaneStreamNode at the top of its node graph.
+- The first audio Lane added to a Clip routes to this LaneStreamNode by
   default.
 - If a second audio Lane is added to that Clip, it also routes to the same
-  LaneStream by default. Aura presents an option in the UI to “split” this Lane
-  to its own LaneStream node.
-- Splitting creates a new LaneStream node in the Channel chain, and the chosen
-  audio Lane’s output is routed to that new node.
+  LaneStreamNode by default. Aura presents an option in the UI to "split" this Lane
+  to its own LaneStreamNode.
+- Splitting creates a new LaneStreamNode in the Channel chain, and the chosen
+  audio Lane's output is routed to that new node.
 - For subsequent Clips on the same Track, audio Lanes route to the first
-  LaneStream by default. Audio Lanes expose a UI element (such as a dropdown)
-  allowing users to route that Lane’s output to a different LaneStream node.
+  LaneStreamNode by default. Audio Lanes expose a UI element (such as a dropdown)
+  allowing users to route that Lane's output to a different LaneStreamNode.
 
 ### 4.4 Per-Clip Lane Routing (MIDI)
 
@@ -312,7 +312,7 @@ Track’s Channel, and therefore implicitly disables all Clips.
 At runtime, Pulse continuously computes:
 
 - which Clip Lanes are active at the current playhead,
-- which LaneStreams or instrument nodes they should feed,
+- which LaneStreamNodes or instrument nodes they should feed,
 - what automation values apply at that moment.
 
 ### 7.2 Lane → Channel Routing
@@ -320,7 +320,7 @@ At runtime, Pulse continuously computes:
 Pulse builds a stable Channel node graph. Clip Lanes do *not* mutate the
 node graph; instead:
 
-- audio Lanes are mapped to the configured LaneStream slots,
+- audio Lanes are mapped to the configured LaneStreamNode slots,
 - MIDI Lanes are mapped to instrument nodes,
 - automation Lanes generate parameter control signals.
 

@@ -17,7 +17,7 @@ relationships, not JUCE implementation details or IPC formats.
 - [3. Node Types](#3-node-types)
   - [3.1 Instruments](#31-instruments)
   - [3.2 Audio Effects](#32-audio-effects)
-  - [3.3 LaneStream Nodes](#33-lanestream-nodes)
+  - [3.3 LaneStreamNode](#33-lanestreamnode)
   - [3.4 Utility and Analysis Nodes](#34-utility-and-analysis-nodes)
   - [3.5 Device/IO Nodes](#35-deviceio-nodes)
 - [4. Node Identity](#4-node-identity)
@@ -27,7 +27,7 @@ relationships, not JUCE implementation details or IPC formats.
 - [5. Node Graphs and Channels](#5-node-graphs-and-channels)
   - [5.1 Serial Chains](#51-serial-chains)
   - [5.2 Relationship to Tracks and Clips](#52-relationship-to-tracks-and-clips)
-  - [5.3 LaneStreams as First-Class Nodes](#53-lanestreams-as-first-class-nodes)
+  - [5.3 LaneStreamNode as First-Class Nodes](#53-lanestreamnode-as-first-class-nodes)
 - [6. Parameters and Nodes](#6-parameters-and-nodes)
   - [6.1 Parameter Ownership](#61-parameter-ownership)
   - [6.2 Parameter Discovery](#62-parameter-discovery)
@@ -53,7 +53,7 @@ strictly serial chain. Nodes include:
 
 - instruments,
 - audio effects,
-- LaneStream nodes,
+- LaneStreamNode(s) (often shortened to 'LaneStream'),
 - utility and analysis nodes,
 - device/IO abstractions.
 
@@ -115,16 +115,16 @@ Audio effect nodes:
 Effects may also expose sidechain inputs; those are represented as additional
 inputs in the node model.
 
-### 3.3 LaneStream Nodes
+### 3.3 LaneStreamNode
 
-LaneStream nodes are special-purpose nodes that:
+LaneStreamNode(s) (often shortened to 'LaneStream') are special-purpose nodes that:
 
 - receive audio from Clip audio Lanes on a Track,
 - appear at (or near) the top of the Channel node graph by default,
 - provide per-Lane mixing controls (gain, pan, phase, mute, etc.),
-- may be split so different sets of Lanes feed different LaneStreams.
+- may be split so different sets of Lanes feed different LaneStreamNodes.
 
-LaneStream nodes are first-class nodes:
+LaneStreamNodes are first-class nodes:
 
 - they have parameters,
 - they can be automated,
@@ -184,7 +184,7 @@ Node IDs are used in:
 A node may be:
 
 - a plugin instance (VST3, CLAP, AU), or
-- a built-in DSP unit (utility, LaneStream, device IO).
+- a built-in DSP unit (utility, LaneStreamNode, device IO).
 
 **Plugin identity** refers to:
 
@@ -225,12 +225,12 @@ updated if node IDs are changed.
 Each Channel has a serial node graph:
 
 ```
-[ LaneStream(s) ] → [ Instruments ] → [ Effects ] → [ Utility/Metering ] → [ Output ]
+[ LaneStreamNode(s) ] → [ Instruments ] → [ Effects ] → [ Utility/Metering ] → [ Output ]
 ```
 
 There is no concurrent parallel graph at this level; parallelism is achieved via:
 
-- LaneStreams feeding different nodes,
+- LaneStreamNodes feeding different nodes,
 - multiple Channels,
 - sends/returns (future),
 - routing and summing between Channels.
@@ -253,12 +253,12 @@ Tracks:
 Clips:
 
 - define Lanes and content,
-- feed LaneStreams and nodes via Channel routing,
+- feed LaneStreamNodes and nodes via Channel routing,
 - never own nodes.
 
-### 5.3 LaneStreams as First-Class Nodes
+### 5.3 LaneStreamNode as First-Class Nodes
 
-LaneStreams are treated as nodes in the graph:
+LaneStreamNodes are treated as nodes in the graph:
 
 - they may appear at different positions in the graph,
 - they can be moved before or after specific effect nodes (subject to rules),
@@ -288,7 +288,7 @@ Nodes own parameters. For each node:
 - Pulse is responsible for reflecting these parameters in the global parameter
   model.
 
-LaneStream parameters are also node-owned:
+LaneStreamNode parameters are also node-owned:
 
 - per-Lane level, pan, mute, phase, etc.,
 - aggregated or per-Lane views for automation.
@@ -325,7 +325,7 @@ parameters; Pulse must remap automation where possible.
 Nodes can be created by:
 
 - user inserting a plugin or built-in node in Aura,
-- implicit creation (LaneStream when first audio lane appears),
+- implicit creation (LaneStreamNode when first audio lane appears),
 - Track templates and presets,
 - project loading.
 
@@ -381,7 +381,7 @@ Pulse:
 - creates, reorders, replaces and removes nodes,
 - manages node IDs and mapping,
 - owns parameter state and automation,
-- determines how LaneStreams are created and routed,
+- determines how LaneStreamNodes are created and routed,
 - uses Composer to interpret plugin and parameter semantics.
 
 Nodes never directly "talk" to Pulse; all communication is mediated through
@@ -432,7 +432,7 @@ Aura:
 - displays node graphs in the mixer and Track inspector,
 - allows inserting, reordering, bypassing and removing nodes,
 - opens plugin UIs (via Signal window handles),
-- exposes LaneStream controls,
+- exposes LaneStreamNode controls,
 - surfaces Composer-enriched metadata (parameter roles, groups, categories).
 
 Aura never directly controls node execution or routing. It sends editing
@@ -449,7 +449,7 @@ The node model anticipates future capabilities such as:
   nodes),
 - macro nodes that wrap multiple internal nodes,
 - dynamic node graphs per Clip or Section (with strict RT constraints),
-- per-Lane insert chains (inside LaneStreams),
+- per-Lane insert chains (inside LaneStreamNodes),
 - distributed or remote nodes.
 
 All such features must preserve the core invariants:

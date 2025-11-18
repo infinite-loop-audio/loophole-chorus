@@ -11,7 +11,7 @@ or Clip. Each Lane:
 - has a `laneType` (MIDI, audio, automation, video, device, etc.),
 - may appear in one or more Clips,
 - may carry content (handled by the corresponding Lane-type domain),
-- may be routed to a LaneStream node in the Track's Channel,
+- may be routed to a LaneStreamNode (often shortened to 'LaneStream') in the Track's Channel,
 - appears in a Clip in a user-defined order for editing.
 
 Pulse owns all Lane state. Aura expresses editing intent only.
@@ -48,7 +48,7 @@ Lanes:
 - belong logically to a Track,
 - are referenced by Clips,
 - may or may not carry content at a given Clip position,
-- may route to one or more LaneStream nodes in the Track's Channel,
+- may route to one or more LaneStreamNode(s) (often shortened to 'LaneStream') in the Track's Channel,
 - may specify presentation properties (colour, name, collapsed state).
 
 The Lane domain governs the existence, identity, presentation and routing of
@@ -173,7 +173,7 @@ Fields:
 Pulse updates routing and may issue Channel/Node domain updates.
 
 **`lane.setSendLevel`**  
-Set the mix level or weighting when a Lane outputs to a LaneStream.
+Set the mix level or weighting when a Lane outputs to a LaneStreamNode.
 
 This applies primarily to audio or video Lanes.
 
@@ -247,7 +247,7 @@ Collapsed/expanded state updated.
 ### 4.3 Routing Events
 
 **`lane.laneStreamChanged`**  
-The Lane's associated LaneStream node has changed.
+The Lane's associated LaneStreamNode has changed.
 
 **`lane.sendLevelChanged`**  
 Mixing or routing weight updated.
@@ -302,7 +302,7 @@ internally consistent at the moment they are emitted.
 
 Lane operations are non-realtime. They may cause:
 
-- Channel graph changes (e.g. creation or removal of LaneStreams),
+- Channel graph changes (e.g. creation or removal of LaneStreamNodes),
 - reassignment of routing paths,
 - impacts on cohort selection if routing affects determinism assumptions.
 

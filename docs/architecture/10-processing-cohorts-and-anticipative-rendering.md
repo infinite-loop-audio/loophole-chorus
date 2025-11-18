@@ -259,7 +259,7 @@ When switching from anticipative to live:
 ## 8. Interaction with Tracks, Channels and Lanes
 
 - Track flags influence cohort selection.  
-- LaneStream nodes inherit cohort membership from the Channel they belong to.  
+- LaneStreamNode(s) (often shortened to 'LaneStream') inherit cohort membership from the Channel they belong to.  
 - Audio Lanes pre-rendered in the anticipative domain behave similarly to track freezing.  
 - Node order changes may require temporary rebalancing of cohort membership.
 

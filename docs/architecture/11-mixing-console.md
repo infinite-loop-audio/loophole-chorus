@@ -110,7 +110,7 @@ Channels are the units that Signal realises as audio processing chains.
 Nodes are the fundamental DSP processing elements inside a Channel. Node types
 include (non-exhaustively):
 
-- **LaneStreamNode** – convert Clip Lane content into streams,
+- **LaneStreamNode** (often shortened to 'LaneStream') – convert Clip Lane content into streams,
 - **PluginNode** – wrap instrument/effect plugins (VST, CLAP, AU),
 - **FaderNode** – implement fader gain,
 - **PanNode** – implement panning/balance,
@@ -150,7 +150,7 @@ Panning/balance is implemented as one or more **PanNodes** (and possibly
 GainNodes) rather than as ad-hoc channel strip logic. A typical Channel chain
 may look like:
 
-- LaneStreamNodes  
+- LaneStreamNode(s) (often shortened to 'LaneStream')  
 - PluginNodes (instruments and effects)  
 - optional utility GainNodes  
 - PanNode  

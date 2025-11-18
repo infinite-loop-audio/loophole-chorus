@@ -25,7 +25,7 @@ non-real-time state.
 - [5. Channels and Node Graphs](#5-channels-and-node-graphs)
   - [5.1 Channel Lifecycle](#51-channel-lifecycle)
   - [5.2 Node Graph Construction](#52-node-graph-construction)
-  - [5.3 LaneStream Nodes](#53-lanestream-nodes)
+  - [5.3 LaneStreamNode](#53-lanestreamnode)
   - [5.4 Graph Stability Constraints](#54-graph-stability-constraints)
 - [6. Parameter Model](#6-parameter-model)
   - [6.1 Parameter Identity](#61-parameter-identity)
@@ -183,7 +183,7 @@ Pulse constructs the node graph:
 
 - serial DSP nodes,
 - instrument nodes,
-- LaneStream nodes,
+- LaneStreamNode(s) (often shortened to 'LaneStream'),
 - sends/returns (future),
 - channel gain, pan and metering nodes.
 
@@ -194,13 +194,13 @@ Pulse ensures the graph is:
 - free of cycles or branching,
 - suitable for deterministic execution in Signal.
 
-### 5.3 LaneStream Nodes
+### 5.3 LaneStreamNode
 
-LaneStreams represent audio from Lanes of Clips. Pulse:
+LaneStreamNode(s) (often shortened to 'LaneStream') represent audio from Lanes of Clips. Pulse:
 
 - creates them on first use,
 - routes audio Lanes to them,
-- allows user-defined splitting (additional LaneStreams),
+- allows user-defined splitting (additional LaneStreamNodes),
 - inserts them at the top of the node graph by default.
 
 ### 5.4 Graph Stability Constraints

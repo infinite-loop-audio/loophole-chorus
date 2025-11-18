@@ -155,7 +155,7 @@ Pulse stores this hint and may trigger a cohort re-evaluation.
 Attach or detach a Track-owned Channel from a Track:
 
 - When enabling and no Channel exists, Pulse creates a Track-owned Channel
-  and initial LaneStream nodes.
+  and initial LaneStreamNode(s) (often shortened to 'LaneStream').
 - When disabling, Pulse removes or deactivates the Track-owned Channel
   according to project rules.
 

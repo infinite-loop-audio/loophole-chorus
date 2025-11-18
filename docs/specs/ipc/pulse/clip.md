@@ -335,7 +335,7 @@ Clip operations are non-realtime and must not run on Signal’s audio thread.
 However, Clip changes may have implications for:
 
 - Lane routing (which may alter Channel graph structure),
-- required nodes (e.g. LaneStreams),
+- required nodes (e.g. LaneStreamNode(s), often shortened to 'LaneStream'),
 - cohort assignment if Lane content implies routing changes.
 
 Any necessary graph updates or cohort reassignment are handled by Pulse

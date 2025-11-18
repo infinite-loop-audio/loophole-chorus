@@ -21,7 +21,7 @@ or structural inference. Pulse constructs the engine graph; Signal executes it.
   - [4.1 Graph Structure](#41-graph-structure)
   - [4.2 Nodes](#42-nodes)
   - [4.3 Node Order](#43-node-order)
-  - [4.4 LaneStreams](#44-lanestreams)
+  - [4.4 LaneStreamNode](#44-lanestreamnode)
   - [4.5 Graph Updates](#45-graph-updates)
 - [5. Plugin Hosting](#5-plugin-hosting)
   - [5.1 Formats](#51-formats)
@@ -132,7 +132,7 @@ graph; it only prepares and executes it.
 
 Node types include:
 
-- **LaneStream nodes** (audio input from Tracks),
+- **LaneStreamNode(s)** (often shortened to 'LaneStream') (audio input from Tracks),
 - **Instruments**,
 - **Audio effects**,
 - **Utility DSP** (gain, pan, meters),
@@ -142,10 +142,9 @@ Node types include:
 
 Order is strictly serial. Signal executes nodes in the order defined by Pulse.
 
-### 4.4 LaneStreams
+### 4.4 LaneStreamNode
 
-LaneStreams provide a buffer for audio from Clip Lanes routed via Pulse. Signal
-treats them as input sources. They are:
+LaneStreamNode(s) (often shortened to 'LaneStream') provide a buffer for audio from Clip Lanes routed via Pulse. Signal treats them as input sources. They are:
 
 - created/destroyed by graph updates,
 - filled with audio data from Pulse-provided buffers or internal feeders,
@@ -277,7 +276,7 @@ Signal receives commands for:
 
 - loading/unloading nodes,
 - reordering nodes,
-- adding LaneStreams,
+- adding LaneStreamNodes,
 - removing nodes,
 - updating routing,
 - resending full engine graph when required.

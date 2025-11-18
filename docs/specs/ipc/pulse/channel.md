@@ -11,7 +11,7 @@ A **Channel** is a DSP processing container. It owns:
 - input and output routing,
 - built-in gain/pan state,
 - metering configuration,
-- default LaneStreamNodes (created when Lanes exist),
+- default LaneStreamNode(s) (often shortened to 'LaneStream') (created when Lanes exist),
 - analysis nodes (if required).
 
 Channels are often created for and associated with Tracks (track-owned Channels),
@@ -169,7 +169,7 @@ Configure meter behaviour:
 
 **`channel.resetGraph`**  
 Remove all user-added Nodes and restore the Channel to its default minimal
-configuration (LaneStreamNodes + FaderNode/PanNode).
+configuration (LaneStreamNode(s) + FaderNode/PanNode).
 
 Pulse then emits:
 

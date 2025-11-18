@@ -31,7 +31,7 @@ Tracks provide:
 - timeline structure,
 - default routing behaviour for attached Channels.
 
-Nesting a Track inside another Track implicitly creates folder-like behaviour, but without introducing a separate “folder track” type. A parent Track MAY or MAY NOT have a Channel. If it does, its Channel MAY receive LaneStream(s) derived from child Tracks.
+Nesting a Track inside another Track implicitly creates folder-like behaviour, but without introducing a separate "folder track" type. A parent Track MAY or MAY NOT have a Channel. If it does, its Channel MAY receive LaneStreamNode(s) (often shortened to 'LaneStream') derived from child Tracks.
 
 Tracks do not perform audio processing. They describe structure only.
 
@@ -54,7 +54,7 @@ Channels:
 A Channel contains:
 
 - zero or more nodes (plugins or DSP blocks),
-- zero or more LaneStream nodes (derived from Lanes),
+- zero or more LaneStreamNode(s) (often shortened to 'LaneStream') (derived from Lanes),
 - routing metadata,
 - parameter states,
 - automation staging buffers.
@@ -74,7 +74,7 @@ Nodes are plugins or DSP units inside a Channel. They MAY include:
 - MIDI nodes,
 - utility or analysis nodes.
 
-Nodes sit in a linear graph with strict ordering. A node MAY consume one or more LaneStreams as input. Serial mixing of LaneStreams is permitted and handled within the node graph.
+Nodes sit in a linear graph with strict ordering. A node MAY consume one or more LaneStreamNode(s) (often shortened to 'LaneStream') as input. Serial mixing of LaneStreamNode(s) is permitted and handled within the node graph.
 
 Pulse is responsible for constructing and updating node graphs. Signal performs real-time execution.
 
@@ -107,7 +107,7 @@ Lanes are typed content streams inside Clips. Every Clip contains one or more La
 - device control (future),
 - global-only control lanes (e.g. tempo or groove lanes outside Tracks).
 
-Lanes define the content, but not the DSP. Audio-producing Lanes route to LaneStreams inside a Channel. MIDI Lanes route to instruments defined in the Channel's node graph. Automation Lanes affect parameters in Pulse which translate into parameter updates for Signal.
+Lanes define the content, but not the DSP. Audio-producing Lanes route to LaneStreamNode(s) (often shortened to 'LaneStream') inside a Channel. MIDI Lanes route to instruments defined in the Channel's node graph. Automation Lanes affect parameters in Pulse which translate into parameter updates for Signal.
 
 A Track does not define Lanes directly. Clips define Lanes. Tracks constrain where Clips appear.
 
@@ -115,7 +115,7 @@ A Track does not define Lanes directly. Clips define Lanes. Tracks constrain whe
 
 # 7. LaneStreams
 
-A LaneStreamNode (also referred to as "LaneStream" for brevity) is a first-class Node type in the Channel's node graph. LaneStreamNodes are created by Pulse to receive audio from Clip audio-producing Lanes. One Track MAY have one or multiple LaneStreamNodes depending on how Clips are configured.
+A LaneStreamNode (often shortened to 'LaneStream') is a first-class Node type in the Channel's node graph. LaneStreamNodes are created by Pulse to receive audio from Clip audio-producing Lanes. One Track MAY have one or multiple LaneStreamNodes depending on how Clips are configured.
 
 Default behaviour:
 
@@ -140,7 +140,7 @@ Tracks can be nested arbitrarily. Nesting affects:
 If a parent Track has a Channel:
 
 - its Channel MAY sum audio from child Tracks (if configured),
-- the UI MAY show a LaneStream mixer view for its child content.
+- the UI MAY show a LaneStreamNode mixer view for its child content.
 
 If a parent Track has no Channel:
 
@@ -194,7 +194,7 @@ Tracks cannot host global lanes.
 - Tracks contain Clips and define structure.
 - Channels contain nodes and define audio processing.
 - Lanes define Clip content.
-- LaneStreams bridge Lanes to Channel nodes.
+- LaneStreamNodes bridge Lanes to Channel nodes.
 - Nesting Tracks provides powerful structural organisation.
 - Composer influences metadata and mapping, not architecture.
 - Pulse resolves everything into a deterministic engine graph for Signal.
