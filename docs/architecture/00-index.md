@@ -29,40 +29,41 @@ Human-readable titles are provided for clarity, but filenames govern structure.
 
 ---
 
-## Timeline Core (14–18)
+## Timeline Core (14–19)
 
-- **14-timebase-tempo-and-groove.md** *(planned)*  
-- **15-advanced-clips.md** *(planned)*  
-- **16-automation-and-modulation.md** *(planned)*  
-- **17-midi-architecture.md** *(planned)*  
-- **18-comping-architecture.md** *(planned)*
-
----
-
-## Creative & Performance Systems (19–22)
-
-- **19-clip-launcher.md** — Clip Launcher Architecture  
-- **20-rendering-and-offline-processing.md** *(planned)*  
-- **21-control-surfaces.md** *(planned)*  
-- **22-ux-and-visual-layer.md** *(planned)*
+- **14-timebase-tempo-and-groove.md** — Timebase, Tempo & Groove Architecture  
+- **15-advanced-clips.md** — Advanced Clips Architecture  
+- **16-editing-and-nondestructive-layers.md** — Editing & Nondestructive Layers Architecture  
+- **17-automation-and-modulation.md** *(planned)*  
+- **18-midi-architecture.md** *(planned)*  
+- **19-comping-architecture.md** *(planned)*
 
 ---
 
-## External Integration (23–26)
+## Creative & Performance Systems (20–23)
 
-- **23-windowing-and-plugin-ui.md** — Windowing & Plugin UI Architecture  
-- **24-diagnostics-and-performance.md** *(planned)*  
-- **25-scripting-and-extensibility.md** *(planned)*  
-- **26-video-architecture.md** *(planned)*
+- **20-clip-launcher.md** — Clip Launcher Architecture  
+- **21-rendering-and-offline-processing.md** *(planned)*  
+- **22-control-surfaces.md** *(planned)*  
+- **23-ux-and-visual-layer.md** *(planned)*
 
 ---
 
-## Future Systems (27–30)
+## External Integration (24–27)
 
-- **27-collaboration-architecture.md** *(future)*  
-- **28-composer-extended-intelligence.md** *(future)*  
-- **29-future-workflow-prototypes.md** *(future)*  
-- **30-experimental-systems.md** *(future)*
+- **24-windowing-and-plugin-ui.md** — Windowing & Plugin UI Architecture  
+- **25-diagnostics-and-performance.md** *(planned)*  
+- **26-scripting-and-extensibility.md** *(planned)*  
+- **27-video-architecture.md** *(planned)*
+
+---
+
+## Future Systems (28–31)
+
+- **28-collaboration-architecture.md** *(future)*  
+- **29-composer-extended-intelligence.md** *(future)*  
+- **30-future-workflow-prototypes.md** *(future)*  
+- **31-experimental-systems.md** *(future)*
 
 ---
 
