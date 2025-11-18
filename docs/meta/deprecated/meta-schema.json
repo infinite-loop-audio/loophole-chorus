@@ -1,4 +1,5 @@
 {
+    "$comment": "Status: Deprecated. This file is preserved for historical reference. It has been superseded by ../ai-workflow.md and is no longer part of the active project workflow.",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Chorus Meta Block",
     "type": "object",

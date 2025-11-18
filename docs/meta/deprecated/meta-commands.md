@@ -1,13 +1,17 @@
 # Meta-Commands — Operational Semantics for Meta Blocks
 
+> **Status:** Deprecated  
+> This file is preserved for historical reference.  
+> It has been superseded by `../ai-workflow.md` and is no longer part of the active project workflow.
+
 This document defines the **exact behaviour** required for each Meta Block
-operation defined in the Meta-Protocol. These operational rules are *normative*
+operation defined in the Meta-Protocol. These operational rules are *normative* (historical; see deprecation header)
 and MUST be followed by all AI agents (Cursor, Codex, ChatGPT middle-agents).
 
 This document complements:
 
-- `meta-protocol.md` — governance & high-level rules
-- `meta-schema.json` — formal schema definition
+- `../deprecated/meta-protocol.md` — governance & high-level rules
+- `../deprecated/meta-schema.json` — formal schema definition
 - `.cursor/rules/00-architecture.md` — general editing policy
 
 Together, these form the complete contract for modifying documentation and specs
@@ -19,7 +23,7 @@ in the **Chorus** repository.
 
 Before performing any operation, an AI agent MUST:
 
-1. Validate the Meta Block against `meta-schema.json`
+1. Validate the Meta Block against `../deprecated/meta-schema.json`
 2. Confirm the target file exists (unless using `create_file`)
 3. Apply the operation **exactly** as defined here
 4. Avoid changes outside the scope of the operation
@@ -323,7 +327,7 @@ operations. AI agents MUST follow these rules precisely to ensure:
 - architectural coherence
 - consistency across repos
 
-This document, together with `meta-protocol.md` and `meta-schema.json`,
+This document, together with `../deprecated/meta-protocol.md` and `../deprecated/meta-schema.json`,
 defines the complete mutation model for Chorus.
 
 ---

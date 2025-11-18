@@ -1,5 +1,9 @@
 # Meta-Protocol for Documentation & Specification Updates
 
+> **Status:** Deprecated  
+> This file is preserved for historical reference.  
+> It has been superseded by `../ai-workflow.md` and is no longer part of the active project workflow.
+
 This document defines the **Meta-Protocol**, a structured mechanism for safely,
 predictably, and reproducibly updating documentation and specifications within
 the **Chorus** meta-repository.
@@ -14,7 +18,7 @@ It ensures that changes across the Loophole architecture remain:
 - reviewable
 - traceable
 
-The Meta-Protocol is **normative**:
+The Meta-Protocol is **normative** (historical; see deprecation header):
 All AI agents MUST follow it when modifying documentation or specifications.
 
 ---
@@ -44,7 +48,7 @@ Its goals include:
 A *Meta Block* is a JSON object conforming to the schema:
 
 ```
-@chorus:/docs/meta/meta-schema.json
+@chorus:/docs/meta/deprecated/meta-schema.json
 ```
 
 Meta Blocks:
@@ -70,7 +74,7 @@ Operations define how documentation/specs should be mutated.
 These are formally defined in:
 
 ```
-@chorus:/docs/meta/meta-commands.md
+@chorus:/docs/meta/deprecated/meta-commands.md
 ```
 
 The approved operations are:
@@ -133,7 +137,7 @@ Meta Blocks MUST NOT contain comments inside JSON fields.
 
 Before acting on any Meta Block, an AI agent MUST:
 
-1. Validate the block against `meta-schema.json`
+1. Validate the block against `../deprecated/meta-schema.json`
 2. Reject any block that does not conform
 3. Fail safely by making **no changes**
 
@@ -250,8 +254,8 @@ New operations MAY be added, but require:
 
 1. A dedicated ADR
 2. Updates to:
-   - `meta-schema.json`
-   - `meta-commands.md`
+   - `../deprecated/meta-schema.json`
+   - `../deprecated/meta-commands.md`
    - This document
 3. A justification for why existing operations are insufficient
 
