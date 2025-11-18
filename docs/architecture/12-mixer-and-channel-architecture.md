@@ -83,7 +83,7 @@ Tracks are the primary user-facing containers in the arrangement timeline.
 They:
 
 - own Clips and Lanes (see
-  [Tracks, Lanes & Roles](./11-tracks-lanes-and-roles.md)),
+  [Tracks, Lanes & Roles](./08-tracks-lanes-and-roles.md)),
 - may optionally own a Channel (via the Track domain),
 - expose user-level flags (mute, solo, arm, monitor).
 
@@ -129,7 +129,7 @@ include (non-exhaustively):
 - various routing and utility Nodes.
 
 Nodes own parameters (Parameter domain) and are assigned to cohorts in the
-[Processing Cohorts](./10-processing-cohorts-and-anticipative-rendering.md) architecture.
+[Processing Cohorts](./06-processing-cohorts-and-anticipative-rendering.md) architecture.
 
 For details, see the
 [Pulse Node Domain Specification](../specs/ipc/pulse/node.md).
@@ -393,11 +393,11 @@ need for separate routing editors.
 This document builds on and interacts with:
 
 - [01-overview](./01-overview.md) – high-level architecture overview,  
-- [11-tracks-lanes-and-roles](./11-tracks-lanes-and-roles.md) – structural
+- [08-tracks-lanes-and-roles](./08-tracks-lanes-and-roles.md) – structural
   definitions for Tracks and Channels,
-- [12-clips](./12-clips.md) – how Clips and Lanes feed into Channels,
-- [13-parameters](./13-parameters.md) – parameter identity, types and ownership,
-- [10-processing-cohorts-and-anticipative-rendering](./10-processing-cohorts-and-anticipative-rendering.md) –
+- [09-clips](./09-clips.md) – how Clips and Lanes feed into Channels,
+- [10-parameters](./10-parameters.md) – parameter identity, types and ownership,
+- [06-processing-cohorts-and-anticipative-rendering](./06-processing-cohorts-and-anticipative-rendering.md) –
   cohort assignment and anticipative rendering.
 
 For IPC-level definitions:

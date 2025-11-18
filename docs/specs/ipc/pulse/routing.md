@@ -48,7 +48,7 @@ Routing in Loophole is defined as a **project-level graph**:
 - the master (or master chain) terminates the audible signal path.
 
 The overall mixing and console architecture is described in
-[Mixer & Channel Architecture](../../architecture/15-mixer-and-channel-architecture.md).
+[Mixer & Channel Architecture](../../architecture/12-mixer-and-channel-architecture.md).
 
 Routing commands express user intent around how Channels connect to each other
 and to hardware. Pulse validates and applies these changes, then emits events

@@ -174,7 +174,7 @@ Each node has a stable ID within its Channel:
 
 Node IDs are used in:
 
-- parameter IDs (see [@chorus:/docs/architecture/13-parameters.md](13-parameters.md)),
+- parameter IDs (see [@chorus:/docs/architecture/10-parameters.md](10-parameters.md)),
 - automation targets,
 - routing specifications,
 - graph update messages to Signal.

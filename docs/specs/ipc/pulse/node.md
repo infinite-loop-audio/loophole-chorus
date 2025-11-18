@@ -55,7 +55,7 @@ Nodes form the processing chain of a Channel. Each Node:
 
 For an architectural overview of how Nodes participate in the mixer and
 console model, see
-[Mixer & Channel Architecture](../../architecture/15-mixer-and-channel-architecture.md).
+[Mixer & Channel Architecture](../../architecture/12-mixer-and-channel-architecture.md).
 
 Aura manipulates Nodes at the level of the user's timeline/mixer editing intent;
 Pulse owns the authoritative DSP graph and enforces constraints.
@@ -273,5 +273,5 @@ Node changes may, however:
 - invalidate anticipative render buffers,
 - trigger graph rebuilds in Signal.
 
-Cohort semantics are described in the [Processing Cohorts](../architecture/10-processing-cohorts-and-anticipative-rendering.md) architecture document.  
+Cohort semantics are described in the [Processing Cohorts](../architecture/06-processing-cohorts-and-anticipative-rendering.md) architecture document.  
 Pulse makes all cohort decisions; Aura simply reflects state visually where needed.

@@ -63,8 +63,8 @@ domain; the Parameter domain defines the *target* values and control inputs
 automation operates on.
 
 For the broader conceptual model, see
-[Parameters Architecture](../../architecture/13-parameters.md) and
-[Mixer & Channel Architecture](../../architecture/15-mixer-and-channel-architecture.md).
+[Parameters Architecture](../../architecture/10-parameters.md) and
+[Mixer & Channel Architecture](../../architecture/12-mixer-and-channel-architecture.md).
 
 ---
 
@@ -369,7 +369,7 @@ anticipative). Pulse is responsible for:
 The Parameter domain itself is not directly executed on the audio thread, but
 its commands and events must be compatible with realtime-safe propagation.
 
-Cohort semantics are defined in the [Processing Cohorts](../architecture/10-processing-cohorts-and-anticipative-rendering.md) architecture document.
+Cohort semantics are defined in the [Processing Cohorts](../architecture/06-processing-cohorts-and-anticipative-rendering.md) architecture document.
 
 ---
 
