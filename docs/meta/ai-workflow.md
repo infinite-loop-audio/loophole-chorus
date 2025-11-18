@@ -159,6 +159,29 @@ docs/meta/<TASK>-REPORT.md
 
 This ensures full auditing.
 
+### **5.6 Report File Storage**
+
+All multi-file Cursor operations (cohesion passes, renumbering, refactors, link rewrites, protocol updates, etc.) must produce a report file stored in:
+
+```
+docs/reports/
+```
+
+Report files must follow the naming convention:
+
+```
+YYYY-MM-DD-HHMMSS-task-name-report.md
+```
+
+Where `YYYY-MM-DD-HHMMSS` is the UTC timestamp at the moment the task is run. This format is chosen so that lexicographic filename order matches chronological order for reports created on the same day.
+
+Rules:
+
+- All reports go into `docs/reports/`.
+- One report per major Cursor task.
+- No trailing newline.
+- Cursor must create `docs/reports/` if it does not exist.
+
 ---
 
 ## 6. Decision Documents (ADRs)
