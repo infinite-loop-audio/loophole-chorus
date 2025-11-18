@@ -172,7 +172,7 @@ Every normal IPC message is a single JSON object with this shape:
   - `"routing"`, `"mixer"`,  
   - `"media"`, `"recording"`, `"rendering"`,  
   - `"gesture"`, `"metering"`,  
-  - `"ui"`, `"pluginUi"`,  
+  - `"ui"`, `"pluginUi"`, `"pluginLibrary"`,  
   - `"engine"`, `"cohort"`, `"session"`,  
   - `"history"`, `"hardwareIo"`, `"engineDiagnostics"`, `"projectMetadata"`.
 

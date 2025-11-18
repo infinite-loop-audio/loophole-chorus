@@ -10,6 +10,13 @@ It covers commands and events for managing:
 - geometry synchronisation between Aura and Signal,
 - plugin-initiated resizes.
 
+This domain handles **engine-facing plugin UI lifecycle** (window management for
+plugin instances that are already part of the NodeGraph). High-level
+**browser-driven actions** like plugin insertion and replacement are initiated
+through the **Plugin Library domain** (`pluginLibrary.insertPlugin`,
+`pluginLibrary.replacePlugin`), which then orchestrates NodeGraph + plugin
+lifecycle + plugin UI commands as needed.
+
 This domain works alongside the Window Layout Architecture to ensure:
 
 - deterministic window placement,
@@ -287,7 +294,23 @@ Plugin windows should not assume that parameter updates occur synchronously.
 
 ---
 
-## 7. Relationship to Window Layout Architecture
+## 7. Relationship to Other Domains
+
+### 7.1 Plugin Library Domain
+
+High-level plugin insertion and replacement operations are handled by the
+**Plugin Library domain** (`docs/specs/ipc/pulse/plugin-library.md`). When a
+user inserts or replaces a plugin via the browser, `pluginLibrary.insertPlugin`
+or `pluginLibrary.replacePlugin` orchestrates:
+
+- NodeGraph modifications (via the Node domain),
+- Plugin instance creation (via Signal plugin lifecycle),
+- Plugin UI opening (via this domain, if requested).
+
+This domain focuses solely on **window lifecycle and geometry** for plugin
+instances that already exist in the NodeGraph.
+
+### 7.2 Window Layout Architecture
 
 This domain depends critically on:
 

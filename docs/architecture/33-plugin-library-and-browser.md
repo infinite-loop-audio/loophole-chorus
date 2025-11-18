@@ -489,29 +489,35 @@ Pulse uses Composer hints as advisory input.
 
 # 13. IPC Responsibilities
 
+The Plugin Library domain is defined in detail in:
+
+- `docs/specs/ipc/pulse/plugin-library.md`
+
 ### Aura → Pulse
-- `pluginLibrary.open`
+- `pluginLibrary.requestSummary`
 - `pluginLibrary.search`
-- `pluginLibrary.rename`
-- `pluginLibrary.tag.add/remove`
-- `pluginLibrary.category.assign`
-- `pluginLibrary.variant.select`
-- `pluginLibrary.hide`
-- `pluginLibrary.favourite`
-- `pluginChain.create/edit/delete`
-- `pluginPreset.save/load`
-- `plugin.replace`
-- `plugin.insertAt`
+- `pluginLibrary.renamePlugin`
+- `pluginLibrary.addTag` / `pluginLibrary.removeTag`
+- `pluginLibrary.assignCategories`
+- `pluginLibrary.selectVariant`
+- `pluginLibrary.setHidden`
+- `pluginLibrary.setFavourite`
+- `pluginLibrary.createChain` / `pluginLibrary.updateChain` / `pluginLibrary.deleteChain`
+- `pluginLibrary.savePreset` / `pluginLibrary.deletePreset`
+- `pluginLibrary.insertPlugin`
+- `pluginLibrary.replacePlugin`
 
 ### Pulse → Aura
-- `pluginLibrary.updated`
+- `pluginLibrary.summary`
 - `pluginLibrary.searchResults`
-- `pluginLibrary.suggestion`
-- `plugin.missing`
-- `plugin.conflict`
+- `pluginLibrary.details`
+- `pluginLibrary.entryUpdated`
+- `pluginLibrary.libraryUpdated`
+- `pluginLibrary.missingPlugin`
+- `pluginLibrary.replacementResult`
 
 ### Pulse → Signal
-- (Handled under plugin lifecycle)
+- (Handled under plugin lifecycle; see `docs/specs/ipc/signal/plugin.md`)
 - `plugin.instance.create`
 - `plugin.instance.destroy`
 - `plugin.state.apply`

@@ -17,9 +17,13 @@ concerns that sit on top of the engine-facing plugin lifecycle:
 
 It does *not* deal with engine-level processing or sandboxing; those are defined in:
 
-- `docs/specs/ipc/pulse/plugin-ui.md`
-- `docs/specs/ipc/signal/plugin.md`
-- `docs/specs/ipc/signal/engine.md`
+- `docs/specs/ipc/pulse/plugin-ui.md` (plugin UI window management)
+- `docs/specs/ipc/signal/plugin.md` (plugin lifecycle and sandboxing)
+- `docs/specs/ipc/signal/engine.md` (engine-level operations)
+
+For the architectural overview of the Plugin Library system, see:
+
+- `docs/architecture/33-plugin-library-and-browser.md`
 
 The Plugin Library domain is **Aura ↔ Pulse only**. Pulse may in turn call
 existing Pulse → Signal plugin lifecycle commands when insert/replace actions

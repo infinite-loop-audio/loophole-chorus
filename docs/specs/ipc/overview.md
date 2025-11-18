@@ -27,12 +27,20 @@ details are defined in the corresponding specification files within
   - [4.2 Pulse to Signal](#42-pulse-to-signal)
   - [4.3 Signal to Pulse](#43-signal-to-pulse)
   - [4.4 Signal to Aura](#44-signal-to-aura)
-- [5. Parameter Gestures and Streaming](#5-parameter-gestures-and-streaming)
-  - [5.1 Begin and End Messages](#51-begin-and-end-messages)
-  - [5.2 High-Rate Parameter Streaming](#52-high-rate-parameter-streaming)
-  - [5.3 Model Commitment](#53-model-commitment)
-- [6. Early-Stage Implementation Notes](#6-early-stage-implementation-notes)
-- [7. Future Process Separation](#7-future-process-separation)
+- [5. Pulse IPC Domains](#5-pulse-ipc-domains)
+  - [5.1 Core Project Domains](#51-core-project-domains)
+  - [5.2 Media and Recording](#52-media-and-recording)
+  - [5.3 Plugin Management](#53-plugin-management)
+  - [5.4 Engine and Diagnostics](#54-engine-and-diagnostics)
+  - [5.5 System and Metadata](#55-system-and-metadata)
+- [6. Processing Cohorts and Anticipative Rendering](#6-processing-cohorts-and-anticipative-rendering)
+- [7. Parameter Gestures and Streaming](#7-parameter-gestures-and-streaming)
+  - [7.1 Begin and End Messages](#71-begin-and-end-messages)
+  - [7.2 High-Rate Parameter Streaming](#72-high-rate-parameter-streaming)
+  - [7.3 Model Commitment](#73-model-commitment)
+- [8. Early-Stage Implementation Notes](#8-early-stage-implementation-notes)
+- [9. Hardware Domains](#9-hardware-domains)
+- [10. Future Process Separation](#10-future-process-separation)
 
 ---
 
@@ -189,7 +197,63 @@ Aura uses this data for visual display.
 
 ---
 
-## 5. Processing Cohorts and Anticipative Rendering
+## 5. Pulse IPC Domains
+
+Pulse IPC is organised into domain-specific namespaces, each covering a distinct
+area of functionality. Key domains include:
+
+### 5.1 Core Project Domains
+
+- **`project`** — Project lifecycle (open, save, new, close)
+- **`transport`** — Playback control and position
+- **`timebase`** — Tempo, time signatures, and timing
+- **`track`** — Track creation, deletion, and organisation
+- **`clip`** — Audio and MIDI clip management
+- **`lane`** — Clip lane organisation within tracks
+- **`channel`** — Channel strip configuration and routing
+- **`node`** — DSP graph node management
+- **`parameter`** — Parameter values and automation
+- **`automation`** — Automation curve editing
+- **`routing`** — Signal routing and send/return paths
+
+### 5.2 Media and Recording
+
+- **`media`** — Media file management and metadata
+- **`recording`** — Audio and MIDI recording operations
+- **`rendering`** — Offline rendering and export
+
+### 5.3 Plugin Management
+
+- **`pluginLibrary`** — Plugin organisation, search, tagging, favourites, chains,
+  presets, and high-level insert/replace operations (Aura ↔ Pulse only)
+- **`pluginUi`** — Plugin UI window lifecycle and geometry management
+
+See `docs/specs/ipc/pulse/plugin-library.md` for the Plugin Library domain
+specification, and `docs/architecture/33-plugin-library-and-browser.md` for the
+architectural overview.
+
+### 5.4 Engine and Diagnostics
+
+- **`engine`** — Engine configuration and control
+- **`cohort`** — Processing cohort assignment
+- **`engineDiagnostics`** — Performance monitoring and diagnostics
+- **`metering`** — Audio level metering
+- **`gesture`** — Parameter gesture boundaries
+
+### 5.5 System and Metadata
+
+- **`session`** — Session management and background tasks
+- **`hardwareIo`** — Audio hardware device configuration
+- **`history`** — Undo/redo history
+- **`projectMetadata`** — Project-level metadata and markers
+- **`ui`** — General UI state and layout
+
+Each domain defines its own command and event types. Domain-specific
+specifications are located in `docs/specs/ipc/pulse/` and `docs/specs/ipc/signal/`.
+
+---
+
+## 6. Processing Cohorts and Anticipative Rendering
 
 IPC messages remain domain-based (Project, Transport, Track, etc.), but some
 domains now have **engine-level consequences** for processing cohorts and
@@ -211,7 +275,7 @@ commands, not the IPC message structure.
 
 ---
 
-## 6. Parameter Gestures and Streaming
+## 7. Parameter Gestures and Streaming
 
 Continuous parameter interaction requires a separation between:
 
@@ -220,7 +284,7 @@ Continuous parameter interaction requires a separation between:
 
 This is handled through **parameter gestures**.
 
-### 5.1 Begin and End Messages
+### 7.1 Begin and End Messages
 
 Aura notifies Pulse when a user begins a gesture:
 
@@ -232,7 +296,7 @@ parameter.gesture.end
 Pulse updates its internal state and may generate semantic engine commands (such
 as setting an initial or final value).
 
-### 5.2 High-Rate Parameter Streaming
+### 7.2 High-Rate Parameter Streaming
 
 During the gesture, Aura sends compact high-frequency parameter updates directly
 to Signal via the engine stream plane.
@@ -242,7 +306,7 @@ immediately to the relevant plugin parameter.
 
 Streams may be identified with a gesture or stream identifier provided by Pulse.
 
-### 5.3 Model Commitment
+### 7.3 Model Commitment
 
 When the gesture ends, Aura sends a `parameter.gesture.end` message to Pulse
 including the final parameter value and optional automation data.
@@ -252,7 +316,7 @@ ensure consistency.
 
 ---
 
-## 7. Early-Stage Implementation Notes
+## 8. Early-Stage Implementation Notes
 
 Initially, Pulse resides inside Aura. Despite this, Aura must treat Pulse as a
 logical external service:
@@ -268,11 +332,11 @@ adapters without changes to semantics.
 
 ---
 
-## 8. Hardware Domains
+## 9. Hardware Domains
 
 Loophole's IPC includes hardware-related domains for both audio I/O and control surfaces:
 
-### 8.1 Audio Hardware I/O
+### 9.1 Audio Hardware I/O
 
 The Hardware I/O domain (Pulse ↔ Signal, Pulse ↔ Aura) handles:
 
@@ -283,7 +347,7 @@ The Hardware I/O domain (Pulse ↔ Signal, Pulse ↔ Aura) handles:
 
 Signal owns low-level audio API interaction; Pulse maintains stable configuration models.
 
-### 8.2 Control Surfaces
+### 9.2 Control Surfaces
 
 Control surface communication follows a three-layer model:
 
@@ -297,7 +361,7 @@ Signal acts as a transport layer: it parses low-level inputs and forwards struct
 
 ---
 
-## 9. Future Process Separation
+## 10. Future Process Separation
 
 When Pulse becomes a standalone service:
 

@@ -26,6 +26,11 @@ It complements:
 - `25-control-surfaces-and-assistive-hardware.md`
 - Composer architecture (`05-composer.md`)
 - Pulse/Signal IPC in `node.md`, `processor.md`, `hardware.md`
+- `33-plugin-library-and-browser.md` (user-facing plugin organisation and search)
+
+User-facing plugin organisation, search, tagging, and browser-driven insertion
+workflows are described in `33-plugin-library-and-browser.md`. This document
+focuses on the engine-facing plugin lifecycle and sandboxing.
 
 Plugins in Loophole are treated as first-class modular units, each running in an
 isolated, crash-safe sandbox with stable identity and robust parameter mapping.

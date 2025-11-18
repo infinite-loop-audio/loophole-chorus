@@ -60,6 +60,12 @@ console model, see
 Aura manipulates Nodes at the level of the user's timeline/mixer editing intent;
 Pulse owns the authoritative DSP graph and enforces constraints.
 
+**Note**: Node creation for plugin nodes is often initiated via the **Plugin
+Library domain** (`pluginLibrary.insertPlugin`), which then calls Node domain
+commands to modify the graph. The Plugin Library domain handles high-level
+browser-driven insertion workflows; this domain provides the low-level Node
+graph manipulation primitives.
+
 ---
 
 ## 2. Node Roles and Types
@@ -105,14 +111,20 @@ Each Node type defines:
 ### 3.1 Creation and Removal
 
 **`node.add`**  
-Add a Node to a Channel’s DSP graph.
+Add a Node to a Channel's DSP graph.
 
 Payload fields include:
 
 - `channelId`,
 - `nodeType`,
 - `index` (insertion point),
+- `context?: "start"|"end"|"replace"|"after"|"before"` (optional positioning hint),
 - Node-type-specific initial parameters or settings.
+
+The `context` parameter provides positioning hints for "smart insert" workflows
+initiated by the Plugin Library domain (e.g., `pluginLibrary.insertPlugin`).
+When provided, Pulse uses the context to determine the exact insertion point
+relative to existing nodes, potentially overriding or refining the `index` value.
 
 Pulse allocates a `nodeId` and inserts the Node.
 
