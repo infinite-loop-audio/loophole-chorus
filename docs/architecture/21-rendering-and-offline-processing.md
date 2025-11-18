@@ -98,7 +98,11 @@ Signal is a stateless execution engine:
 - renders sample-domain blocks  
 - returns rendered buffers  
 
-Signal **never** reads from disk directly; Pulse provides all media buffers.
+Signal **does not autonomously discover or manage media on disk**.  
+Pulse owns the media index and lifecycle, and provides Signal with explicit
+media descriptors (including file paths, formats and policies). Signal may
+stream or memory-map media directly from disk based on those descriptors, but
+it never accesses files outside Pulse's control.
 
 ---
 
