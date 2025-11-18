@@ -1,14 +1,16 @@
-# ADR 0002 — IPC Transport and Topology
+# Decision: IPC Transport and Topology
 
-## Status
-Accepted
-
-## Date
-2025-11-14
+- **ID:** 2025-11-16-ipc-transport-and-topology  
+- **Date:** 2025-11-16  
+- **Status:** accepted  
+- **Owner:** Infinite Loop Audio (Loophole core)  
+- **Related docs:**  
+  - `docs/specs/ipc/signal/engine.md`  
+  - `docs/architecture/01-overview.md`  
 
 ---
 
-# 1. Context
+## 1. Context
 
 Loophole is a multi-process system consisting initially of:
 
@@ -39,7 +41,7 @@ We need to choose:
 
 ---
 
-# 2. Problem Statement
+## 2. Problem Statement
 
 We require a transport that:
 
@@ -54,9 +56,89 @@ connect, and how this will extend when Pulse becomes a separate service.
 
 ---
 
-# 3. Decision
+## 3. Options
 
-## 3.1 Transport
+### 3.1 Unix Domain Sockets / Named Pipes
+
+**Description**
+
+Use platform-specific local IPC mechanisms: Unix domain sockets on macOS/Linux, named pipes on Windows.
+
+**Pros**
+
+- Slightly lower latency than TCP loopback
+- OS-native semantics
+- Potentially better performance on some platforms
+
+**Cons**
+
+- Divergent implementations per OS
+- Higher complexity early in the project
+- Requires platform-specific code paths
+- More difficult to test and debug across platforms
+
+**Conclusion**
+
+Rejected. The cross-platform complexity outweighs the performance benefits for initial implementation. A future decision can introduce optional platform-optimised transports if profiling shows it necessary.
+
+---
+
+### 3.2 WebSockets over Loopback
+
+**Description**
+
+Use WebSocket protocol over localhost for IPC communication.
+
+**Pros**
+
+- Easy to integrate with browser environments
+- Potential reuse for remote control scenarios
+- Well-established protocol
+
+**Cons**
+
+- Extra protocol layers (HTTP upgrade semantics)
+- HTTP semantics unnecessary for trusted local IPC
+- More overhead and complexity in C++
+- Optimised for browser/server scenarios rather than process-local IPC
+
+**Conclusion**
+
+Rejected. The additional protocol complexity is unnecessary for trusted local IPC, and a separate WebSocket-based control plane can be added later if needed.
+
+---
+
+### 3.3 TCP Loopback with Custom Framing
+
+**Description**
+
+Use TCP on the local loopback interface (`127.0.0.1` / `::1`) with a custom length-prefixed framing protocol, carrying structured messages serialised as JSON (initially).
+
+**Pros**
+
+- Portability: works uniformly across macOS, Windows and Linux
+- Simplicity: both C++ and Node/Electron have robust, well-tested TCP APIs
+- Performance: loopback TCP is sufficiently fast and low latency for DAW-style IPC
+- Isolation: binding explicitly to loopback prevents remote access by default
+- Future-proofing: can later be extended to remote control or multi-machine setups
+- Easy debugging using standard TCP tools
+- Natural mapping into JSON Schema and TypeScript interfaces
+
+**Cons**
+
+- TCP loopback is marginally slower than local domain sockets or named pipes
+- JSON introduces some encoding/decoding overhead and verbosity
+- Port allocation and conflict handling must be managed
+
+**Conclusion**
+
+Accepted. Provides the best balance of simplicity, portability, and performance for initial implementation.
+
+---
+
+## 4. Decision
+
+### 4.1 Transport
 
 Loophole will use:
 
@@ -71,7 +153,7 @@ Key points:
 - Message payloads are JSON to begin with, but the framing supports evolution to
   more efficient encodings later (e.g. MessagePack, protobuf, or custom binary).
 
-## 3.2 Topology
+### 4.2 Topology
 
 Initial topology:
 
@@ -91,9 +173,9 @@ When Pulse becomes a separate process:
   - connect to Signal via Aura (Aura as broker), or
   - expose its own TCP server on loopback for Aura to connect.
 
-This will be formalised in a later ADR once Pulse is extracted.
+This will be formalised in a later decision once Pulse is extracted.
 
-## 3.3 Channel Model
+### 4.3 Channel Model
 
 Initially:
 
@@ -106,14 +188,14 @@ Initially:
 This separation is implemented at the message level (e.g. `type` fields in the
 message envelope), not by multiple sockets.
 
-A future ADR may introduce multiple sockets or specialised telemetry channels if
+A future decision may introduce multiple sockets or specialised telemetry channels if
 profiling shows it to be beneficial.
 
 ---
 
-# 4. Rationale
+## 5. Rationale
 
-### 4.1 Why TCP loopback?
+### 5.1 Why TCP loopback?
 
 - **Portability**: Works uniformly across macOS, Windows and Linux.
 - **Simplicity**: Both C++ and Node/Electron have robust, well-tested TCP APIs.
@@ -122,15 +204,15 @@ profiling shows it to be beneficial.
 - **Future-proofing**: A TCP-based solution can later be extended to remote control
   or multi-machine setups if desired.
 
-### 4.2 Why not Unix domain sockets or named pipes?
+### 5.2 Why not Unix domain sockets or named pipes?
 
 - They provide performance benefits on some platforms, but:
   - Require different implementations per OS.
   - Complicate the initial implementation and testing matrix.
 - TCP loopback offers a single cross-platform abstraction.
-- If necessary, a future ADR can introduce optional platform-optimised transports.
+- If necessary, a future decision can introduce optional platform-optimised transports.
 
-### 4.3 Why not WebSockets?
+### 5.3 Why not WebSockets?
 
 - WebSockets add HTTP and upgrade semantics that are unnecessary for a trusted,
   local-only engine connection.
@@ -139,7 +221,7 @@ profiling shows it to be beneficial.
 - A thin TCP protocol is simpler to debug and reason about for engine purposes,
   and a separate WebSocket-based control plane can be added later if needed.
 
-### 4.4 Why JSON payloads initially?
+### 5.4 Why JSON payloads initially?
 
 - JSON is easy to inspect and debug.
 - It integrates naturally with TypeScript (Aura, Pulse).
@@ -151,9 +233,9 @@ while preserving the same framing and topology.
 
 ---
 
-# 5. Consequences
+## 6. Consequences
 
-## 5.1 Positive
+### 6.1 Positive
 
 - Simple, cross-platform IPC implementation.
 - Clean separation between engine and UI at the process level.
@@ -161,54 +243,34 @@ while preserving the same framing and topology.
 - Natural mapping into JSON Schema and TypeScript interfaces in Chorus.
 - Clear path to more efficient encodings without changing transport.
 
-## 5.2 Negative
+### 6.2 Negative / Trade-offs
 
 - TCP loopback is marginally slower than local domain sockets or named pipes.
 - JSON introduces some encoding/decoding overhead and verbosity.
 - Port allocation and conflict handling must be managed (e.g. configurable port,
   retry strategy, or ephemeral port discovery).
-
-## 5.3 Neutral / Trade-offs
-
 - Exposing TCP on loopback rather than a more opaque OS-specific mechanism trades
   a slight security advantage for clarity and portability.
-- This ADR defers remote/network control decisions to a future ADR.
+- This decision defers remote/network control decisions to a future decision.
 
 ---
 
-# 6. Alternatives Considered
+## 7. Follow-Up Actions
 
-### Unix Domain Sockets / Named Pipes
-
-- Pros: Slightly lower latency, OS-native semantics.
-- Cons: Divergent implementations per OS; higher complexity early in the project.
-
-### WebSockets over Loopback
-
-- Pros: Easy to integrate with browser environments, potential reuse for remote
-  control.
-- Cons: Extra protocol layers; HTTP semantics unnecessary for trusted local IPC;
-  more overhead and complexity in C++.
-
-### Single-Process Architecture
-
-- Rejected in ADR 0001. Would violate isolation and real-time constraints that
-  motivated Loophole’s architecture.
+1. Define the exact framing format and message envelope shape in `docs/specs/ipc/`.
+2. Specify port configuration and conflict resolution strategy.
+3. Create JSON Schema definitions for all IPC message types.
+4. Implement TCP server in Signal (C++).
+5. Implement TCP client in Aura (TypeScript).
+6. Design reconnection and error handling semantics.
 
 ---
 
-# 7. Notes
+## 8. Notes
 
-- This ADR does not define the message schemas themselves; those will be
-  specified in `@chorus:/docs/specs/ipc/`.
+- This decision does not define the message schemas themselves; those will be
+  specified in `docs/specs/ipc/`.
 - The exact framing format, message envelope shape and port configuration will
   be defined in follow-up specifications.
 
 ---
-
-# 8. Decision
-
-Loophole will use a **TCP loopback connection** with a simple length-prefixed
-message framing protocol and JSON payloads as the default IPC mechanism between
-Aura and Signal (and any future local processes), with Signal acting as a local
-TCP server and Aura as the client.
