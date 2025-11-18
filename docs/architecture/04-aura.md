@@ -35,12 +35,16 @@ data-layer concerns.
   - [7.4 Parameter and Automation Views](#74-parameter-and-automation-views)
   - [7.5 Plugin Browser](#75-plugin-browser)
 - [8. Interaction with Composer](#8-interaction-with-composer)
-- [9. UI/UX Considerations](#9-uiux-considerations)
-  - [9.1 Deterministic Rendering](#91-deterministic-rendering)
-  - [9.2 Visual Virtualisation](#92-visual-virtualisation)
-  - [9.3 High-Frequency Updates](#93-high-frequency-updates)
-- [10. Extensibility](#10-extensibility)
-- [11. Future Extensions](#11-future-extensions)
+- [9. Control Surfaces and Hardware](#9-control-surfaces-and-hardware)
+  - [9.1 Context Signals](#91-context-signals)
+  - [9.2 Hardware Management UI](#92-hardware-management-ui)
+  - [9.3 Learn Mode](#93-learn-mode)
+- [10. UI/UX Considerations](#10-uiux-considerations)
+  - [10.1 Deterministic Rendering](#101-deterministic-rendering)
+  - [10.2 Visual Virtualisation](#102-visual-virtualisation)
+  - [10.3 High-Frequency Updates](#103-high-frequency-updates)
+- [11. Extensibility](#11-extensibility)
+- [12. Future Extensions](#12-future-extensions)
 
 ---
 
@@ -282,16 +286,57 @@ Aura is a consumer of metadata, not a participant in metadata inference.
 
 ---
 
-## 9. UI/UX Considerations
+## 9. Control Surfaces and Hardware
 
-### 9.1 Deterministic Rendering
+Aura participates in the control-surfaces ecosystem by providing UI for hardware management and visualising mapping state.
+
+### 9.1 Context Signals
+
+Aura emits **context signals** to Pulse indicating:
+
+- which view is active (Arranger, Mixer, Launcher, Plugin UI, Clip Editor),
+- which track/clip/plugin is focused,
+- which mixer bank is in view.
+
+These context signals enable Pulse to switch mapping sets automatically, ensuring hardware controls adapt to the current view.
+
+### 9.2 Hardware Management UI
+
+Aura provides UIs for:
+
+- hardware overview and status (connected devices, capabilities),
+- "Learn" mode and mapping editing (creating and modifying mapping rules),
+- per-device mapping visualisation (showing what each control does),
+- feedback/diagnostic overlays ("Controller X mapped to Y").
+
+Aura does **not** perform mapping logic; it:
+- reflects Pulse's mapping decisions in the UI,
+- passes user edits (e.g. new mapping, delete mapping) back to Pulse as editing intents.
+
+### 9.3 Learn Mode
+
+When the user activates "Learn" mode:
+
+1. Aura enters a special UI state highlighting the target parameter/action,
+2. User moves a hardware control,
+3. Signal forwards the control event to Pulse,
+4. Pulse detects the active parameter/target in UI context and creates a MappingRule override,
+5. Aura updates the UI to show the new mapping.
+
+All mapping decisions remain in Pulse; Aura only provides the UI workflow.
+
+---
+
+## 10. UI/UX Considerations
+
+### 10.1 Deterministic Rendering
 
 Aura should render deterministically based on Pulse snapshots:
 
 - no hidden local state,
 - derived UI always consistent with the model.
 
-### 9.2 Visual Virtualisation
+### 10.2 Visual Virtualisation
 
 Aura must virtualise:
 
@@ -302,7 +347,7 @@ Aura must virtualise:
 
 This is essential for performance in large projects.
 
-### 9.3 High-Frequency Updates
+### 10.3 High-Frequency Updates
 
 Aura may receive large volumes of metering/analysis data.
 It must:
@@ -315,7 +360,7 @@ These updates do not affect project state.
 
 ---
 
-## 10. Extensibility
+## 11. Extensibility
 
 The architecture is designed for extensions such as:
 
@@ -329,7 +374,7 @@ Pulse remains the authority; Aura only displays new capabilities.
 
 ---
 
-## 11. Future Extensions
+## 12. Future Extensions
 
 - collaborative editing (multiple Aura clients),
 - spatial audio editors,

@@ -42,6 +42,7 @@ non-real-time state.
   - [8.2 Parameter and Automation Streams](#82-parameter-and-automation-streams)
   - [8.3 High-Rate Gesture Stream](#83-highrate-gesture-stream)
   - [8.4 Engine Graph Rebasing](#84-engine-graph-rebasing)
+  - [8.5 Hardware Control and Feedback](#85-hardware-control-and-feedback)
 - [9. Interaction with Aura](#9-interaction-with-aura)
   - [9.1 State Projection](#91-state-projection)
   - [9.2 Validation and Feedback](#92-validation-and-feedback)
@@ -51,7 +52,12 @@ non-real-time state.
   - [10.2 Draft/Autosave Storage](#102-draftautosave-storage)
   - [10.3 Deterministic Serialisation](#103-deterministic-serialisation)
 - [11. Processing Cohort Assignment and Engine Policies](#11-processing-cohort-assignment-and-engine-policies)
-- [12. Future Extensions](#12-future-extensions)
+- [12. Hardware & Control Surfaces](#12-hardware--control-surfaces)
+  - [12.1 HardwareDevice Registry](#121-hardwaredevice-registry)
+  - [12.2 Mapping Engine](#122-mapping-engine)
+  - [12.3 Feedback System](#123-feedback-system)
+  - [12.4 Persistence](#124-persistence)
+- [13. Future Extensions](#13-future-extensions)
 
 ---
 
@@ -302,6 +308,10 @@ Composer suggestions are advisory. Pulse always:
 
 Signal has zero awareness of Composer.
 
+### 7.5 Hardware Device Intelligence
+
+Pulse sends **device fingerprints** to Composer when hardware connects, and receives profiles and default mappings back from Composer. This integration enables plug-and-play control surface support with intelligent default mappings.
+
 ---
 
 ## 8. Interaction with Signal
@@ -341,6 +351,12 @@ Rebasing is:
 - infrequent,
 - atomic,
 - explicitly triggered by major edits.
+
+### 8.5 Hardware Control and Feedback
+
+Pulse receives structured **control messages** from Signal representing hardware inputs (MIDI, HID, OSC). Pulse evaluates mapping rules to produce control intents and sends **Feedback Intents** back to Signal for hardware output (LEDs, displays, meters).
+
+Pulse does not perform low-level I/O parsing; Signal handles device enumeration, message parsing, and output dispatch. Pulse owns the mapping logic and context-aware behaviour.
 
 ---
 
@@ -520,7 +536,65 @@ assignments before playback begins or during transitions.
 
 ---
 
-## 12. Future Extensions
+## 12. Hardware & Control Surfaces
+
+Pulse maintains a comprehensive hardware device registry and mapping engine for control surfaces and assistive hardware.
+
+### 12.1 HardwareDevice Registry
+
+Pulse maintains a **HardwareDevice registry** containing:
+
+- device descriptors (vendor, product, transport type),
+- capabilities (keys, pads, faders, encoders, grids, LEDs, displays, etc.),
+- profiles from Composer (default mappings and device intelligence),
+- user overrides (per-machine and per-project customisations).
+
+Devices are discovered by Signal and registered with Pulse via device descriptors. Pulse constructs capability fingerprints and queries Composer for known device profiles.
+
+### 12.2 Mapping Engine
+
+Pulse owns the **mapping engine** that translates hardware control inputs into project actions:
+
+- **MappingRules** define how hardware controls (pads, faders, encoders, buttons) map to:
+  - ParameterIds (track/channel/plugin parameters),
+  - ActionIds (transport, clip triggering, scene launching),
+  - Mixer channels (fader banks, send levels),
+  - Plugin parameters (context-aware parameter pages).
+
+- **Context-aware mapping**: mappings switch automatically based on active context:
+  - Arranger View,
+  - Mixer View,
+  - Launcher View,
+  - Plugin UI View,
+  - Clip Editor,
+  - Global Mode.
+
+- **Mapping evaluation**: Pulse evaluates mapping rules to produce:
+  - **Control Intents** (e.g. "change track 5 volume", "trigger clip", "tweak cutoff") forwarded to the engine or UI,
+  - **Feedback Intents** (LED colours, display updates, meter levels) forwarded to Signal for hardware output.
+
+### 12.3 Feedback System
+
+Pulse generates **Feedback Intents** to drive hardware visual feedback:
+
+- LED colours, on/off/blink states,
+- grid pad colours representing clips/scenes,
+- text/value updates to displays,
+- meter levels for controllers with level bars.
+
+These intents are sent to Signal, which translates them into appropriate MIDI/OSC/sysex/HID outputs.
+
+### 12.4 Persistence
+
+Pulse persists:
+
+- per-device profiles and overrides (machine-specific),
+- per-machine hardware configuration,
+- optional per-project mappings (when project-specific control layouts are desired).
+
+---
+
+## 13. Future Extensions
 
 Pulse is designed for long-term extensibility. Possible future additions include:
 

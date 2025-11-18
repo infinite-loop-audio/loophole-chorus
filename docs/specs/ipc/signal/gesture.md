@@ -37,16 +37,18 @@ The Signal Gesture domain:
 - decodes high-rate value packets and applies them to engine parameters in a
   real-time-safe way.
 - optionally emits low-rate snapshots back to Pulse to keep the model in sync.
+- participates in control surface gesture streams: control-surface inputs that are high-resolution or continuous can participate in gesture/value-stream sessions, allowing Pulse to distinguish between high-res gesture streams (e.g. knob sweeps, fader movements) and normal control events (e.g. simple button presses).
 
 ### 1.2 Non-Goals
 
 The Gesture domain does **not**:
 
-- decide when gestures start/stop (Pulse decides based on Aura input),
-- own parameter metadata (that’s the Parameter/Node/Plugin domains),
+- decide when gestures start/stop (Pulse decides based on Aura input or control surface events),
+- own parameter metadata (that's the Parameter/Node/Plugin domains),
 - replace normal parameter set/get commands:
   - it provides a *temporary fast path*,
-  - final parameter values are committed via Pulse’s model.
+  - final parameter values are committed via Pulse's model.
+- make mapping decisions for control surfaces (Pulse owns the mapping engine; Signal only transports gesture data).
 
 ---
 

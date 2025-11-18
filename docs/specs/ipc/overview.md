@@ -268,7 +268,36 @@ adapters without changes to semantics.
 
 ---
 
-## 8. Future Process Separation
+## 8. Hardware Domains
+
+Loophole's IPC includes hardware-related domains for both audio I/O and control surfaces:
+
+### 8.1 Audio Hardware I/O
+
+The Hardware I/O domain (Pulse ↔ Signal, Pulse ↔ Aura) handles:
+
+- audio device enumeration and selection,
+- sample rate and buffer size configuration,
+- channel mapping and routing,
+- latency reporting and clock source management.
+
+Signal owns low-level audio API interaction; Pulse maintains stable configuration models.
+
+### 8.2 Control Surfaces
+
+Control surface communication follows a three-layer model:
+
+- **Hardware discovery (Signal)**: Signal enumerates control surface devices (MIDI, HID, OSC) and emits device descriptors to Pulse.
+
+- **Mapping and context (Pulse)**: Pulse maintains mapping rules, evaluates control inputs into control intents, generates feedback intents, and manages context-aware behaviour.
+
+- **Device intelligence (Composer)**: Composer provides device profiles and default mapping recommendations based on device fingerprints from Pulse.
+
+Signal acts as a transport layer: it parses low-level inputs and forwards structured control messages to Pulse, and sends hardware outputs (LEDs, displays) as requested by Pulse. Pulse owns all mapping logic and context-aware behaviour.
+
+---
+
+## 9. Future Process Separation
 
 When Pulse becomes a standalone service:
 

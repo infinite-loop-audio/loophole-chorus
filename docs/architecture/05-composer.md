@@ -172,6 +172,28 @@ All collected anonymously and combined probabilistically.
 Composer does NOT need a full DSP profile; high-level capability knowledge is
 sufficient.
 
+### **Control Surface Device Intelligence**
+
+Composer maintains knowledge about control surfaces, MIDI controllers, and assistive hardware:
+
+- **Device fingerprints**: accepts HardwareDevice fingerprints from Pulse containing:
+  - vendor/product identifiers,
+  - ports and capabilities (keys, pads, faders, encoders, grids, LEDs, displays),
+  - sysex identity replies,
+  - HID descriptors (summarised).
+
+- **DeviceProfiles**: returns device intelligence including:
+  - device class (Keyboard, Pad Controller, MCU Surface, Grid Surface, etc.),
+  - default mapping recommendations for different contexts (Arranger, Mixer, Launcher, Plugin UI),
+  - known protocol quirks (e.g., special DAW modes, sysex handshakes),
+  - LED and display protocols, if known.
+
+- **Statistics and learning**: collects anonymised statistics about:
+  - how users override mappings,
+  - which mappings are most common,
+  - which modes are used most for a given device,
+  - uses these statistics to **improve default mappings** over time.
+
 ---
 
 ## 4. Core Data Model
@@ -372,6 +394,20 @@ Composer only assists in making good guesses:
 This separation of concerns ensures that machine-specific hardware
 configurations remain local, whilst Composer provides community-driven
 recommendations to improve the initial mapping experience.
+
+### 5.5 Interaction with Control Surfaces
+
+Composer provides device intelligence for control surfaces and MIDI controllers:
+
+- **Device fingerprinting**: Pulse sends HardwareDevice fingerprints to Composer when hardware connects. Composer responds with DeviceProfiles containing default mappings and device class information.
+
+- **Default mappings**: Composer provides recommended mapping rules for different contexts (Arranger, Mixer, Launcher, Plugin UI), enabling plug-and-play behaviour.
+
+- **Learning and improvement**: Composer collects anonymised statistics about user mapping overrides and uses this data to improve default mappings over time.
+
+- **Protocol knowledge**: Composer maintains information about device-specific protocols (sysex handshakes, LED protocols, display protocols) to assist Pulse in generating appropriate Feedback Intents.
+
+Pulse remains authoritative for all mapping decisions; Composer provides advisory intelligence to enhance the user experience.
 
 ---
 

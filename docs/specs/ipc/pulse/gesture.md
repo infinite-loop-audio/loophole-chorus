@@ -51,13 +51,15 @@ values. They allow Aura to:
 
 - send very rapid changes with minimal overhead,
 - override automation during active gestures (touch/latch/write),
-- feed the audio engine’s live cohort with realtime data,
+- feed the audio engine's live cohort with realtime data,
 - support hardware surfaces with sub-millisecond response.
 
 Pulse coordinates behaviour, but Signal is the primary realtime consumer.
 
 Gesture streams are **session-scoped** — they do not persist into project
 files and are re-established at runtime as needed.
+
+**Control Surface Integration:** Control-surface inputs that are high-resolution or continuous can participate in gesture/value-stream sessions. Pulse may distinguish between high-res *gesture streams* (e.g. knob sweeps, fader movements) and normal control events (e.g. simple button presses). Hardware controllers discovered by Signal can generate gesture streams when mapped to parameters via Pulse's mapping engine.
 
 ---
 

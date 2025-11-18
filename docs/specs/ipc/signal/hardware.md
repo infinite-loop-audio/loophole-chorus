@@ -34,6 +34,7 @@ The Hardware domain:
 
 - enumerates audio input and output devices and their capabilities,
 - enumerates MIDI input/output ports,
+- enumerates control surface devices (MIDI controllers, HID devices, OSC controllers),
 - applies requested audio device selections and configurations:
   - chosen input device,
   - chosen output device,
@@ -43,19 +44,24 @@ The Hardware domain:
   - device add/remove events,
   - device lost / recovered,
   - errors and warnings (dropouts, configuration issues),
-- exposes external sync endpoints (MIDI clock, MTC, LTC, Link-style, etc.).
+- exposes external sync endpoints (MIDI clock, MTC, LTC, Link-style, etc.),
+- parses low-level control surface inputs (MIDI messages, HID reports, OSC packets),
+- forwards structured control messages to Pulse with timestamps,
+- sends hardware outputs (MIDI/OSC/sysex/HID) as requested by Pulse for LEDs/displays.
 
 ### 1.2 Non-Goals
 
 The Hardware domain does **not**:
 
 - manage audio routing within the DAW (that is handled by `signal.graph` and
-  Pulse’s routing model),
-- decide which device “role” (e.g. “Control Room”, “Headphones”) a hardware
+  Pulse's routing model),
+- decide which device "role" (e.g. "Control Room", "Headphones") a hardware
   channel corresponds to,
 - manage recording destinations (that belongs to recording/media specs),
 - implement per-plugin audio/MIDI routing (that belongs to the graph / node
-  model).
+  model),
+- make mapping decisions for control surfaces (Signal never decides what fader 1 does; it just reports "fader 1 moved"),
+- interpret control surface semantics (Signal acts as a transport for FeedbackIntents from Pulse).
 
 ---
 
@@ -626,3 +632,36 @@ Future additions may include:
 The Hardware domain should remain a **thin, OS-facing layer**, with all
 long-lived mapping, aliasing, and role assignment logic residing in Pulse and
 Composer.
+
+### 8.1 Control Surface Device Discovery
+
+Signal discovers control surface devices (MIDI controllers, HID devices, OSC controllers) and emits device descriptors to Pulse. These descriptors include:
+
+- device identifier,
+- vendor/product information,
+- port information,
+- protocol type (MIDI/HID/OSC/etc.),
+- capability hints (keys, pads, faders, encoders, grids, LEDs, displays).
+
+Pulse uses these descriptors to construct device fingerprints and query Composer for device profiles.
+
+### 8.2 Control Input Events
+
+Signal forwards control surface inputs to Pulse as structured control messages. These messages include:
+
+- `deviceId` (identifying which device),
+- `controlId` (or structured description of the control),
+- `value` (the control value),
+- `timestamp` (for accurate timing).
+
+Signal does not interpret what the control does; it only reports the raw control event.
+
+### 8.3 Feedback Intent Delivery
+
+Signal receives **Feedback Intents** from Pulse and translates them into hardware outputs:
+
+- LED state/colour commands (MIDI CC, RGB pad commands, sysex),
+- display text/value updates (MCU/HUI display messages, OSC),
+- meter levels (if the controller supports level bars).
+
+Signal's role is purely delivery; Pulse decides all feedback behaviour.

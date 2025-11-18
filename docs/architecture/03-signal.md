@@ -44,7 +44,13 @@ or structural inference. Pulse constructs the engine graph; Signal executes it.
 - [9. Interaction with Composer](#9-interaction-with-composer)
 - [10. Persistence](#10-persistence)
 - [11. Processing Cohorts and Anticipative Rendering](#11-processing-cohorts-and-anticipative-rendering)
-- [12. Future Extensions](#12-future-extensions)
+- [12. Hardware I/O and Control Surfaces](#12-hardware-io-and-control-surfaces)
+  - [12.1 Device Enumeration and Discovery](#121-device-enumeration-and-discovery)
+  - [12.2 Input Parsing and Forwarding](#122-input-parsing-and-forwarding)
+  - [12.3 Output Dispatch](#123-output-dispatch)
+  - [12.4 Transport Control Path](#124-transport-control-path)
+  - [12.5 Gesture and Value-Stream Participation](#125-gesture-and-value-stream-participation)
+- [13. Future Extensions](#13-future-extensions)
 
 ---
 
@@ -88,7 +94,10 @@ Signal handles:
 6. **Engine graph execution**
    Running the node graph constructed by Pulse.
 
-Signal does *not* manage routing rules, editing operations, or metadata resolution.
+7. **Hardware device enumeration and I/O**
+   Discovering and managing MIDI, HID, OSC, and audio devices; parsing low-level inputs; sending hardware outputs.
+
+Signal does *not* manage routing rules, editing operations, metadata resolution, or mapping decisions for control surfaces.
 
 ---
 
@@ -434,7 +443,60 @@ synchronisation between threads to avoid race conditions or timing drift.
 
 ---
 
-## 12. Future Extensions
+## 12. Hardware I/O and Control Surfaces
+
+Signal is responsible for low-level hardware I/O operations and acts as a transport layer for control surface communication.
+
+### 12.1 Device Enumeration and Discovery
+
+Signal handles:
+
+- enumerating hardware devices (MIDI, HID, OSC, HUI/MCU),
+- detecting plug/unplug events,
+- classifying endpoints and protocols,
+- providing device descriptors to Pulse with timestamps.
+
+Signal never makes mapping decisions; it only reports what hardware is available and what events occur.
+
+### 12.2 Input Parsing and Forwarding
+
+Signal:
+
+- parses low-level inputs (MIDI messages, HID reports, OSC packets),
+- forwards structured **control messages** to Pulse with timestamps,
+- handles protocol-specific parsing (sysex identity queries, HID descriptor decoding),
+- ensures low-latency forwarding (within a few milliseconds).
+
+Signal **does not** interpret what a control does; it only reports "fader 1 moved" or "pad 5 pressed", not "change track 5 volume" or "trigger clip".
+
+### 12.3 Output Dispatch
+
+Signal receives **Feedback Intents** from Pulse and translates them into hardware outputs:
+
+- MIDI CC messages for LEDs,
+- RGB pad commands,
+- sysex display updates,
+- MCU/HUI display messages,
+- HID output reports.
+
+Signal's job is purely delivery; Pulse decides all behaviour and visual feedback.
+
+### 12.4 Transport Control Path
+
+Transport controls (play/stop/record) may have a low-latency path via Signal, but Pulse still owns the authoritative transport state. Signal forwards transport button presses to Pulse and executes transport commands from Pulse.
+
+### 12.5 Gesture and Value-Stream Participation
+
+Signal participates in gesture/value-stream IPC for high-resolution controller movements. Control-surface inputs that are high-resolution or continuous can participate in gesture/value-stream sessions, allowing Pulse to distinguish between:
+
+- high-res *gesture streams* (e.g. knob sweeps, fader movements),
+- normal control events (e.g. simple button presses).
+
+Signal forwards gesture stream data to Pulse and applies gesture-driven parameter updates in the audio engine.
+
+---
+
+## 13. Future Extensions
 
 Signal may evolve to support:
 

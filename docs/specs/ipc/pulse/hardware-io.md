@@ -62,6 +62,8 @@ Key responsibilities:
 Hardware configuration is largely **machine-specific**; project files may store
 preferences, but cannot assume the same hardware exists on other machines.
 
+**Note:** This domain covers audio I/O devices (interfaces, sound cards). Control surfaces, MIDI controllers, and assistive hardware are handled through separate IPC mechanisms. Pulse maintains mapping rules for control surfaces and sends Feedback Intents to Signal for hardware output (LEDs, displays), but the low-level device enumeration and I/O transport is handled by Signal's hardware domain.
+
 ---
 
 ## 2. Hardware I/O Concepts
@@ -682,3 +684,5 @@ The Hardware I/O domain interacts with:
 The Hardware I/O domain provides a stable abstraction over platform-specific
 audio APIs, allowing Aura and Pulse to reason about devices without embedding
 OS-level details.
+
+**Relationship to Control Surfaces:** Control surfaces and MIDI controllers are handled separately. Pulse maintains mapping rules and context-aware behaviour for control surfaces, while Signal handles low-level device enumeration and I/O transport. Pulse sends mapping decisions and Feedback Intents to Signal, not Aura. Mapping rules operate on abstract controls (pads/faders/buttons/etc.) and ParameterIds/ActionIds.
