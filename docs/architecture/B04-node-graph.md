@@ -117,7 +117,7 @@ inputs in the node model.
 
 ### 3.3 StackNode
 
-**StackNode** — a container node that holds multiple plugin variants (e.g. different EQs or compressors) while exposing a single logical processor in the graph. Only one variant is active at a time. StackNodes enable A/B testing of plugins, support lossless fallback behaviour for missing plugins, and preserve all plugin automation/state across variants. See [StackNode Architecture](./12-stack-nodes.md) for full details.
+**StackNode** — a container node that holds multiple plugin variants (e.g. different EQs or compressors) while exposing a single logical processor in the graph. Only one variant is active at a time. StackNodes enable A/B testing of plugins, support lossless fallback behaviour for missing plugins, and preserve all plugin automation/state across variants. See [StackNode Architecture](./B05-stack-nodes.md) for full details.
 
 ### ARA-Capable Plugin Nodes
 
@@ -203,7 +203,7 @@ Each node has a stable ID within its Channel:
 
 Node IDs are used in:
 
-- parameter IDs (see [@chorus:/docs/architecture/10-parameters.md](10-parameters.md)),
+- parameter IDs (see [@chorus:/docs/architecture/B03-parameters.md](B03-parameters.md)),
 - automation targets,
 - routing specifications,
 - graph update messages to Signal.
@@ -378,7 +378,7 @@ Pulse:
 
 Signal is instructed to tear down the old node and load the new one.
 
-When a plugin is missing during project load, Pulse wraps it in a **StackNode** to preserve the original plugin state and allow seamless fallback. See [StackNode Architecture](./12-stack-nodes.md) for details on how StackNodes handle missing plugins and enable non-destructive plugin replacement.
+When a plugin is missing during project load, Pulse wraps it in a **StackNode** to preserve the original plugin state and allow seamless fallback. See [StackNode Architecture](./B05-stack-nodes.md) for details on how StackNodes handle missing plugins and enable non-destructive plugin replacement.
 
 ### 7.3 Removal
 

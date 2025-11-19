@@ -54,7 +54,7 @@ Channel. A Channel is responsible for:
 - integrating with cohort assignment decisions.
 
 The overall mixing model and console semantics are described in
-[Mixer & Channel Architecture](../../architecture/12-mixer-and-channel-architecture.md).
+[Mixer & Channel Architecture](../../architecture/B06-mixer-and-channel-architecture.md).
 
 Track-owned Channels are created when Tracks request them (Track domain's
 `track.setChannelEnabled` command).  
@@ -279,7 +279,7 @@ However, Channel changes may:
 - invalidate anticipative buffers,
 - trigger cohort reassignment via Pulse → Signal updates.
 
-Cohort behaviour is governed by the [Processing Cohorts](../architecture/06-processing-cohorts-and-anticipative-rendering.md) architecture document.
+Cohort behaviour is governed by the [Processing Cohorts](../architecture/A06-processing-cohorts-and-anticipative-rendering.md) architecture document.
 
 Aura never interacts with cohorts directly; Channel events may trigger UI cues
 (e.g. meter resets, graph rebuild animations).

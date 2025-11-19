@@ -64,7 +64,7 @@ tasks/
 ### Key Directories
 
 - Architecture Overview
-  [`@chorus:/docs/architecture/01-overview.md`](docs/architecture/01-overview.md)
+  [`@chorus:/docs/architecture/A01-overview.md`](docs/architecture/A01-overview.md)
 
 - Specifications (IPC, Data Models, Schemas)
   [`@chorus:/docs/specs/`](docs/specs/)
@@ -104,7 +104,7 @@ https://github.com/infinite-loop-audio/loophole-aura
 Recommended reading order:
 
 1. Architecture Overview
-   [`@chorus:/docs/architecture/01-overview.md`](docs/architecture/01-overview.md)
+   [`@chorus:/docs/architecture/A01-overview.md`](docs/architecture/A01-overview.md)
 
 2. Specifications (IPC, structures, schema contracts)
    [`@chorus:/docs/specs/`](docs/specs/)

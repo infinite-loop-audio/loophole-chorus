@@ -394,10 +394,10 @@ belong to incompatible display configurations or different machines.
 
 This architecture interacts with:
 
-- [Aura Architecture](./04-aura.md) – Aura responsibilities and UI scope,
-- [Signal Architecture](./02-signal.md) – Signal’s management of plugin
+- [Aura Architecture](./A04-aura.md) – Aura responsibilities and UI scope,
+- [Signal Architecture](./A03-signal.md) – Signal's management of plugin
   instances and native UI,
-- [Tracks, Lanes & Roles](./08-tracks-lanes-and-roles.md) – identity
+- [Tracks, Lanes & Roles](./B01-tracks-lanes-and-roles.md) – identity
   of Nodes and context for plugin UIs,
 - Plugin UI IPC spec (`docs/specs/ipc/pulse/plugin-ui.md`) – command and
   event definitions for managing plugin window lifecycle and geometry.

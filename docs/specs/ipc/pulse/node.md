@@ -55,7 +55,7 @@ Nodes form the processing chain of a Channel. Each Node:
 
 For an architectural overview of how Nodes participate in the mixer and
 console model, see
-[Mixer & Channel Architecture](../../architecture/12-mixer-and-channel-architecture.md).
+[Mixer & Channel Architecture](../../architecture/B06-mixer-and-channel-architecture.md).
 
 Aura manipulates Nodes at the level of the user's timeline/mixer editing intent;
 Pulse owns the authoritative DSP graph and enforces constraints.
@@ -79,7 +79,7 @@ Pulse recognises a core set of Node types:
   Wraps a plugin instance (VST, CLAP, AU) for instrument or effect processing.
 
 - **StackNode**  
-  A container node that holds multiple plugin variants while exposing a single logical processor in the graph. Only one variant is active at a time. StackNodes enable A/B testing, preserve automation across variants, and provide lossless fallback for missing plugins. See [StackNode Architecture](../../architecture/12-stack-nodes.md) for full details.
+  A container node that holds multiple plugin variants while exposing a single logical processor in the graph. Only one variant is active at a time. StackNodes enable A/B testing, preserve automation across variants, and provide lossless fallback for missing plugins. See [StackNode Architecture](../../architecture/B05-stack-nodes.md) for full details.
 
 - **FaderNode / PanNode**  
   Built-in Nodes that implement the Channel fader and pan. FaderNode and PanNode are explicitly realised within the Channel's Node graph, enabling pre/post-fader send behaviour to be defined purely by Node graph topology.
@@ -378,5 +378,5 @@ Node changes may, however:
 - invalidate anticipative render buffers,
 - trigger graph rebuilds in Signal.
 
-Cohort semantics are described in the [Processing Cohorts](../architecture/06-processing-cohorts-and-anticipative-rendering.md) architecture document.  
+Cohort semantics are described in the [Processing Cohorts](../architecture/A06-processing-cohorts-and-anticipative-rendering.md) architecture document.  
 Pulse makes all cohort decisions; Aura simply reflects state visually where needed.

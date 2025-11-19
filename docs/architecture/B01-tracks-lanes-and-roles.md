@@ -125,7 +125,7 @@ Default behaviour:
 
 LaneStreamNodes appear in the node graph and MAY be reordered relative to other nodes, subject to constraints defined by Pulse.
 
-Signal executes LaneStreamNodes as part of its processing graph. For details on LaneStreamNode as a Node type, see [Node Graph Architecture](./11-node-graph.md).
+Signal executes LaneStreamNodes as part of its processing graph. For details on LaneStreamNode as a Node type, see [Node Graph Architecture](./B04-node-graph.md).
 
 ---
 

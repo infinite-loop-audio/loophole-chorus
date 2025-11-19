@@ -63,8 +63,8 @@ Pulse:
 
 For conceptual background see:
 
-- [Parameters Architecture](../../architecture/10-parameters.md)  
-- [Mixer & Channel Architecture](../../architecture/12-mixer-and-channel-architecture.md)
+- [Parameters Architecture](../../architecture/B03-parameters.md)  
+- [Mixer & Channel Architecture](../../architecture/B06-mixer-and-channel-architecture.md)
 
 ---
 
@@ -448,7 +448,7 @@ Pulse is responsible for:
 - invalidating anticipative renders when automation changes affect the
   anticipative window.
 
-Cohort details and anticipative behaviour are described in the [Processing Cohorts](../architecture/06-processing-cohorts-and-anticipative-rendering.md) architecture document. The Automation domain provides the time-based
+Cohort details and anticipative behaviour are described in the [Processing Cohorts](../architecture/A06-processing-cohorts-and-anticipative-rendering.md) architecture document. The Automation domain provides the time-based
 control data; cohort logic determines when and how those changes affect
 rendered audio.
 
