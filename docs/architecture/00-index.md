@@ -63,6 +63,7 @@ Human-readable titles are provided for clarity, but filenames govern structure.
 - **e04-video-architecture.md** - Video Architecture  
 - **e05-plugin-lifecycle-and-sandboxing.md** — Plugin Lifecycle & Sandboxing Architecture  
 - **e06-plugin-library-and-browser.md** — Plugin Library & Browser Architecture
+- **e07-ai-assisted-audio-tools.md** — AI-Assisted Audio Tools Architecture
 
 ---
 
