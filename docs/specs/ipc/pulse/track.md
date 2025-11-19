@@ -286,7 +286,7 @@ however, trigger changes that lead to Signal graph rebuilds or cohort updates
 (e.g. changing Track flags or processing policy).
 
 Processing policy hints directly feed into the processing cohort system:
-[@chorus:/docs/architecture/A06-processing-cohorts-and-anticipative-rendering.md](../../architecture/A06-processing-cohorts-and-anticipative-rendering.md)
+[@chorus:/docs/architecture/a06-processing-cohorts-and-anticipative-rendering.md](../../architecture/a06-processing-cohorts-and-anticipative-rendering.md)
 
 Pulse determines whether Track-level changes require:
 

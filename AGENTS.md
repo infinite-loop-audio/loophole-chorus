@@ -43,7 +43,7 @@ When in doubt, follow the patterns already present in:
 - Use **relative links** for documents within this repository, for example:
 
   ```markdown
-  See [Pulse Architecture](../architecture/A02-pulse.md).
+  See [Pulse Architecture](../architecture/a02-pulse.md).
   ```
 
 - Keep relative paths correct if you move or rename files, and update any

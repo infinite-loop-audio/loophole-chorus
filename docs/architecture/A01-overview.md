@@ -215,7 +215,7 @@ The **anticipative cohort** processes deterministic nodes ahead of the playhead 
 
 Pulse owns all cohort assignment decisions, determining membership based on liveness requirements, deterministic behaviour metadata (from Composer), routing dependencies, and user preferences. Signal executes these assignments using dual schedulers: a real-time engine for the live cohort and an anticipative engine running on worker threads. The system dynamically switches nodes between cohorts as the user interacts (e.g., opening plugin UIs, arming tracks), with graph-driven dependency closure ensuring correct propagation of liveness requirements.
 
-For complete details, see [@chorus:/docs/architecture/A06-processing-cohorts-and-anticipative-rendering.md](A06-processing-cohorts-and-anticipative-rendering.md).
+For complete details, see [@chorus:/docs/architecture/a06-processing-cohorts-and-anticipative-rendering.md](a06-processing-cohorts-and-anticipative-rendering.md).
 
 ---
 
