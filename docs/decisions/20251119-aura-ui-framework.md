@@ -280,6 +280,10 @@ No CSS utility framework (such as Tailwind) will be used in Aura’s core UI.
 - AI-assisted development remains viable and productive while avoiding the
   worst complexity traps of React + hooks.
 - DAW-scale UI performance benefits from Svelte’s compiled output.
+- Aura will use **Bits UI** as the headless behavioural primitive layer
+  (e.g. menus, dialogs, popovers, tabs, tooltips), providing accessible,
+  predictable interaction patterns while leaving all visual styling to
+  Aura’s own design system and CSS variable themes.
 
 ### Negative / Trade-Offs
 
