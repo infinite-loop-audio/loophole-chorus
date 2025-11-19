@@ -65,14 +65,20 @@ Human-readable titles are provided for clarity, but filenames govern structure.
 
 ---
 
-## Future Systems (F01–F06)
+## Engine Extensions (F01–F01)
 
-- **f01-collaboration-architecture.md** - Collaboration Architecture
-- **f02-composer-extended-intelligence.md** - Composer Extended Intelligence Architecture
-- **f03-future-workflow-prototypes.md** - Future Workflow Prototypes Architecture
-- **f04-experimental-systems.md** - Experimental Systems Architecture
-- **f05-ai-assisted-audio-tools.md** — AI-Assisted Audio Tools Architecture  
-- **f06-sampler-and-virtual-instruments.md** — Sampler & Virtual Instruments Architecture
+- **f01-distributed-signal-cluster.md** — Distributed Signal Cluster Architecture *(planned)*
+
+---
+
+## Future Systems (X01–X06)
+
+- **x01-collaboration-architecture.md** - Collaboration Architecture
+- **x02-composer-extended-intelligence.md** - Composer Extended Intelligence Architecture
+- **x03-future-workflow-prototypes.md** - Future Workflow Prototypes Architecture
+- **x04-experimental-systems.md** - Experimental Systems Architecture
+- **x05-ai-assisted-audio-tools.md** — AI-Assisted Audio Tools Architecture  
+- **x06-sampler-and-virtual-instruments.md** — Sampler & Virtual Instruments Architecture
 
 ---
 
