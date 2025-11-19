@@ -154,7 +154,7 @@ Every normal IPC message is a single JSON object with this shape:
   - Not intended for sample-accurate audio timing (that is a domain concern).
 
 - `origin` (string)  
-  Source of the message. One of:
+  Origin of the message. One of:
 
   - `"aura"`, `"pulse"`, `"signal"`, `"composer"`.
 
