@@ -51,6 +51,7 @@ Human-readable titles are provided for clarity, but filenames govern structure.
 - **d03-control-surfaces-and-assistive-hardware.md** Control Surfaces & Assistive Hardware Architecture  
 - **d04-ux-and-visual-layer.md** - UX & Visual Layer Architecture  
 - **d05-performance-and-live-recording.md** — Performance & Live Recording Architecture
+- **d06-ai-assisted-creative-tools.md** - AI-Assisted Creative Tools Architecture
 
 ---
 
