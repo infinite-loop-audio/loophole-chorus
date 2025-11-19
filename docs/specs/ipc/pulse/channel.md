@@ -71,7 +71,7 @@ Each Channel has:
 - an optional `trackId` for Track-owned Channels,
 - an optional `role` field for special Channels such as `"track"`, `"master"`,
   `"bus"`, `"fx"`, `"send"`, `"return"`, `"monitor"`, `"io"`, etc.,
-- an ordered list of `nodeId`s representing the Node graph,
+- an ordered list of `nodeId`s representing the Node graph (which may include StackNodes; StackNodes are semantically equivalent to a single processor in the chain),
 - input configuration (Track input sources, audio/MIDI),
 - output configuration (main output, bus routing, sidechain sends),
 - fader state (gain, pan, balance),

@@ -78,6 +78,9 @@ Pulse recognises a core set of Node types:
 - **PluginNode**  
   Wraps a plugin instance (VST, CLAP, AU) for instrument or effect processing.
 
+- **StackNode**  
+  A container node that holds multiple plugin variants while exposing a single logical processor in the graph. Only one variant is active at a time. StackNodes enable A/B testing, preserve automation across variants, and provide lossless fallback for missing plugins. See [StackNode Architecture](../../architecture/12-stack-nodes.md) for full details.
+
 - **FaderNode / PanNode**  
   Built-in Nodes that implement the Channel fader and pan. FaderNode and PanNode are explicitly realised within the Channel's Node graph, enabling pre/post-fader send behaviour to be defined purely by Node graph topology.
 
@@ -163,6 +166,49 @@ Disabling removes the Node from the active DSP graph but retains its state.
 **`node.setBypass`**  
 Enable or disable bypass mode for capable Node types.
 
+### 3.3.1 StackNode Variant Management
+
+The following commands apply specifically to StackNodes:
+
+**`node.setActiveVariant`**  
+Set the active variant for a StackNode.
+
+Payload fields:
+- `nodeId` (must be a StackNode),
+- `activeIndex` (zero-based index of the variant to activate).
+
+Pulse updates the active variant and emits `node.activeVariantChanged`. From the perspective of routing and channel topology, the StackNode continues to be treated as a single processor.
+
+**`node.addVariant`**  
+Add a new plugin variant to a StackNode.
+
+Payload fields:
+- `nodeId` (must be a StackNode),
+- `pluginIdentifier` (optional; if omitted, creates an empty slot),
+- `pluginFormat` (VST3/CLAP/AU, required if `pluginIdentifier` is provided),
+- `insertIndex` (optional; defaults to end of variants list).
+
+Pulse adds the variant and emits `node.variantAdded`.
+
+**`node.removeVariant`**  
+Remove a variant from a StackNode.
+
+Payload fields:
+- `nodeId` (must be a StackNode),
+- `variantIndex` (zero-based index of the variant to remove).
+
+Pulse removes the variant. If the removed variant was active, Pulse activates variant 0 (or the next available variant). Pulse emits `node.variantRemoved`.
+
+**`node.markVariantMissing`**  
+Mark a variant as missing/unavailable (typically used during project load when a plugin cannot be instantiated).
+
+Payload fields:
+- `nodeId` (must be a StackNode),
+- `variantIndex`,
+- `missing: bool`.
+
+Pulse marks the variant and emits `node.variantMetadataChanged`. Missing variants preserve their original plugin identifier and state but are not instantiated in Signal.
+
 ---
 
 ### 3.4 Parameter and Capability Updates
@@ -233,6 +279,43 @@ Pulse may re-route or disable the Node as required.
 **`node.metadataChanged`**  
 For presentation updates (e.g. name, icon).
 
+### 4.4 StackNode Variant Events
+
+The following events are emitted for StackNode variant operations:
+
+**`node.activeVariantChanged`**  
+The active variant of a StackNode has changed.
+
+Payload includes:
+- `nodeId`,
+- `activeIndex` (new active variant index).
+
+**`node.variantAdded`**  
+A new variant has been added to a StackNode.
+
+Payload includes:
+- `nodeId`,
+- `variantIndex`,
+- `variantId`,
+- `pluginIdentifier` (if provided),
+- `pluginFormat` (if provided),
+- `missing: bool`.
+
+**`node.variantRemoved`**  
+A variant has been removed from a StackNode.
+
+Payload includes:
+- `nodeId`,
+- `variantIndex` (the removed variant's index).
+
+**`node.variantMetadataChanged`**  
+Variant metadata has been updated (e.g. missing status, plugin identifier).
+
+Payload includes:
+- `nodeId`,
+- `variantIndex`,
+- updated metadata fields.
+
 ---
 
 ## 5. Snapshot Semantics
@@ -248,6 +331,16 @@ project snapshot and include:
 - enabled/bypass state,
 - parameter schema summary (full parameter values appear in Parameter domain snapshots),
 - Node-type-specific static properties.
+
+For StackNodes, snapshot entries additionally include:
+- `variants: []` array, each with:
+  - `variantId`,
+  - `pluginIdentifier`,
+  - `pluginFormat`,
+  - `stateBlob` (serialised plugin state),
+  - `missing: bool`,
+  - optional metadata,
+- `activeIndex` (zero-based index of the active variant).
 
 ### Snapshot Application
 

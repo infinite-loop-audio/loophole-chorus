@@ -126,6 +126,7 @@ A **Node** is a processing element in a Channel, e.g.:
 - SendNode / ReturnNode,
 - InstrumentNode / SamplerNode,
 - PluginNode,
+- StackNode (container for multiple plugin variants; appears as a single processor in the graph),
 - MeterNode / AnalyserNode.
 
 The type system and semantics are defined in Pulse’s Node architecture and IPC
@@ -145,6 +146,18 @@ docs; the Graph domain sees Nodes as:
 ```
 
 Signal is responsible for mapping `kind` → actual engine implementation.
+
+#### 4.2.1 StackNode Variant Lifecycle
+
+StackNodes contain multiple plugin variants, but only one variant is active at a time:
+
+- **Active variant**: receives audio and MIDI, processes in the graph like any other processor node.
+- **Inactive variants**: may be loaded in memory (during user interaction) but do not receive audio/MIDI.
+- **Variant lifecycle**: Signal typically instantiates only the active variant. When Pulse instructs Signal to enter "Engaged" mode (e.g. during A/B switching), Signal may load all variants concurrently. Variants are unloaded when no longer required (Cooling/Idle states).
+- **Switching**: variant activation must be glitch-minimised, ideally performed on buffer boundaries to maintain deterministic processing and correct latency reporting.
+- **Missing variants**: variants with `missing: true` are not instantiated; Signal creates placeholders only.
+
+From the graph perspective, a StackNode appears as a **single node** in the processing chain, regardless of how many variants it contains or which variant is active.
 
 ### 4.3 Cohorts
 

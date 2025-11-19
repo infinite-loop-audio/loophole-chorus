@@ -445,11 +445,13 @@ User replaces a synth with a different synth.
 
 Pulse queries Composer:
 
-- “What are `filter.cutoff`, `filter.resonance`, `amp.attack` equivalents for this new plugin?”
+- "What are `filter.cutoff`, `filter.resonance`, `amp.attack` equivalents for this new plugin?"
 
 Composer returns candidate parameters with confidence levels.
 
 Pulse remaps automation appropriately.
+
+Composer can also be used to **suggest StackNode variants** for missing plugins, based on known mappings and community usage statistics. When a plugin is missing during project load, Pulse may query Composer for recommended alternatives to populate as additional variants in a StackNode, enabling seamless fallback behaviour.
 
 ### 6.4 Plugin Organisation and Browsing
 

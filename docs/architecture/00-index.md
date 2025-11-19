@@ -24,6 +24,7 @@ Human-readable titles are provided for clarity, but filenames govern structure.
 - **09-clips.md** — Clips Architecture  
 - **10-parameters.md** — Parameters Architecture  
 - **11-node-graph.md** — Node Graph Architecture  
+- **12-stack-nodes.md** — StackNode Architecture  
 - **12-mixer-and-channel-architecture.md** — Mixer & Channel Architecture  
 - **13-media-architecture.md** — Media Architecture  
 - **14-channel-routing-and-send-return.md** — Channel Routing & Send/Return Architecture  

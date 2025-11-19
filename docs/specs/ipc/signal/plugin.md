@@ -92,6 +92,17 @@ A **Plugin Instance** is a specific live instance of a plugin type:
 - Instances are referenced by Nodes via `pluginInstanceId` in the Graph domain.
 - Multiple instances can share the same `pluginId`.
 
+### 2.3 StackNode Variants
+
+StackNodes (defined in the Graph domain) contain multiple plugin variants. From the Plugin domain perspective:
+
+- Each variant within a StackNode may have its own `pluginInstanceId` (if the variant is instantiated).
+- Signal typically instantiates only the **active variant** under normal conditions.
+- When Pulse instructs Signal to enter "Engaged" mode (e.g. during A/B switching or when the StackNode UI is open), Signal may load all variants concurrently.
+- Signal must support loading and unloading individual variants on request from Pulse.
+- Variants with `missing: true` are not instantiated; Signal creates placeholders only and does not attempt plugin loading.
+- StackNode variant switching must maintain deterministic processing and must not break latency reporting for the node (switching should occur on buffer boundaries).
+
 ---
 
 ## 3. Message Flow Overview
@@ -100,10 +111,9 @@ Typical flows:
 
 1. At startup or on demand, Pulse calls `plugin.listAvailable` or
    `plugin.rescan` to discover plugins.
-2. When a Node of kind `PluginNode` is created in Pulse:
-   - Pulse calls `plugin.createInstance`,
-   - gets back a `pluginInstanceId`,
-   - puts that ID into the Node’s config, then applies it via `signal.graph`.
+2. When a Node of kind `PluginNode` or `StackNode` is created in Pulse:
+   - For PluginNodes: Pulse calls `plugin.createInstance`, gets back a `pluginInstanceId`, puts that ID into the Node's config, then applies it via `signal.graph`.
+   - For StackNodes: Pulse creates plugin instances for each variant (typically only the active variant initially), associates `pluginInstanceId`s with variant indices, and applies the StackNode via `signal.graph` with variant metadata.
 3. When saving/loading projects:
    - Pulse fetches plugin state blobs via `plugin.getState`,
    - stores them in the project model,

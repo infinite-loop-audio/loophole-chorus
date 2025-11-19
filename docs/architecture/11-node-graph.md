@@ -115,6 +115,10 @@ Audio effect nodes:
 Effects may also expose sidechain inputs; those are represented as additional
 inputs in the node model.
 
+### 3.3 StackNode
+
+**StackNode** — a container node that holds multiple plugin variants (e.g. different EQs or compressors) while exposing a single logical processor in the graph. Only one variant is active at a time. StackNodes enable A/B testing of plugins, support lossless fallback behaviour for missing plugins, and preserve all plugin automation/state across variants. See [StackNode Architecture](./12-stack-nodes.md) for full details.
+
 ### ARA-Capable Plugin Nodes
 
 A PluginNode may declare `supportsAra = true`, indicating it can host
@@ -140,7 +144,7 @@ ARA groups as either:
 This behaviour is implementation-specific and not part of the Pulse
 contract.
 
-### 3.3 LaneStreamNode
+### 3.4 LaneStreamNode
 
 LaneStreamNode(s) (often shortened to 'LaneStream') are special-purpose nodes that:
 
@@ -156,7 +160,7 @@ LaneStreamNodes are first-class nodes:
 - they can be reordered (subject to constraints defined by Pulse),
 - they can be inspected in Aura like any other node.
 
-### 3.4 Utility and Analysis Nodes
+### 3.5 Utility and Analysis Nodes
 
 Utility nodes include:
 
@@ -174,7 +178,7 @@ Analysis nodes include:
 These nodes may be native to Signal or plugin-based. In both cases they
 obey the same node contract.
 
-### 3.5 Device/IO Nodes
+### 3.6 Device/IO Nodes
 
 Device/IO nodes represent:
 
@@ -373,6 +377,8 @@ Pulse:
 - updates the Channel graph accordingly.
 
 Signal is instructed to tear down the old node and load the new one.
+
+When a plugin is missing during project load, Pulse wraps it in a **StackNode** to preserve the original plugin state and allow seamless fallback. See [StackNode Architecture](./12-stack-nodes.md) for details on how StackNodes handle missing plugins and enable non-destructive plugin replacement.
 
 ### 7.3 Removal
 
