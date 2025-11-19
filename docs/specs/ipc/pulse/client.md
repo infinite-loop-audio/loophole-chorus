@@ -67,16 +67,14 @@ harnesses) that want to control Pulse without a full UI.
 
 The Client domain uses the following identifiers:
 
-- `clientId` — stable identifier assigned by Pulse for the **client program**  
-  (e.g. `"aura:desktop"`). This may be reused across sessions.
+- `clientId` — stable logical identity for the **client program**  
+  (e.g. `"aura"`, `"loophole-cli"`). This is provided by the client in registration and echoed back by Pulse. Pulse may use `clientId` for operations such as determining managed status (`isManaged`). This value may be reused across sessions.
 - `sessionId` — unique identifier for a **connection/session**  
-  (e.g. `"session:8f2c9d..."`).
-- `instanceId` — identifier provided by Aura describing the specific UI
-  instance (e.g. `"aura:macbook-pro-2025"`). This is **optional** and purely
-  advisory.
+  (e.g. `"session:8f2c9d..."`). Pulse is authoritative for this value.
+- `instanceId` — unique identifier provided by the client describing the specific running instance  
+  (e.g. a UUID generated per client process). This is **optional** and purely advisory. Helps clients recognise "same Pulse instance" or track their own instances. Not required for Pulse to operate.
 
-Pulse is authoritative for `clientId` and `sessionId`. Aura may suggest an
-existing `clientId` if reconnecting, but Pulse chooses the final values.
+Pulse echoes back `clientId` and `instanceId` in responses to confirm the effective identity for the session.
 
 ---
 
@@ -99,8 +97,8 @@ Payload:
 {
   "clientName": "Loophole Aura",
   "clientVersion": "0.1.0-dev",
-  "proposedClientId": "aura:desktop",
-  "instanceId": "aura:studio-mac",
+  "clientId": "aura",
+  "instanceId": "550e8400-e29b-41d4-a716-446655440000",
   "capabilities": {
     "supportsRichSnapshots": true,
     "supportsPartialSnapshots": true,
@@ -110,12 +108,18 @@ Payload:
 }
 ```
 
+Fields:
+
+- `clientId` (string) — stable logical identity for the client (e.g. `"aura"`, `"loophole-cli"`). Pulse may use this to determine managed status if it was launched with a matching `--client-id`.
+- `instanceId` (string | null, optional) — unique identifier for this running instance of the client (e.g. a UUID). Helps clients recognise "same Pulse instance" or track their own instances. Not required for Pulse to operate.
+
 Behaviour:
 
-- Pulse assigns or confirms a `clientId`.
+- Pulse accepts the provided `clientId` and echoes it back in responses.
 - Pulse creates a new `sessionId` bound to the underlying connection.
 - Pulse records advertised capabilities.
-- On success, Pulse responds and emits `client.registered`.
+- Pulse determines `isManaged` based on whether the client's `clientId` matches the `--client-id` it was launched with.
+- On success, Pulse emits `client.welcome` and `client.registered` events.
 
 #### `client.unregister`
 
@@ -125,7 +129,7 @@ Payload:
 
 ```json
 {
-  "clientId": "aura:desktop",
+  "clientId": "aura",
   "sessionId": "session:8f2c9d..."
 }
 ```
@@ -150,7 +154,7 @@ Payload:
 
 ```json
 {
-  "clientId": "aura:desktop",
+  "clientId": "aura",
   "sessionId": "session:8f2c9d...",
   "seq": 42
 }
@@ -176,7 +180,7 @@ Payload:
 
 ```json
 {
-  "clientId": "aura:desktop",
+  "clientId": "aura",
   "sessionId": "session:8f2c9d...",
   "subscriptions": [
     {
@@ -210,7 +214,7 @@ Payload:
 
 ```json
 {
-  "clientId": "aura:desktop",
+  "clientId": "aura",
   "sessionId": "session:8f2c9d...",
   "domains": ["metering", "diagnostics"]
 }
@@ -231,7 +235,7 @@ Payload:
 
 ```json
 {
-  "clientId": "aura:desktop",
+  "clientId": "aura",
   "sessionId": "session:8f2c9d...",
   "capabilities": {
     "supportsHighFrequencyEvents": false,
@@ -253,7 +257,7 @@ Payload:
 
 ```json
 {
-  "clientId": "aura:desktop",
+  "clientId": "aura",
   "sessionId": "session:8f2c9d...",
   "preferences": {
     "heartbeatIntervalMs": 5000,
@@ -279,25 +283,53 @@ Events use:
 
 ### 3.1 Session Lifecycle Events
 
-#### `client.registered`
+#### `client.welcome`
 
-Emitted after successful `client.register`.
+Emitted after successful `client.register`, providing initial session information including project state if available.
 
 Payload:
 
 ```json
 {
-  "clientId": "aura:desktop",
-  "sessionId": "session:8f2c9d...",
-  "assignedAt": "2025-11-19T12:00:00Z",
-  "capabilities": {
-    "supportsRichSnapshots": true,
-    "supportsPartialSnapshots": true,
-    "supportsHighFrequencyEvents": true,
-    "supportsScriptingPanels": false
-  }
+  "clientId": "aura",
+  "instanceId": "550e8400-e29b-41d4-a716-446655440000",
+  "isManaged": true,
+  "pulseVersion": "0.1.0",
+  "hasProject": false,
+  "projectId": null,
+  "projectName": null
 }
 ```
+
+Fields:
+
+- `clientId` (string) — echo of the effective client ID for this session (as provided in `client.register`).
+- `instanceId` (string | null) — echo of the instance ID for this session (if provided in `client.register`).
+- `isManaged` (boolean) — indicates whether this Pulse instance considers itself to be managed by this client. True when the client's `clientId` matches the `--client-id` Pulse was launched with; false otherwise.
+- `pulseVersion` (string) — version of the Pulse server.
+- `hasProject` (boolean) — whether a project is currently loaded.
+- `projectId` (string | null) — ID of the current project (if any).
+- `projectName` (string | null) — name of the current project (if any).
+
+#### `client.registered`
+
+Emitted after successful `client.register`, confirming registration and echoing back client identity.
+
+Payload:
+
+```json
+{
+  "clientId": "aura",
+  "instanceId": "550e8400-e29b-41d4-a716-446655440000",
+  "isManaged": true
+}
+```
+
+Fields:
+
+- `clientId` (string) — echo of the effective client ID for this session (as provided in `client.register`).
+- `instanceId` (string | null) — echo of the instance ID for this session (if provided in `client.register`).
+- `isManaged` (boolean) — indicates whether this Pulse instance considers itself to be managed by this client. True when the client's `clientId` matches the `--client-id` Pulse was launched with; false otherwise.
 
 #### `client.unregistered`
 
@@ -308,7 +340,7 @@ Payload:
 
 ```json
 {
-  "clientId": "aura:desktop",
+  "clientId": "aura",
   "sessionId": "session:8f2c9d...",
   "reason": "clientRequested"  // or "transportClosed", "timeout"
 }
@@ -323,7 +355,7 @@ Payload:
 
 ```json
 {
-  "clientId": "aura:desktop",
+  "clientId": "aura",
   "oldSessionId": "session:old...",
   "newSessionId": "session:new..."
 }
@@ -353,7 +385,7 @@ Payload:
 
 ```json
 {
-  "clientId": "aura:desktop",
+  "clientId": "aura",
   "sessionId": "session:8f2c9d...",
   "lastHeartbeatAt": "2025-11-19T12:05:00Z"
 }
@@ -371,7 +403,7 @@ Payload:
 
 ```json
 {
-  "clientId": "aura:desktop",
+  "clientId": "aura",
   "sessionId": "session:8f2c9d...",
   "subscriptions": [
     { "domain": "project" },
@@ -389,7 +421,7 @@ Payload:
 
 ```json
 {
-  "clientId": "aura:desktop",
+  "clientId": "aura",
   "sessionId": "session:8f2c9d...",
   "capabilities": {
     "supportsHighFrequencyEvents": false,
@@ -466,3 +498,6 @@ Examples:
   real-time Signal processing.
 - Debug/diagnostics features should use the **Debug** domain, not the Client
   domain.
+- Pulse's management relationship is described via `clientId` and `isManaged`.
+  The `instanceId` is auxiliary identity metadata and does not affect managed
+  status determination.
