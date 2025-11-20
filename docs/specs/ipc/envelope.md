@@ -148,8 +148,11 @@ Every normal IPC message is a single JSON object with this shape:
 
   - Fire-and-forget messages (most events) use `null`.
 
-- `ts` (string, ISO 8601)  
+- `ts` (string, ISO 8601, required)  
   Timestamp when the message was created by the origin.  
+  - **Required**: The sender must include a timestamp. This field must never be null or omitted.
+  - Must be a valid ISO 8601 timestamp string (e.g. `"2025-11-17T12:34:56.789Z"`).
+  - If an implementation auto-fills this field, it must still be an ISO 8601 string, never null.
   - Used for ordering diagnostics and drift detection.
   - Not intended for sample-accurate audio timing (that is a domain concern).
 
