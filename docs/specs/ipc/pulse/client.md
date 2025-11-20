@@ -3,7 +3,7 @@
 This document defines the **Client** domain of the Pulse IPC protocol.
 
 The Client domain is responsible for managing **Aura client sessions**:
-registration, capabilities, heartbeats, event subscriptions and orderly
+handshake, capabilities, heartbeats, event subscriptions and orderly
 shutdown. It ensures Pulse always has a clear view of who is connected, what
 they support, and how to shape event delivery.
 
@@ -36,11 +36,11 @@ describes the relationship between a connected UI client (Aura) and Pulse.
 
 The Client domain defines how an Aura instance:
 
-- announces itself to Pulse,
+- announces itself to Pulse via the `hello` handshake,
 - negotiates a **client/session identifier**,
 - declares capabilities and feature flags,
 - specifies which events it wants to receive,
-- proves it is still alive (heartbeats),
+- responds to heartbeat commands from Pulse,
 - and shuts down cleanly.
 
 In future, this same domain can be reused for **headless clients** (e.g. test
@@ -51,7 +51,7 @@ harnesses) that want to control Pulse without a full UI.
 - Provide a **clear handshake** between Aura and Pulse.
 - Allow Pulse to **differentiate clients** (e.g. multiple Auras, tools).
 - Support **event subscription** so Aura can control bandwidth and noise.
-- Provide **heartbeats** and **timeout detection** without mixing into project
+- Provide **heartbeat commands** (Pulse → Client) and **timeout detection** without mixing into project
   or engine domains.
 - Be safe to extend without breaking core IPC semantics.
 
@@ -68,11 +68,19 @@ harnesses) that want to control Pulse without a full UI.
 The Client domain uses the following identifiers:
 
 - `clientId` — stable logical identity for the **client program**  
-  (e.g. `"aura"`, `"loophole-cli"`). This is provided by the client in registration and echoed back by Pulse. Pulse may use `clientId` for operations such as determining managed status (`isManaged`). This value may be reused across sessions.
+  (e.g. `"aura"`, `"loophole-cli"`). This is provided by the client in the handshake and echoed back by Pulse. Pulse uses `clientId` to determine manager status (`isManager`). This value may be reused across sessions. A single UI client with a given `clientId` is designated as the "manager"; if a new instance with the same `clientId` connects, it may reclaim management.
+- `instanceId` — unique identifier provided by the client describing the specific running instance  
+  (e.g. a UUID generated per client process). This is **required** in the handshake and helps clients recognise "same Pulse instance" or track their own instances. Manager status is determined **only by `clientId`**, not `instanceId`.
 - `sessionId` — unique identifier for a **connection/session**  
   (e.g. `"session:8f2c9d..."`). Pulse is authoritative for this value.
-- `instanceId` — unique identifier provided by the client describing the specific running instance  
-  (e.g. a UUID generated per client process). This is **optional** and purely advisory. Helps clients recognise "same Pulse instance" or track their own instances. Not required for Pulse to operate.
+
+**Manager Semantics:**
+
+- A single UI client is designated "manager" based solely on matching `clientId`.
+- Manager status is determined **only by `clientId`**, not `instanceId`.
+- A newly started instance of the same `clientId` may **reclaim management**.
+- The `isManager` field in responses indicates whether the current client is the manager.
+- `managerClientId` and `managerInstanceId` in responses indicate which client (if any) is currently the manager.
 
 Pulse echoes back `clientId` and `instanceId` in responses to confirm the effective identity for the session.
 
@@ -90,6 +98,36 @@ All commands in this domain use:
 #### hello (command — domain: client)
 
 Announce a new client connection and request a session. This is the initial handshake command sent by Aura when establishing a connection to Pulse.
+
+**Command Envelope (Aura → Pulse):**
+
+```jsonc
+{
+  "v": 1,
+  "id": "hello-123",
+  "cid": null,
+  "ts": "2025-11-20T12:34:56.789Z",
+  "origin": "aura",
+  "target": "pulse",
+  "domain": "client",
+  "kind": "command",
+  "name": "hello",
+  "priority": "high",
+  "payload": {
+    "clientId": "aura",
+    "instanceId": "aura:550e8400-e29b-41d4-a716-446655440000",
+    "clientName": "Loophole Aura",
+    "clientVersion": "0.1.0-dev",
+    "capabilities": {
+      "supportsRichSnapshots": true,
+      "supportsPartialSnapshots": true,
+      "supportsHighFrequencyEvents": true,
+      "supportsScriptingPanels": false
+    }
+  },
+  "error": null
+}
+```
 
 **Request Payload:**
 
@@ -116,9 +154,40 @@ Announce a new client connection and request a session. This is the initial hand
 - `clientVersion` (string, optional) — version string of the client (e.g. `"0.1.0-dev"`).
 - `capabilities` (object, optional) — map of capability flags indicating what the client supports.
 
-**Response Payload:**
+**Response Envelope (Pulse → Aura):**
 
-Pulse responds with a response envelope (kind="response", cid set to the request id) containing:
+Pulse responds with a response envelope using:
+- `domain: "client"`
+- `kind: "response"`
+- `name: "hello"` (same name as the command, differentiated by `kind`)
+- `cid: <id of the hello command>`
+
+```jsonc
+{
+  "v": 1,
+  "id": "hello-response-456",
+  "cid": "hello-123",
+  "ts": "2025-11-20T12:34:56.790Z",
+  "origin": "pulse",
+  "target": "aura",
+  "domain": "client",
+  "kind": "response",
+  "name": "hello",
+  "priority": "high",
+  "payload": {
+    "clientId": "aura",
+    "instanceId": "aura:550e8400-e29b-41d4-a716-446655440000",
+    "serverVersion": "0.1.0-dev",
+    "protocolVersion": "1",
+    "isManager": true,
+    "managerClientId": "aura",
+    "managerInstanceId": "aura:550e8400-e29b-41d4-a716-446655440000"
+  },
+  "error": null
+}
+```
+
+**Response Payload:**
 
 ```json
 {
@@ -126,9 +195,9 @@ Pulse responds with a response envelope (kind="response", cid set to the request
   "instanceId": "aura:550e8400-e29b-41d4-a716-446655440000",
   "serverVersion": "0.1.0-dev",
   "protocolVersion": "1",
-  "configuredClientId": "aura",
-  "configuredInstanceId": "aura:550e8400-e29b-41d4-a716-446655440000",
-  "isManagedClient": true
+  "isManager": true,
+  "managerClientId": "aura",
+  "managerInstanceId": "aura:550e8400-e29b-41d4-a716-446655440000"
 }
 ```
 
@@ -138,23 +207,23 @@ Pulse responds with a response envelope (kind="response", cid set to the request
 - `instanceId` (string) — echo of the instance ID for this session (as provided in the request).
 - `serverVersion` (string) — version of the Pulse server.
 - `protocolVersion` (string) — IPC protocol version supported by Pulse.
-- `configuredClientId` (string | null) — the `--client-id` value Pulse was launched with (if any).
-- `configuredInstanceId` (string | null) — the `--client-instance-id` value Pulse was launched with (if any).
-- `isManagedClient` (boolean) — indicates whether this Pulse instance considers itself to be managed by this client. True when the client's `clientId` matches the `--client-id` Pulse was launched with; false otherwise.
+- `isManager` (boolean) — indicates whether this client is the manager. True when this client's `clientId` matches the manager's `clientId`; false otherwise. Manager status is determined **only by `clientId`**, not `instanceId`.
+- `managerClientId` (string | null) — the `clientId` of the current manager (if any).
+- `managerInstanceId` (string | null) — the `instanceId` of the current manager (if any).
 
 **Behaviour:**
 
 - Pulse accepts the provided `clientId` and `instanceId` and echoes them back in the response.
-- Pulse compares the client's `clientId` against the configured `--client-id` to determine `isManagedClient`.
+- Pulse determines manager status based solely on `clientId` matching. A newly started instance with the same `clientId` may reclaim management.
 - Pulse stores the client identity on the session state.
-- Pulse responds with a response envelope (kind="response") containing the handshake response payload.
-- Pulse may also emit `welcome` and `registered` events after the handshake (these are informational events, not the response to the command).
+- Pulse responds with a response envelope (kind="response", name="hello") containing the handshake response payload.
+- Pulse may also emit `welcome` and `connected` events after the handshake (these are informational events, not the response to the command).
 
 **Error Handling:**
 
 If the payload is invalid or malformed, Pulse sends an error envelope (kind="error") with an appropriate error code (e.g. `"invalidPayload"`, `"missingField"`).
 
-#### unregister (command — domain: client)
+#### goodbye (command — domain: client)
 
 Indicate that the client intends to close the session cleanly.
 
@@ -163,7 +232,7 @@ Payload:
 ```json
 {
   "clientId": "aura",
-  "sessionId": "session:8f2c9d..."
+  "instanceId": "aura:550e8400-e29b-41d4-a716-446655440000"
 }
 ```
 
@@ -171,37 +240,68 @@ Behaviour:
 
 - Pulse marks the session as closing.
 - Pulse stops sending events to this session.
-- Pulse may emit `unregistered` events.
+- Pulse responds with a response envelope (kind="response", name="goodbye").
+- Pulse may emit `disconnected` events.
 - The underlying transport may then be closed by either side.
 
-If the TCP/WebSocket connection is dropped without sending `unregister`, Pulse
+If the TCP/WebSocket connection is dropped without sending `goodbye`, Pulse
 will infer disconnection based on transport events and heartbeat timeouts.
 
 ### 2.2 Heartbeats
 
 #### heartbeat (command — domain: client)
 
-Periodic liveness signal from Aura.
+**Pulse sends** periodic heartbeat commands to all connected UI clients to verify liveness.
 
-Payload:
+**Command (Pulse → Client):**
 
-```json
+```jsonc
 {
-  "clientId": "aura",
-  "sessionId": "session:8f2c9d...",
-  "seq": 42
+  "v": 1,
+  "id": "heartbeat-123",
+  "cid": null,
+  "ts": "2025-11-20T12:34:56.789Z",
+  "origin": "pulse",
+  "target": "aura",
+  "domain": "client",
+  "kind": "command",
+  "name": "heartbeat",
+  "priority": "normal",
+  "payload": {}
 }
 ```
 
-Behaviour:
+**Response (Client → Pulse):**
 
-- Pulse updates last-seen time for the session.
-- Pulse may respond with a short `heartbeatAck` response **or** may only
-  emit events when there is a change (implementation detail).
-- Missing heartbeats beyond a configured timeout window result in a
-  `timedOut` event and eventual session teardown.
+All UI clients **must reply** with:
 
-Heartbeat cadence is negotiated by configuration (see `updatePreferences`).
+```jsonc
+{
+  "v": 1,
+  "id": "heartbeat-response-456",
+  "cid": "heartbeat-123",
+  "ts": "2025-11-20T12:34:56.790Z",
+  "origin": "aura",
+  "target": "pulse",
+  "domain": "client",
+  "kind": "response",
+  "name": "heartbeat",
+  "priority": "normal",
+  "payload": {}
+}
+```
+
+**Behaviour:**
+
+- Pulse sends heartbeat commands at regular intervals to all connected clients.
+- Clients **must** respond with a response envelope using the same `name: "heartbeat"` and setting `cid` to the command's `id`.
+- Pulse tracks missing responses and emits timeout events when responses are not received within the grace period.
+- Missing responses beyond a configured timeout window result in:
+  - `client.timedOut` event
+  - `client.disconnected` event
+  - eventual session teardown
+
+Heartbeat cadence is configured by Pulse and may be adjusted based on connection characteristics.
 
 ### 2.3 Event Subscriptions
 
@@ -318,7 +418,7 @@ Events use:
 
 #### welcome (event — domain: client)
 
-Emitted after successful client registration, providing initial session information including project state if available.
+Emitted after successful client handshake, providing initial session information including project state if available.
 
 Payload:
 
@@ -326,7 +426,7 @@ Payload:
 {
   "clientId": "aura",
   "instanceId": "550e8400-e29b-41d4-a716-446655440000",
-  "isManaged": true,
+  "isManager": true,
   "pulseVersion": "0.1.0",
   "hasProject": false,
   "projectId": null,
@@ -336,17 +436,17 @@ Payload:
 
 Fields:
 
-- `clientId` (string) — echo of the effective client ID for this session (as provided in the registration command).
-- `instanceId` (string | null) — echo of the instance ID for this session (if provided in the registration command).
-- `isManaged` (boolean) — indicates whether this Pulse instance considers itself to be managed by this client. True when the client's `clientId` matches the `--client-id` Pulse was launched with; false otherwise.
+- `clientId` (string) — echo of the effective client ID for this session (as provided in the hello command).
+- `instanceId` (string) — echo of the instance ID for this session (as provided in the hello command).
+- `isManager` (boolean) — indicates whether this client is the manager. True when this client's `clientId` matches the manager's `clientId`; false otherwise.
 - `pulseVersion` (string) — version of the Pulse server.
 - `hasProject` (boolean) — whether a project is currently loaded.
 - `projectId` (string | null) — ID of the current project (if any).
 - `projectName` (string | null) — name of the current project (if any).
 
-#### registered (event — domain: client)
+#### connected (event — domain: client)
 
-Emitted after successful client registration, confirming registration and echoing back client identity.
+Emitted after successful client handshake, confirming connection and echoing back client identity.
 
 Payload:
 
@@ -354,19 +454,19 @@ Payload:
 {
   "clientId": "aura",
   "instanceId": "550e8400-e29b-41d4-a716-446655440000",
-  "isManaged": true
+  "isManager": true
 }
 ```
 
 Fields:
 
-- `clientId` (string) — echo of the effective client ID for this session (as provided in the registration command).
-- `instanceId` (string | null) — echo of the instance ID for this session (if provided in the registration command).
-- `isManaged` (boolean) — indicates whether this Pulse instance considers itself to be managed by this client. True when the client's `clientId` matches the `--client-id` Pulse was launched with; false otherwise.
+- `clientId` (string) — echo of the effective client ID for this session (as provided in the hello command).
+- `instanceId` (string) — echo of the instance ID for this session (as provided in the hello command).
+- `isManager` (boolean) — indicates whether this client is the manager. True when this client's `clientId` matches the manager's `clientId`; false otherwise.
 
-#### unregistered (event — domain: client)
+#### disconnected (event — domain: client)
 
-Emitted when a session is closed cleanly (via `unregister` command) or after a
+Emitted when a session is closed cleanly (via `goodbye` command) or after a
 detected timeout / transport tear-down.
 
 Payload:
@@ -374,7 +474,7 @@ Payload:
 ```json
 {
   "clientId": "aura",
-  "sessionId": "session:8f2c9d...",
+  "instanceId": "550e8400-e29b-41d4-a716-446655440000",
   "reason": "clientRequested"  // or "transportClosed", "timeout"
 }
 ```
@@ -396,22 +496,9 @@ Payload:
 
 ### 3.2 Heartbeat and Timeout Events
 
-#### heartbeatRequired (event — domain: client)
-
-Advisory event letting Aura know it should start sending heartbeats.
-
-Payload:
-
-```json
-{
-  "intervalMs": 5000,
-  "graceMs": 15000
-}
-```
-
 #### timedOut (event — domain: client)
 
-Emitted when a client has not sent heartbeats within the configured grace
+Emitted when a client has not responded to heartbeat commands within the configured grace
 period.
 
 Payload:
@@ -419,12 +506,12 @@ Payload:
 ```json
 {
   "clientId": "aura",
-  "sessionId": "session:8f2c9d...",
+  "instanceId": "550e8400-e29b-41d4-a716-446655440000",
   "lastHeartbeatAt": "2025-11-19T12:05:00Z"
 }
 ```
 
-Pulse may follow this with `unregistered` events once cleanup is complete.
+Pulse may follow this with `disconnected` events once cleanup is complete.
 
 ### 3.3 Subscription and Capability Events
 
@@ -531,6 +618,10 @@ Examples:
   real-time Signal processing.
 - Debug/diagnostics features should use the **Debug** domain, not the Client
   domain.
-- Pulse's management relationship is described via `clientId` and `isManaged`.
-  The `instanceId` is auxiliary identity metadata and does not affect managed
-  status determination.
+- Pulse's management relationship is described via `clientId` and `isManager`.
+  Manager status is determined **only by `clientId`**, not `instanceId`.
+  The `instanceId` is auxiliary identity metadata used for tracking specific
+  client instances but does not affect manager status determination.
+- **Commands and responses share the exact same `name`**, differentiated only by `kind`.
+- **Events must never reuse a command name**. For example, `client.connected` is an event
+  and does not conflict with the `client.hello` command.

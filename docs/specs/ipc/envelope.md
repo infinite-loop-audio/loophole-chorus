@@ -202,6 +202,11 @@ Every normal IPC message is a single JSON object with this shape:
 
   The fully-qualified label is derived as `domain + "." + name` (e.g. `"project.open"`). This fully-qualified form is available to runtimes that want it for logging or debugging, but is not part of the envelope structure itself.
 
+  **Naming Conventions:**
+  - **Commands and responses share the exact same `name`**, differentiated only by `kind`. For example, a `client.hello` command (kind="command") and its response (kind="response") both use `name: "hello"`.
+  - **Events must never reuse a command name**. Events use distinct names such as `"connected"`, `"disconnected"`, `"stateChanged"` that do not conflict with command names.
+  - The `name` field must not contain domain separators (e.g. `"gesture.begin"` is invalid; use `domain: "gesture"`, `name: "begin"` instead).
+
   Each domain spec enumerates the valid names and their payloads.
 
 - `priority` (string)  
@@ -269,6 +274,7 @@ permitted. All cross-layer communication flows through Pulse.
 - `kind = "response"`  
   - A reply to a command.
   - Uses `cid = id` of the original command.
+  - **Shares the same `name` as the original command**, differentiated only by `kind`.
   - A `response` may itself be a success or an error, depending on domain design.
 
 - `kind = "event"`  
