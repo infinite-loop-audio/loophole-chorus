@@ -87,18 +87,18 @@ All commands in this domain use:
 
 ### 2.1 Session Lifecycle
 
-#### `client.register`
+#### `client.hello`
 
-Announce a new client connection and request a session.
+Announce a new client connection and request a session. This is the initial handshake command sent by Aura when establishing a connection to Pulse.
 
-Payload:
+**Request Payload:**
 
 ```json
 {
+  "clientId": "aura",
+  "instanceId": "aura:550e8400-e29b-41d4-a716-446655440000",
   "clientName": "Loophole Aura",
   "clientVersion": "0.1.0-dev",
-  "clientId": "aura",
-  "instanceId": "550e8400-e29b-41d4-a716-446655440000",
   "capabilities": {
     "supportsRichSnapshots": true,
     "supportsPartialSnapshots": true,
@@ -108,18 +108,51 @@ Payload:
 }
 ```
 
-Fields:
+**Request Fields:**
 
-- `clientId` (string) — stable logical identity for the client (e.g. `"aura"`, `"loophole-cli"`). Pulse may use this to determine managed status if it was launched with a matching `--client-id`.
-- `instanceId` (string | null, optional) — unique identifier for this running instance of the client (e.g. a UUID). Helps clients recognise "same Pulse instance" or track their own instances. Not required for Pulse to operate.
+- `clientId` (string, required) — stable logical identity for the client (e.g. `"aura"`, `"loophole-cli"`). Pulse uses this to determine managed status if it was launched with a matching `--client-id`.
+- `instanceId` (string, required) — unique identifier for this running instance of the client (e.g. `"aura:<uuid>"`). Helps clients recognise "same Pulse instance" or track their own instances.
+- `clientName` (string, optional) — human-readable name of the client (e.g. `"Loophole Aura"`).
+- `clientVersion` (string, optional) — version string of the client (e.g. `"0.1.0-dev"`).
+- `capabilities` (object, optional) — map of capability flags indicating what the client supports.
 
-Behaviour:
+**Response Payload:**
 
-- Pulse accepts the provided `clientId` and echoes it back in responses.
-- Pulse creates a new `sessionId` bound to the underlying connection.
-- Pulse records advertised capabilities.
-- Pulse determines `isManaged` based on whether the client's `clientId` matches the `--client-id` it was launched with.
-- On success, Pulse emits `client.welcome` and `client.registered` events.
+Pulse responds with a response envelope (kind="response", cid set to the request id) containing:
+
+```json
+{
+  "clientId": "aura",
+  "instanceId": "aura:550e8400-e29b-41d4-a716-446655440000",
+  "serverVersion": "0.1.0-dev",
+  "protocolVersion": "1",
+  "configuredClientId": "aura",
+  "configuredInstanceId": "aura:550e8400-e29b-41d4-a716-446655440000",
+  "isManagedClient": true
+}
+```
+
+**Response Fields:**
+
+- `clientId` (string) — echo of the effective client ID for this session (as provided in the request).
+- `instanceId` (string) — echo of the instance ID for this session (as provided in the request).
+- `serverVersion` (string) — version of the Pulse server.
+- `protocolVersion` (string) — IPC protocol version supported by Pulse.
+- `configuredClientId` (string | null) — the `--client-id` value Pulse was launched with (if any).
+- `configuredInstanceId` (string | null) — the `--client-instance-id` value Pulse was launched with (if any).
+- `isManagedClient` (boolean) — indicates whether this Pulse instance considers itself to be managed by this client. True when the client's `clientId` matches the `--client-id` Pulse was launched with; false otherwise.
+
+**Behaviour:**
+
+- Pulse accepts the provided `clientId` and `instanceId` and echoes them back in the response.
+- Pulse compares the client's `clientId` against the configured `--client-id` to determine `isManagedClient`.
+- Pulse stores the client identity on the session state.
+- Pulse responds with a response envelope (kind="response") containing the handshake response payload.
+- Pulse may also emit `client.welcome` and `client.registered` events after the handshake (these are informational events, not the response to the command).
+
+**Error Handling:**
+
+If the payload is invalid or malformed, Pulse sends an error envelope (kind="error") with an appropriate error code (e.g. `"invalidPayload"`, `"missingField"`).
 
 #### `client.unregister`
 
