@@ -197,7 +197,7 @@ Every normal IPC message is a single JSON object with this shape:
   - `"add"`, `"setValue"`,  
   - `"cohortAssigned"`.
 
-  The fully-qualified label is derived as `domain + "." + name` (e.g. `"project.open"`). This fully-qualified form is available to runtimes that want it, but is not part of the envelope structure itself.
+  The fully-qualified label is derived as `domain + "." + name` (e.g. `"project.open"`). This fully-qualified form is available to runtimes that want it for logging or debugging, but is not part of the envelope structure itself.
 
   Each domain spec enumerates the valid names and their payloads.
 
@@ -534,7 +534,7 @@ Pulse will respond by:
 
 - updating internal transport state,
 - sending appropriate commands to Signal,
-- emitting `transport.stateChanged` events and/or snapshots to Aura.
+- emitting `transportStateChanged` events and/or snapshots to Aura.
 
 ### 10.2 Pulse → Signal: Cohort Graph Update
 

@@ -160,7 +160,8 @@ parameter's semantics.
 
 ### 3.1 Stream Lifecycle
 
-**`gesture.createStream`**  
+#### createStream (command — domain: gesture)
+
 Request creation of a gesture stream.
 
 Fields:
@@ -177,7 +178,8 @@ Pulse then emits a negotiation event for establishing the data-plane channel.
 
 ---
 
-**`gesture.destroyStream`**  
+#### destroyStream (command — domain: gesture)
+
 Destroy the stream.
 
 Fields:
@@ -191,7 +193,8 @@ channel, and emits relevant events.
 
 ### 3.2 Binding
 
-**`gesture.bindParameter`**  
+#### bindParameter (command — domain: gesture)
+
 Attach a gesture stream to one or more parameters.
 
 Fields:
@@ -200,14 +203,16 @@ Fields:
 - `parameterId`,
 - optional scaling options.
 
-**`gesture.unbindParameter`**  
+#### unbindParameter (command — domain: gesture)
+
 Detach a stream from its targets.
 
 ---
 
 ### 3.3 Data-Plane Negotiation
 
-**`gesture.negotiateDataChannel`**  
+#### negotiateDataChannel (command — domain: gesture)
+
 Optional explicit negotiation call. Establishes or renegotiates the
 data-plane transport.
 
@@ -220,7 +225,7 @@ Fields:
 Pulse responds with configuration details or a rejection if unsupported.
 
 In most cases, negotiation will be initiated *by Pulse* after
-`gesture.createStream`, but the IPC contract supports Aura-driven negotiation
+`createStream`, but the IPC contract supports Aura-driven negotiation
 where required.
 
 ---
@@ -234,13 +239,15 @@ Pulse needs clean gesture boundaries to:
 - perform cohort transitions,
 - apply parameter smoothing or handover logic.
 
-**`gesture.beginGesture`**  
+#### beginGesture (command — domain: gesture)
+
 Fields:
 
 - `gestureStreamId`,
 - optional gesture-type metadata (mouse/touch/knob/etc.).
 
-**`gesture.endGesture`**  
+#### endGesture (command — domain: gesture)
+
 Fields:
 
 - `gestureStreamId`,
@@ -258,17 +265,19 @@ Pulse uses these boundaries to:
 
 ### 4.1 Lifecycle Events
 
-**`gesture.streamCreated`**  
+#### streamCreated (event — domain: gesture)
+
 Stream acknowledged and ready for negotiation.
 
-**`gesture.streamDestroyed`**
+#### streamDestroyed (event — domain: gesture)
 
 ---
 
 ### 4.2 Binding Events
 
-**`gesture.parameterBound`**  
-**`gesture.parameterUnbound`**
+#### parameterBound (event — domain: gesture)
+
+#### parameterUnbound (event — domain: gesture)
 
 Pulse alerts Aura when bindings change so UI surfaces and hardware mappings can
 stay in sync.
@@ -277,7 +286,8 @@ stay in sync.
 
 ### 4.3 Data-Plane Negotiation Events
 
-**`gesture.dataChannelReady`**  
+#### dataChannelReady (event — domain: gesture)
+
 Indicates Pulse and Signal have agreed on a data-plane transport.
 
 Fields include:
@@ -286,7 +296,7 @@ Fields include:
 - protocol,
 - any required authentication tokens.
 
-**`gesture.dataChannelFailed`**  
+#### dataChannelFailed (event — domain: gesture)  
 Indicates that the data-plane channel cannot be established.
 
 Aura may choose to fall back to Pulse-mediated updates.

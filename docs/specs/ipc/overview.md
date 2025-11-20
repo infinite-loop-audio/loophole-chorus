@@ -289,8 +289,8 @@ This is handled through **parameter gestures**.
 Aura notifies Pulse when a user begins a gesture:
 
 ```
-domain: "parameter", name: "gesture.begin"
-domain: "parameter", name: "gesture.end"
+domain: "parameter", name: "beginGesture"
+domain: "parameter", name: "endGesture"
 ```
 
 Pulse updates its internal state and may generate semantic engine commands (such
@@ -308,7 +308,7 @@ Streams may be identified with a gesture or stream identifier provided by Pulse.
 
 ### 7.3 Model Commitment
 
-When the gesture ends, Aura sends a message with `domain: "parameter"`, `name: "gesture.end"` to Pulse
+When the gesture ends, Aura sends a message with `domain: "parameter"`, `name: "endGesture"` to Pulse
 including the final parameter value and optional automation data.
 
 Pulse updates the project model and issues any necessary engine commands to

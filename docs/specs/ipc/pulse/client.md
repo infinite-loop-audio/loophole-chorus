@@ -87,7 +87,7 @@ All commands in this domain use:
 
 ### 2.1 Session Lifecycle
 
-#### `client.hello`
+#### hello (command — domain: client)
 
 Announce a new client connection and request a session. This is the initial handshake command sent by Aura when establishing a connection to Pulse.
 
@@ -148,13 +148,13 @@ Pulse responds with a response envelope (kind="response", cid set to the request
 - Pulse compares the client's `clientId` against the configured `--client-id` to determine `isManagedClient`.
 - Pulse stores the client identity on the session state.
 - Pulse responds with a response envelope (kind="response") containing the handshake response payload.
-- Pulse may also emit `client.welcome` and `client.registered` events after the handshake (these are informational events, not the response to the command).
+- Pulse may also emit `welcome` and `registered` events after the handshake (these are informational events, not the response to the command).
 
 **Error Handling:**
 
 If the payload is invalid or malformed, Pulse sends an error envelope (kind="error") with an appropriate error code (e.g. `"invalidPayload"`, `"missingField"`).
 
-#### `client.unregister`
+#### unregister (command — domain: client)
 
 Indicate that the client intends to close the session cleanly.
 
@@ -171,15 +171,15 @@ Behaviour:
 
 - Pulse marks the session as closing.
 - Pulse stops sending events to this session.
-- Pulse may emit `client.unregistered`.
+- Pulse may emit `unregistered` events.
 - The underlying transport may then be closed by either side.
 
-If the TCP/WebSocket connection is dropped without `client.unregister`, Pulse
+If the TCP/WebSocket connection is dropped without sending `unregister`, Pulse
 will infer disconnection based on transport events and heartbeat timeouts.
 
 ### 2.2 Heartbeats
 
-#### `client.heartbeat`
+#### heartbeat (command — domain: client)
 
 Periodic liveness signal from Aura.
 
@@ -196,16 +196,16 @@ Payload:
 Behaviour:
 
 - Pulse updates last-seen time for the session.
-- Pulse may respond with a short `client.heartbeatAck` response **or** may only
+- Pulse may respond with a short `heartbeatAck` response **or** may only
   emit events when there is a change (implementation detail).
 - Missing heartbeats beyond a configured timeout window result in a
-  `client.timedOut` event and eventual session teardown.
+  `timedOut` event and eventual session teardown.
 
-Heartbeat cadence is negotiated by configuration (see `client.updatePreferences`).
+Heartbeat cadence is negotiated by configuration (see `updatePreferences`).
 
 ### 2.3 Event Subscriptions
 
-#### `client.subscribeEvents`
+#### subscribeEvents (command — domain: client)
 
 Declare which domains and/or specific event types Aura wants to receive.
 
@@ -239,7 +239,7 @@ Behaviour:
 - If `events` is omitted, all events in the domain are delivered.
 - Some high-frequency domains (e.g. `metering`) may honour `maxFrequencyHz`.
 
-#### `client.unsubscribeEvents`
+#### unsubscribeEvents (command — domain: client)
 
 Remove one or more subscriptions.
 
@@ -260,7 +260,7 @@ Behaviour:
 
 ### 2.4 Capabilities and Preferences
 
-#### `client.updateCapabilities`
+#### updateCapabilities (command — domain: client)
 
 Update advertised capabilities at runtime.
 
@@ -282,7 +282,7 @@ Behaviour:
 - Pulse merges the new capability set into the existing record.
 - Pulse may adjust event frequencies or feature usage based on capabilities.
 
-#### `client.updatePreferences`
+#### updatePreferences (command — domain: client)
 
 Update client-specific preferences affecting delivery behaviour.
 
@@ -303,7 +303,7 @@ Behaviour:
 
 - Pulse updates internal delivery settings for this session.
 - Invalid or unsupported preference keys are ignored (or produce
-  `client.invalidPreferences` errors).
+  `invalidPreferences` errors).
 
 ---
 
@@ -316,9 +316,9 @@ Events use:
 
 ### 3.1 Session Lifecycle Events
 
-#### `client.welcome`
+#### welcome (event — domain: client)
 
-Emitted after successful `client.register`, providing initial session information including project state if available.
+Emitted after successful client registration, providing initial session information including project state if available.
 
 Payload:
 
@@ -336,17 +336,17 @@ Payload:
 
 Fields:
 
-- `clientId` (string) — echo of the effective client ID for this session (as provided in `client.register`).
-- `instanceId` (string | null) — echo of the instance ID for this session (if provided in `client.register`).
+- `clientId` (string) — echo of the effective client ID for this session (as provided in the registration command).
+- `instanceId` (string | null) — echo of the instance ID for this session (if provided in the registration command).
 - `isManaged` (boolean) — indicates whether this Pulse instance considers itself to be managed by this client. True when the client's `clientId` matches the `--client-id` Pulse was launched with; false otherwise.
 - `pulseVersion` (string) — version of the Pulse server.
 - `hasProject` (boolean) — whether a project is currently loaded.
 - `projectId` (string | null) — ID of the current project (if any).
 - `projectName` (string | null) — name of the current project (if any).
 
-#### `client.registered`
+#### registered (event — domain: client)
 
-Emitted after successful `client.register`, confirming registration and echoing back client identity.
+Emitted after successful client registration, confirming registration and echoing back client identity.
 
 Payload:
 
@@ -360,13 +360,13 @@ Payload:
 
 Fields:
 
-- `clientId` (string) — echo of the effective client ID for this session (as provided in `client.register`).
-- `instanceId` (string | null) — echo of the instance ID for this session (if provided in `client.register`).
+- `clientId` (string) — echo of the effective client ID for this session (as provided in the registration command).
+- `instanceId` (string | null) — echo of the instance ID for this session (if provided in the registration command).
 - `isManaged` (boolean) — indicates whether this Pulse instance considers itself to be managed by this client. True when the client's `clientId` matches the `--client-id` Pulse was launched with; false otherwise.
 
-#### `client.unregistered`
+#### unregistered (event — domain: client)
 
-Emitted when a session is closed cleanly (via `client.unregister`) or after a
+Emitted when a session is closed cleanly (via `unregister` command) or after a
 detected timeout / transport tear-down.
 
 Payload:
@@ -379,7 +379,7 @@ Payload:
 }
 ```
 
-#### `client.reconnected` (optional / future)
+#### reconnected (event — domain: client) (optional / future)
 
 If Pulse supports session resumption, this event signals that a new underlying
 connection has been bound to an existing logical session.
@@ -396,7 +396,7 @@ Payload:
 
 ### 3.2 Heartbeat and Timeout Events
 
-#### `client.heartbeatRequired`
+#### heartbeatRequired (event — domain: client)
 
 Advisory event letting Aura know it should start sending heartbeats.
 
@@ -409,7 +409,7 @@ Payload:
 }
 ```
 
-#### `client.timedOut`
+#### timedOut (event — domain: client)
 
 Emitted when a client has not sent heartbeats within the configured grace
 period.
@@ -424,11 +424,11 @@ Payload:
 }
 ```
 
-Pulse may follow this with `client.unregistered` once cleanup is complete.
+Pulse may follow this with `unregistered` events once cleanup is complete.
 
 ### 3.3 Subscription and Capability Events
 
-#### `client.subscriptionsUpdated`
+#### subscriptionsUpdated (event — domain: client)
 
 Emitted when subscriptions are successfully changed.
 
@@ -446,7 +446,7 @@ Payload:
 }
 ```
 
-#### `client.capabilitiesUpdated`
+#### capabilitiesUpdated (event — domain: client)
 
 Emitted when Pulse has applied new capability information.
 

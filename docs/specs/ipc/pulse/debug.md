@@ -72,7 +72,7 @@ All commands in this domain use:
 
 ### 2.1 Logging and Diagnostics Control
 
-#### `debug.setLogLevel`
+#### setLogLevel (command — domain: debug)
 
 Adjust the verbosity of Pulse logs for the current process.
 
@@ -90,7 +90,7 @@ Behaviour:
 - May not be supported in all build profiles; if unsupported, returns an
   error.
 
-#### `debug.enableDomainLogging`
+#### enableDomainLogging (command — domain: debug)
 
 Enable or disable logging for specific IPC domains (for debugging noisy
 interactions).
@@ -112,7 +112,7 @@ Behaviour:
 
 ### 2.2 Introspection and State Inspection
 
-#### `debug.getStateSummary`
+#### getStateSummary (command — domain: debug)
 
 Request a coarse-grained summary of current Pulse state for debugging.
 
@@ -149,7 +149,7 @@ Typical response payload:
 This command is intended for **debug panels** and should not be used in normal
 runtime flows.
 
-#### `debug.getDomainState`
+#### getDomainState (command — domain: debug)
 
 Request a domain-specific state snapshot for debugging.
 
@@ -190,7 +190,7 @@ Example response payload:
 These commands are **optional** and may not be available in all builds. They
 are intended for testing IPC paths, error handling and diagnostics UI.
 
-#### `debug.echo`
+#### echo (command — domain: debug)
 
 Round-trip echo of an arbitrary JSON payload, used to validate IPC wiring.
 
@@ -216,7 +216,7 @@ Response payload:
 }
 ```
 
-#### `debug.simulateError`
+#### simulateError (command — domain: debug)
 
 Ask Pulse to emit a structured error event, for testing error handling in Aura.
 
@@ -250,7 +250,7 @@ Events use:
 
 ### 3.1 Log and Diagnostic Events
 
-#### `debug.log`
+#### log (event — domain: debug)
 
 Structured log event forwarded to Aura, typically for a debug console.
 
@@ -270,7 +270,7 @@ Payload:
 }
 ```
 
-#### `debug.diagnostic`
+#### diagnostic (event — domain: debug)
 
 General-purpose diagnostic event for ad-hoc debug data.
 
@@ -292,7 +292,7 @@ Payload:
 Some introspection commands may emit follow-up events (in addition to
 responses) where streaming is more convenient than a single large response.
 
-#### `debug.stateChunk`
+#### stateChunk (event — domain: debug)
 
 Optional event used when a state snapshot is emitted in chunks.
 
@@ -339,10 +339,10 @@ Examples:
 {
   "error": {
     "code": "unsupportedCommand",
-    "message": "Command debug.simulateError is not available.",
+    "message": "Command simulateError is not available.",
     "domain": "debug",
     "details": {
-      "command": "debug.simulateError"
+      "command": "simulateError"
     }
   }
 }

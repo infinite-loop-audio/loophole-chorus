@@ -138,7 +138,8 @@ project model, and emits events.
 
 ### 4.1 Direct Value Control
 
-**`parameter.setValue`**  
+#### setValue (command — domain: parameter)
+
 Set the value of a parameter directly.
 
 Payload fields include:
@@ -149,7 +150,7 @@ Payload fields include:
 This represents an immediate, non-gesture change (e.g. UI toggle, jump).
 
 Pulse applies the change, resolves any group interactions and automation
-precedence, and emits `parameter.valueChanged` if the effective value changes.
+precedence, and emits `valueChanged` events if the effective value changes.
 
 ---
 
@@ -159,7 +160,8 @@ Gesture-based control supports continuous adjustments (e.g. dragging a fader).
 It allows Aura to mark a gesture window to apply smoothing, automation
 capture and precedence correctly.
 
-**`parameter.beginGesture`**  
+#### beginGesture (command — domain: parameter)
+
 Indicate the start of a user gesture for a parameter.
 
 Fields:
@@ -170,7 +172,8 @@ Fields:
   - source (e.g. mouse, MIDI controller, touch),
   - gestureId (optional correlation token).
 
-**`parameter.updateGesture`**  
+#### updateGesture (command — domain: parameter)
+
 Provide a new value for a parameter during an active gesture.
 
 Fields:
@@ -178,7 +181,8 @@ Fields:
 - `parameterId`,
 - `value`.
 
-**`parameter.endGesture`**  
+#### endGesture (command — domain: parameter)
+
 Indicate the end of a user gesture. Pulse may use this boundary for automation
 writes or other gesture-related logic.
 
@@ -188,7 +192,7 @@ Fields:
 
 Aura should always send `beginGesture` and `endGesture` for continuous
 operations where meaningful. For simple clicks or toggles, Aura may send only
-`parameter.setValue`.
+`setValue`.
 
 ---
 
@@ -197,7 +201,8 @@ operations where meaningful. For simple clicks or toggles, Aura may send only
 Control Groups are defined in the Parameter domain to implement VCA-style
 behaviour and other grouped control patterns. They do not pass audio.
 
-**`parameter.createGroup`**  
+#### createGroup (command — domain: parameter)
+
 Create a new Control Group.
 
 Fields include:
@@ -208,11 +213,13 @@ Fields include:
 Pulse returns/announces a `groupId`, which may also be represented as a
 `parameterId` for the group’s master control.
 
-**`parameter.deleteGroup`**  
+#### deleteGroup (command — domain: parameter)
+
 Delete an existing Control Group. Pulse removes group associations and cleans
 up any related master controls.
 
-**`parameter.setGroupMembers`**  
+#### setGroupMembers (command — domain: parameter)
+
 Define or update the set of member parameters in a Control Group.
 
 Fields:
@@ -224,8 +231,9 @@ Fields:
 Pulse uses this to apply relative changes from the group’s master parameter to
 its members.
 
-**`parameter.setGroupMasterValue`**  
-Set the value of a group master parameter (can also use `parameter.setValue`
+#### setGroupMasterValue (command — domain: parameter)
+
+Set the value of a group master parameter (can also use `setValue`
 if the group master is represented as a normal parameter). Pulse calculates
 relative adjustments to member parameters based on the group configuration.
 
@@ -233,7 +241,8 @@ relative adjustments to member parameters based on the group configuration.
 
 ### 4.4 Metadata and Presentation
 
-**`parameter.setPresentation`**  
+#### setPresentation (command — domain: parameter)
+
 Set presentation metadata for a parameter. This may include:
 
 - display name or alias,
@@ -253,7 +262,8 @@ updates.
 
 ### 5.1 Value and State Events
 
-**`parameter.valueChanged`**  
+#### valueChanged (event — domain: parameter)
+
 Indicates that the effective value of a parameter has changed.
 
 Includes:
@@ -265,7 +275,8 @@ Includes:
 
 Aura uses this to update displayed controls.
 
-**`parameter.published`**  
+#### published (event — domain: parameter)
+
 Optionally used when a parameter becomes available or its metadata changes,
 including:
 
@@ -280,12 +291,14 @@ This allows Aura to discover parameters dynamically.
 
 ### 5.2 Gesture Events
 
-**`parameter.gestureBegan`**  
+#### gestureBegan (event — domain: parameter)
+
 Optional event indicating that a gesture has been recognised and accepted
 internally. May be used to confirm initiation of a write or to reflect
 external gesture sources.
 
-**`parameter.gestureEnded`**  
+#### gestureEnded (event — domain: parameter)
+
 Optional event indicating the end of a gesture as recognised by Pulse.
 
 Aura may not need to rely on these events if it already tracks gestures
@@ -295,17 +308,20 @@ locally, but they can be useful in distributed setups.
 
 ### 5.3 Control Group Events
 
-**`parameter.groupCreated`**  
+#### groupCreated (event — domain: parameter)
+
 Indicates that a Control Group has been created. Includes:
 
 - `groupId`,
 - name,
 - role.
 
-**`parameter.groupDeleted`**  
+#### groupDeleted (event — domain: parameter)
+
 Indicates that a Control Group has been removed.
 
-**`parameter.groupMembersChanged`**  
+#### groupMembersChanged (event — domain: parameter)
+
 Indicates the member list or weightings have changed for a group.
 
 Aura may use these events to build and update Control Group UIs that mimic or
@@ -329,7 +345,7 @@ references the same `parameterId`s.
 
 ### Snapshot Application
 
-When Aura receives a `project.snapshot` that includes this domain, it MUST treat
+When Aura receives a `snapshot` event (domain: project) that includes this domain, it MUST treat
 the snapshot as the **authoritative** representation of the current state for
 this domain.
 
@@ -352,8 +368,8 @@ Pulse is responsible for ensuring that snapshots across all domains are
 internally consistent at the moment they are emitted.
 
 On snapshot application, Pulse replaces parameter state according to the
-snapshot definition and emits `parameter.valueChanged` and/or
-`parameter.published` as needed for Aura to synchronise UI.
+snapshot definition and emits `valueChanged` and/or
+`published` events as needed for Aura to synchronise UI.
 
 ---
 

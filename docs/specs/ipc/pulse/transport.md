@@ -43,8 +43,8 @@ Signal is responsible for real-time execution.
 
 The routing model for transport operations is:
 
-- **Aura → Pulse**: sends user transport intents (`transport.play`,
-  `transport.pause`, `transport.seek`, etc.).
+- **Aura → Pulse**: sends user transport intents (`play`,
+  `pause`, `seek`, etc.).
 - **Pulse → Signal**: sends derived transport commands with full timing context.
 - **Signal → Pulse**: may send confirmations or engine-status related events but
   never initiates transport changes.
@@ -55,7 +55,8 @@ The routing model for transport operations is:
 
 ### 2.1 Basic Transport Control
 
-**`transport.play`**
+#### play (command — domain: transport)
+
 Begin playback from the current transport position, or from a specified position
 if the command payload includes one.
 
@@ -64,9 +65,10 @@ Pulse:
 - updates its transport state to `playing` (subject to engine confirmation),
 - instructs Signal to start playback from the chosen position.
 
-**`transport.stop`**
+#### stop (command — domain: transport)
+
 Stop playback and seek to a specified position. This is distinct from
-`transport.stop`:
+`pause`:
 
 - if a target position is provided in the payload, Pulse sets the transport
   position accordingly after stopping;
@@ -79,7 +81,8 @@ Pulse:
 - adjusts its internal transport position,
 - instructs Signal to stop playback and seek.
 
-**`transport.seek`**
+#### seek (command — domain: transport)
+
 Move the transport position without changing play/stop state.
 
 - If called while stopped, this is a simple reposition of the playhead.
@@ -92,7 +95,8 @@ The seek target (time or musical position) is carried in the command payload.
 
 ### 2.2 Looping
 
-**`transport.setLoopRegion`**
+#### setLoopRegion (command — domain: transport)
+
 Set the loop region boundaries.
 Payload includes:
 
@@ -101,7 +105,8 @@ Payload includes:
 
 in the chosen coordinate system (time, musical or both).
 
-**`transport.setLoopEnabled`**
+#### setLoopEnabled (command — domain: transport)
+
 Enable or disable looping.
 
 Pulse:
@@ -115,7 +120,8 @@ Pulse:
 
 ### 3.1 State Changes
 
-**`transport.stateChanged`**
+#### stateChanged (event — domain: transport)
+
 Emitted whenever the semantic transport state changes. This includes:
 
 - transitions between playing, stopped (and paused, if introduced later),
@@ -130,7 +136,7 @@ Typical payload fields include:
 - `loopEnabled`: boolean,
 - `loopRegion`: start and end positions.
 
-Aura should rely on `transport.stateChanged` to update transport controls and
+Aura should rely on `stateChanged` events to update transport controls and
 high-level UI elements (e.g. play/stop/loop button states). Fine-grained
 playhead position for drawing is provided by telemetry from Signal.
 
@@ -138,7 +144,8 @@ playhead position for drawing is provided by telemetry from Signal.
 
 ### 3.2 Errors
 
-**`transport.error`**
+#### error (event — domain: transport)
+
 Emitted when a transport command cannot be fulfilled. Examples include:
 
 - no active or valid audio device,
@@ -147,7 +154,7 @@ Emitted when a transport command cannot be fulfilled. Examples include:
 
 Typical payload fields include:
 
-- `command`: the originating transport command (e.g. `transport.play`),
+- `command`: the originating transport command (e.g. `play`),
 - `code`: machine-readable error code,
 - `message`: human-readable description,
 - `details`: optional structured context (for logging or diagnostics).
@@ -164,7 +171,7 @@ The Transport domain concerns the model-level representation of playback:
 - Pulse issues engine commands to Signal in the Engine Integration Protocol
   (e.g. engine-level play, stop, seek, loop configuration).
 - Signal reports engine outcomes back to Pulse, which reconciles them before
-  emitting `transport.stateChanged` and any relevant `transport.error` events.
+  emitting `stateChanged` and any relevant `error` events.
 
 High-resolution transport information (e.g. continuous playhead position and
 timing data) is delivered directly from Signal to Aura via the telemetry plane,

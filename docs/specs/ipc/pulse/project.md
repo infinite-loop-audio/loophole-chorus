@@ -42,7 +42,7 @@ updates internal state and emits events reflecting the outcome.
 Pulse is always the **source of truth** for the in-memory project model.
 
 Aura never mutates project data directly and does not read project files.
-All project state visible to Aura is carried through `project.snapshot` and
+All project state visible to Aura is carried through `snapshot` events (domain: project) and
 related events.
 
 ### Routing Model
@@ -65,21 +65,24 @@ mutations flow through Pulse.
 
 ### 2.1 Lifecycle
 
-**`project.new`**
+#### new (command — domain: project)
+
 Create a new empty project in memory. No primary storage location is required.
 
-**`project.open`**
-Open a project from a specified location (path or URI).
-Triggers `project.loaded` followed by `project.snapshot` on success.
+#### open (command — domain: project)
 
-On success, `project.open` triggers:
+Open a project from a specified location (path or URI).
+Triggers `loaded` events followed by `snapshot` events on success.
+
+On success, `open` triggers:
 - model load in Pulse,
 - **fresh cohort assignment**,
 - a new engine graph build for Signal,
-- emission of `project.snapshot` toward Aura.
+- emission of `snapshot` events toward Aura.
 
-**`project.close`**
-Close the current project and reset Pulse’s project state.
+#### close (command — domain: project)
+
+Close the current project and reset Pulse's project state.
 
 ---
 
@@ -92,15 +95,17 @@ Pulse maintains two conceptual copies of project state:
 
 Commands:
 
-**`project.saveDraft`**
+#### saveDraft (command — domain: project)
+
 Persist the current in-memory project state to the draft location.
 This may be called explicitly by Aura or invoked on a timer within Pulse.
 
-**`project.save`**
+#### save (command — domain: project)
+
 Commit the current project state to the **primary project file**.
 Fails if the project does not yet have a primary location.
 
-**`project.saveAs`**
+#### saveAs (command — domain: project)
 Commit to a new primary project location.
 On success, the new location becomes the primary project file.
 
@@ -108,14 +113,14 @@ On success, the new location becomes the primary project file.
 
 ### 2.3 Identity and Metadata
 
-**`project.rename`**
+#### rename (command — domain: project)
 Change the project’s title.
 
-**`project.move`**
+#### move (command — domain: project)
 Move the project’s primary file (and optionally associated assets) to a new
 location.
 
-**`project.updateMeta`**
+#### updateMeta (command — domain: project)
 Apply updated metadata such as author, description, notes or tags.
 
 ---
