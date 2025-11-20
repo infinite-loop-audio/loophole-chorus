@@ -68,7 +68,7 @@ It is intentionally narrow in scope:
 All commands in this domain use:
 
 - `domain: "debug"`
-- `type: "debug.<action>"`
+- `name: "<action>"`
 
 ### 2.1 Logging and Diagnostics Control
 
@@ -246,7 +246,7 @@ Behaviour:
 Events use:
 
 - `domain: "debug"`
-- `type: "debug.<eventName>"`
+- `name: "<eventName>"`
 
 ### 3.1 Log and Diagnostic Events
 
@@ -265,7 +265,7 @@ Payload:
   "details": {
     "origin": "aura",
     "domain": "project",
-    "type": "project.open"
+    "name": "open"
   }
 }
 ```

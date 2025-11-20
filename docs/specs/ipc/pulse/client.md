@@ -83,7 +83,7 @@ Pulse echoes back `clientId` and `instanceId` in responses to confirm the effect
 All commands in this domain use:
 
 - `domain: "client"`
-- `type: "client.<action>"`
+- `name: "<action>"`
 
 ### 2.1 Session Lifecycle
 
@@ -218,14 +218,14 @@ Payload:
   "subscriptions": [
     {
       "domain": "project",
-      "events": ["project.loaded", "project.snapshot"]
+      "events": ["loaded", "snapshot"]
     },
     {
       "domain": "transport"
     },
     {
       "domain": "metering",
-      "events": ["metering.levels"],
+      "events": ["levels"],
       "maxFrequencyHz": 30
     }
   ]
@@ -312,7 +312,7 @@ Behaviour:
 Events use:
 
 - `domain: "client"`
-- `type: "client.<eventName>"`
+- `name: "<eventName>"`
 
 ### 3.1 Session Lifecycle Events
 

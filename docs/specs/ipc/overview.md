@@ -248,7 +248,7 @@ architectural overview.
 - **`projectMetadata`** — Project-level metadata and markers
 - **`ui`** — General UI state and layout
 
-Each domain defines its own command and event types. Domain-specific
+Each domain defines its own command and event names. Domain-specific
 specifications are located in `docs/specs/ipc/pulse/` and `docs/specs/ipc/signal/`.
 
 ---
@@ -262,7 +262,7 @@ anticipative buffers:
 - **Cohort decisions** are made entirely in Pulse and sent to Signal as:
   - graph updates
   - node annotations
-- **Project load operations** (`project.open`, `project.new`) trigger:
+- **Project load operations** (domain: `project`, name: `open` or `new`) trigger:
   - fresh cohort assignment in Pulse
   - graph rebuild instructions to Signal
 - **Transport operations** (seek, loop changes) may trigger:
@@ -289,8 +289,8 @@ This is handled through **parameter gestures**.
 Aura notifies Pulse when a user begins a gesture:
 
 ```
-parameter.gesture.begin
-parameter.gesture.end
+domain: "parameter", name: "gesture.begin"
+domain: "parameter", name: "gesture.end"
 ```
 
 Pulse updates its internal state and may generate semantic engine commands (such
@@ -308,7 +308,7 @@ Streams may be identified with a gesture or stream identifier provided by Pulse.
 
 ### 7.3 Model Commitment
 
-When the gesture ends, Aura sends a `parameter.gesture.end` message to Pulse
+When the gesture ends, Aura sends a message with `domain: "parameter"`, `name: "gesture.end"` to Pulse
 including the final parameter value and optional automation data.
 
 Pulse updates the project model and issues any necessary engine commands to

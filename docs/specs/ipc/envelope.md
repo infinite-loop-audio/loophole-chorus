@@ -114,7 +114,7 @@ Every normal IPC message is a single JSON object with this shape:
 
   "kind": "command|event|snapshot|response|error",
 
-  "type": "project.open|project.snapshot|transport.play|track.create|node.add|...",
+  "name": "open|snapshot|play|create|add|...",
 
   "priority": "realtime|high|normal|low",
 
@@ -176,7 +176,7 @@ Every normal IPC message is a single JSON object with this shape:
   - `"engine"`, `"cohort"`, `"session"`,  
   - `"history"`, `"hardwareIo"`, `"engineDiagnostics"`, `"projectMetadata"`.
 
-  Domain-specific documents define the available types and payloads within each
+  Domain-specific documents define the available names and payloads within each
   domain.
 
 - `kind` (string)  
@@ -188,16 +188,18 @@ Every normal IPC message is a single JSON object with this shape:
   - `"response"` – response to a command.
   - `"error"` – error response or error event.
 
-- `type` (string)  
-  Fully-qualified message type of the form `<domain>.<name>`. Examples:
+- `name` (string)  
+  Unqualified message name within the domain. Examples:
 
-  - `"project.open"`, `"project.snapshot"`,  
-  - `"transport.play"`, `"transport.stateChanged"`,  
-  - `"track.create"`, `"clip.split"`,  
-  - `"node.add"`, `"parameter.setValue"`,  
-  - `"engine.cohortAssigned"`.
+  - `"open"`, `"snapshot"`,  
+  - `"play"`, `"stateChanged"`,  
+  - `"create"`, `"split"`,  
+  - `"add"`, `"setValue"`,  
+  - `"cohortAssigned"`.
 
-  Each domain spec enumerates the valid types and their payloads.
+  The fully-qualified label is derived as `domain + "." + name` (e.g. `"project.open"`). This fully-qualified form is available to runtimes that want it, but is not part of the envelope structure itself.
+
+  Each domain spec enumerates the valid names and their payloads.
 
 - `priority` (string)  
   Hint for scheduling and queueing:
@@ -210,7 +212,7 @@ Every normal IPC message is a single JSON object with this shape:
   This field is advisory; implementations may use it to create separate queues.
 
 - `payload` (object)  
-  Domain-specific content. Each `type` has its own schema defined in the
+  Domain-specific content. Each `name` (within its `domain`) has its own schema defined in the
   relevant domain document.
 
 - `error` (object or null)  
@@ -358,7 +360,7 @@ Example for a gesture stream:
   "target": "signal",
   "domain": "gesture",
   "kind": "command",
-  "type": "gestureStream.open",
+  "name": "open",
   "priority": "realtime",
   "payload": {
     "streamId": "gstrm-abc",
@@ -369,11 +371,11 @@ Example for a gesture stream:
 }
 ```
 
-Signal replies with a `gestureStream.opened` response/event. Afterwards,
+Signal replies with a response/event (domain: `gesture`, name: `opened`). Afterwards,
 binary frames using `streamId = "gstrm-abc"` carry the actual gesture data.
 
-Closing a stream is symmetrical, via a `gestureStream.close` command and
-corresponding `gestureStream.closed` event/response.
+Closing a stream is symmetrical, via a command (domain: `gesture`, name: `close`) and
+corresponding event/response (domain: `gesture`, name: `closed`).
 
 Metering streams may follow an analogous pattern (`meterStream.open`, etc.).
 
@@ -395,7 +397,7 @@ For example, a response to a failing command:
   "target": "aura",
   "domain": "project",
   "kind": "error",
-  "type": "project.open",
+  "name": "open",
   "priority": "high",
   "payload": {},
   "error": {
@@ -410,7 +412,7 @@ For example, a response to a failing command:
 
 Notes:
 
-- `type` is typically the original command type, so that the error can be
+- `name` is typically the original command name, so that the error can be
   easily mapped to the request.
 - `cid` is the `id` of the original command.
 - `error.code` is machine-friendly; `error.message` is suitable for UI/logging.
@@ -428,7 +430,7 @@ Standalone engine errors (e.g. plugin crashes) may be emitted as events:
   "target": "pulse",
   "domain": "engine",
   "kind": "error",
-  "type": "engine.pluginCrashed",
+  "name": "pluginCrashed",
   "priority": "realtime",
   "payload": {
     "nodeId": "track.3.channel.node.2",
@@ -454,7 +456,7 @@ Versioning operates at two levels:
 
 1. **Envelope version (`v`)**  
    - Controls top-level envelope fields (`id`, `cid`, `ts`, `origin`, `target`,
-     `domain`, `kind`, `type`, `priority`, `payload`, `error`).
+     `domain`, `kind`, `name`, `priority`, `payload`, `error`).
    - Incremented only when we introduce incompatible changes to the envelope
      shape.
 
@@ -484,7 +486,7 @@ should be used with the following principles:
 
 - **Strict validation** on receipt:
 
-  - `origin`, `target`, `domain`, `kind`, `type` must be verified against
+  - `origin`, `target`, `domain`, `kind`, `name` must be verified against
     known sets,
   - malformed envelopes should be rejected or logged as protocol errors.
 
@@ -519,7 +521,7 @@ at deployment/environment level, not in this envelope spec.
   "target": "pulse",
   "domain": "transport",
   "kind": "command",
-  "type": "transport.play",
+  "name": "play",
   "priority": "high",
   "payload": {
     "fromPosition": null
@@ -546,7 +548,7 @@ Pulse will respond by:
   "target": "signal",
   "domain": "cohort",
   "kind": "command",
-  "type": "cohort.assign",
+  "name": "assign",
   "priority": "high",
   "payload": {
     "graphVersion": 12,
@@ -574,7 +576,7 @@ its live/anticipative execution plans accordingly.
   "target": "aura",
   "domain": "project",
   "kind": "snapshot",
-  "type": "project.snapshot",
+  "name": "snapshot",
   "priority": "normal",
   "payload": {
     "projectId": "proj-abc",
