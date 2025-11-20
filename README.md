@@ -122,23 +122,39 @@ Recommended reading order:
 
 ## AI-Assisted Development
 
-Loophole uses a structured and deterministic approach to AI-assisted editing.
+Chorus now uses a streamlined workflow that pairs ChatGPT (architect), Cursor
+(editor) and a human operator (reviewer). The legacy Meta-Protocol schema and
+command files have been deprecated.
 
-### Core Meta Documents
+### Current Meta References
 
-- Meta-Protocol
-  [`@chorus:/docs/meta/meta-protocol.md`](docs/meta/meta-protocol.md)
+- **AI Workflow Guide** – roles, conventions, reporting rules  
+  [`@chorus:/docs/meta/ai-workflow.md`](docs/meta/ai-workflow.md)
 
-- Meta-Commands
-  [`@chorus:/docs/meta/meta-commands.md`](docs/meta/meta-commands.md)
+- **Implementation Workflow & Tooling** – how Chorus work flows into the runtime repos  
+  [`@chorus:/docs/meta/dev-workflow.md`](docs/meta/dev-workflow.md)
 
-- Meta Schema
-  [`@chorus:/docs/meta/meta-schema.json`](docs/meta/meta-schema.json)
+- **Architecture Inbox & Backlog** – capture ideas and future tasks  
+  [`@chorus:/docs/meta/architecture-inbox.md`](docs/meta/architecture-inbox.md)
 
-- Cursor Rule Set
-  [`@chorus:/.cursor/rules/00-architecture.md`](.cursor/rules/00-architecture.md)
+- **Glossary** – canonical wording and terminology  
+  [`@chorus:/docs/meta/glossary.md`](docs/meta/glossary.md)
 
-AI tools must follow these documents precisely.
+### Interaction Model (Summary)
+
+1. **You** request architecture/spec outputs from ChatGPT.  
+2. **ChatGPT** produces full documents (wrapped in quad backticks) or succinct
+   Cursor prompts that describe the desired change.  
+3. **Cursor** performs every edit, runs cohesion/consistency passes as needed,
+   and writes a timestamped report to `docs/reports/` for any multi-file task.  
+4. **You** review diffs, run tests, and commit.
+
+All documentation stays in British English, files have no trailing newline, and
+relative/absolute linking rules from `ai-workflow.md` must be honoured. Any
+multi-file Cursor action (cohesion pass, renumbering, etc.) must add a new
+report named `YYYY-MM-DD-HHMMSS-task-name-report.md` under `docs/reports/`.
+
+Older Meta Protocol assets live under `docs/meta/deprecated/` for reference only.
 
 ---
 
