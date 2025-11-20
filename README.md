@@ -91,11 +91,14 @@ runtime repositories:
 ### Signal — Audio Engine (C++ / JUCE)
 https://github.com/infinite-loop-audio/loophole-signal
 
-### Pulse — Project and Data Model (TypeScript)
+### Pulse — Project and Data Model (Rust)
 https://github.com/infinite-loop-audio/loophole-pulse
 
 ### Aura — User Interface (Electron / TypeScript)
 https://github.com/infinite-loop-audio/loophole-aura
+
+### Composer — Metadata & Knowledge Service (future Rust/TypeScript mix)
+https://github.com/infinite-loop-audio/loophole-composer
 
 ---
 
