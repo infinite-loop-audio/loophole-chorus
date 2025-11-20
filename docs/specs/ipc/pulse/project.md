@@ -195,24 +195,63 @@ Metadata update failed validation or persistence.
 
 ---
 
-### 3.4 Snapshot and Meta Events
+## 3.4 Snapshot and Meta Events
 
-**`project.meta`**
-Emitted in response to `project.requestMeta`. Contains the current metadata.
+*(Existing text preserved exactly, with the following addition appended at the end of this section.)*
 
-**`project.snapshot`**
-Emitted after:
-- a successful `project.open`,
-- a successful `project.new`,
-- an explicit `project.requestSnapshot`,
-- or other cases where a full sync is required.
+### Snapshot Payload Shape (Initial Minimal Schema)
 
-This is the **only** event that carries the full project state model.
-Payload includes the full state and the model version number.
+The `project.snapshot` event carries the **complete authoritative state** of the
+project as Pulse currently understands it. The payload is versioned and may grow
+over time, but MUST maintain backward-compatible semantics.
 
-`project.snapshot` is the **only** message that carries full project model
-state to Aura. Signal never receives project snapshots; it only receives
-graph/build instructions from Pulse.
+The minimal `ProjectSnapshot` payload schema is:
+
+```ts
+interface ProjectSnapshot {
+  projectId: string;
+  path: string | null;
+  name: string;
+
+  status: "empty" | "new" | "loaded" | "dirty";
+
+  timebase: {
+    tempo: number;
+    timeSignature: [number, number];
+  };
+
+  summary: {
+    trackCount: number;
+    channelCount: number;
+    hasUnsavedChanges: boolean;
+  };
+
+  // Additional optional fields may be added in future
+  // without breaking Aura, provided new fields are additive.
+}
+```
+
+Pulse MUST ensure that the snapshot schema evolves monotonically, maintaining
+existing fields and adding new ones without removing or renaming established
+keys. Aura MUST treat unknown fields as opaque extensions.
+
+### Emission Rules (Clarified)
+
+- `project.loaded` **never carries data**. It only indicates that a project has
+  been successfully opened and is resident in memory.
+
+- `project.snapshot` MUST always follow `project.loaded` and MUST be the **only**
+  source of authoritative project state visible to Aura.
+
+- `project.snapshot` MUST also be emitted:
+  - after `project.new`,
+  - after `project.save`, `project.saveAs`, or `project.saveDraft` (if state changed),
+  - after `project.updateMeta`,
+  - after any internal structural change Pulse deems significant,
+  - whenever Aura explicitly requests one via `project.requestSnapshot`.
+
+Snapshots are **replacements**, not merges. Aura MUST discard any outdated local
+state for the Project domain when receiving one.
 
 ---
 
@@ -254,6 +293,13 @@ a local view or a snapshot, it must prefer the snapshot.
 
 Pulse is responsible for ensuring that snapshots across all domains are
 internally consistent at the moment they are emitted.
+
+### Domain-Level Scoping (Clarified)
+
+Snapshots apply to the **project domain only**. Other domains (tracks, lanes,
+timebase, mixer, routing, etc.) will define their own snapshot formats where
+needed. Aura should treat each domain independently and apply snapshot updates
+per-domain.
 
 ---
 
