@@ -538,9 +538,9 @@ Aura may display this in diagnostics or status indicators.
 
 ---
 
-#### **`hardware.diagnosticsUpdated`**
+#### **`hardware.diagnosticsUpdated`** (event — domain: hardwareIo)
 
-Response to `hardware.requestDiagnostics`, summarising the current state.
+Emitted in response to `hardware.requestDiagnostics` command, summarising the current state. This is an event, not a direct response envelope.
 
 ---
 

@@ -183,53 +183,86 @@ schedules them accordingly.
 
 Apply a full graph snapshot: Channels, Nodes, connections, and cohort mapping.
 
-**Request**
+**Command Envelope (Pulse → Signal):**
 
-```json
+```jsonc
 {
-  "command": "graph.applySnapshot",
-  "graphId": "graph:project:current",
-  "channels": [
-    {
-      "channelId": "ch:master",
-      "name": "Master",
-      "inputs": {
-        "sources": ["ch:bus:drums", "ch:bus:music"]
-      },
-      "outputs": {
-        "hardwareOut": "hw:mainOut"
-      },
-      "nodes": [
-        {
-          "nodeId": "node:master:meterIn",
-          "kind": "MeterNode",
-          "position": 0,
-          "config": {}
+  "v": 1,
+  "id": "apply-snapshot-123",
+  "cid": null,
+  "ts": "2025-11-20T12:34:56.789Z",
+  "origin": "pulse",
+  "target": "signal",
+  "domain": "graph",
+  "kind": "command",
+  "name": "applySnapshot",
+  "priority": "high",
+  "payload": {
+    "graphId": "graph:project:current",
+    "channels": [
+      {
+        "channelId": "ch:master",
+        "name": "Master",
+        "inputs": {
+          "sources": ["ch:bus:drums", "ch:bus:music"]
         },
-        {
-          "nodeId": "node:master:fader",
-          "kind": "FaderNode",
-          "position": 1,
-          "config": {
-            "initialGainDb": 0.0
+        "outputs": {
+          "hardwareOut": "hw:mainOut"
+        },
+        "nodes": [
+          {
+            "nodeId": "node:master:meterIn",
+            "kind": "MeterNode",
+            "position": 0,
+            "config": {}
+          },
+          {
+            "nodeId": "node:master:fader",
+            "kind": "FaderNode",
+            "position": 1,
+            "config": {
+              "initialGainDb": 0.0
+            }
+          },
+          {
+            "nodeId": "node:master:meterOut",
+            "kind": "MeterNode",
+            "position": 2,
+            "config": {}
           }
-        },
-        {
-          "nodeId": "node:master:meterOut",
-          "kind": "MeterNode",
-          "position": 2,
-          "config": {}
-        }
-      ]
-    }
-  ],
-  "cohorts": [
-    {
-      "cohortId": "cohort:rt:master",
-      "mode": "realtime",
-      "channelIds": ["ch:master"]
-    }
-  ]
+        ]
+      }
+    ],
+    "cohorts": [
+      {
+        "cohortId": "cohort:rt:master",
+        "mode": "realtime",
+        "channelIds": ["ch:master"]
+      }
+    ]
+  },
+  "error": null
+}
+```
+
+**Response Envelope (Signal → Pulse):**
+
+```jsonc
+{
+  "v": 1,
+  "id": "apply-snapshot-response-456",
+  "cid": "apply-snapshot-123",
+  "ts": "2025-11-20T12:34:56.790Z",
+  "origin": "signal",
+  "target": "pulse",
+  "domain": "graph",
+  "kind": "response",
+  "name": "applySnapshot",
+  "priority": "high",
+  "payload": {
+    "ok": true
+  },
+  "error": null
 }
 ```
 
@@ -239,15 +272,7 @@ Apply a full graph snapshot: Channels, Nodes, connections, and cohort mapping.
 - On success, previous Channels/Nodes become invalid (unless reused internally
   in an optimisation).
 - This command is ideal on project load, large topology changes, or recovery.
-
-**Response**
-
-- Success:
-  ```json
-  { "replyTo": "graph.applySnapshot", "ok": true }
-  ```
-- Error:
-  - Use standard error envelope with details of failed Channels/Nodes.
+- On error, Signal returns an error envelope with details of failed Channels/Nodes.
 
 ---
 
@@ -255,45 +280,78 @@ Apply a full graph snapshot: Channels, Nodes, connections, and cohort mapping.
 
 Apply incremental changes to the graph.
 
-**Request**
+**Command Envelope (Pulse → Signal):**
 
-```json
+```jsonc
 {
-  "command": "graph.applyDelta",
-  "graphId": "graph:project:current",
-  "changes": [
-    {
-      "op": "addChannel",
-      "channel": {
-        "channelId": "ch:fx:delay",
-        "name": "FX – Delay",
-        "inputs": {
-          "sources": []
-        },
-        "outputs": {
-          "toChannels": ["ch:master"]
-        },
-        "nodes": []
-      }
-    },
-    {
-      "op": "addNode",
-      "node": {
-        "nodeId": "node:fx:delay:plugin",
-        "channelId": "ch:fx:delay",
-        "kind": "PluginNode",
-        "position": 0,
-        "config": {
-          "pluginInstanceId": "plugin:someDelay"
+  "v": 1,
+  "id": "apply-delta-123",
+  "cid": null,
+  "ts": "2025-11-20T12:34:56.789Z",
+  "origin": "pulse",
+  "target": "signal",
+  "domain": "graph",
+  "kind": "command",
+  "name": "applyDelta",
+  "priority": "high",
+  "payload": {
+    "graphId": "graph:project:current",
+    "changes": [
+      {
+        "op": "addChannel",
+        "channel": {
+          "channelId": "ch:fx:delay",
+          "name": "FX – Delay",
+          "inputs": {
+            "sources": []
+          },
+          "outputs": {
+            "toChannels": ["ch:master"]
+          },
+          "nodes": []
         }
+      },
+      {
+        "op": "addNode",
+        "node": {
+          "nodeId": "node:fx:delay:plugin",
+          "channelId": "ch:fx:delay",
+          "kind": "PluginNode",
+          "position": 0,
+          "config": {
+            "pluginInstanceId": "plugin:someDelay"
+          }
+        }
+      },
+      {
+        "op": "connectChannel",
+        "fromChannelId": "ch:track:snare",
+        "toChannelId": "ch:fx:delay"
       }
-    },
-    {
-      "op": "connectChannel",
-      "fromChannelId": "ch:track:snare",
-      "toChannelId": "ch:fx:delay"
-    }
-  ]
+    ]
+  },
+  "error": null
+}
+```
+
+**Response Envelope (Signal → Pulse):**
+
+```jsonc
+{
+  "v": 1,
+  "id": "apply-delta-response-456",
+  "cid": "apply-delta-123",
+  "ts": "2025-11-20T12:34:56.790Z",
+  "origin": "signal",
+  "target": "pulse",
+  "domain": "graph",
+  "kind": "response",
+  "name": "applyDelta",
+  "priority": "high",
+  "payload": {
+    "ok": true
+  },
+  "error": null
 }
 ```
 
@@ -328,25 +386,58 @@ Set cohort assignments separately from topology changes.
 
 This may be used when only processing allocation changes are needed.
 
-**Request**
+**Command Envelope (Pulse → Signal):**
 
-```json
+```jsonc
 {
-  "command": "graph.setCohorts",
-  "cohorts": [
-    {
-      "cohortId": "cohort:rt:inputs",
-      "mode": "realtime",
-      "channelIds": ["ch:track:vocal", "ch:track:guitar"],
-      "nodeIds": []
-    },
-    {
-      "cohortId": "cohort:anticipative:mix",
-      "mode": "anticipative",
-      "channelIds": ["ch:bus:drums", "ch:bus:music"],
-      "nodeIds": []
-    }
-  ]
+  "v": 1,
+  "id": "set-cohorts-123",
+  "cid": null,
+  "ts": "2025-11-20T12:34:56.789Z",
+  "origin": "pulse",
+  "target": "signal",
+  "domain": "graph",
+  "kind": "command",
+  "name": "setCohorts",
+  "priority": "high",
+  "payload": {
+    "cohorts": [
+      {
+        "cohortId": "cohort:rt:inputs",
+        "mode": "realtime",
+        "channelIds": ["ch:track:vocal", "ch:track:guitar"],
+        "nodeIds": []
+      },
+      {
+        "cohortId": "cohort:anticipative:mix",
+        "mode": "anticipative",
+        "channelIds": ["ch:bus:drums", "ch:bus:music"],
+        "nodeIds": []
+      }
+    ]
+  },
+  "error": null
+}
+```
+
+**Response Envelope (Signal → Pulse):**
+
+```jsonc
+{
+  "v": 1,
+  "id": "set-cohorts-response-456",
+  "cid": "set-cohorts-123",
+  "ts": "2025-11-20T12:34:56.790Z",
+  "origin": "signal",
+  "target": "pulse",
+  "domain": "graph",
+  "kind": "response",
+  "name": "setCohorts",
+  "priority": "high",
+  "payload": {
+    "ok": true
+  },
+  "error": null
 }
 ```
 
@@ -364,36 +455,59 @@ This may be used when only processing allocation changes are needed.
 
 Request a summary of the current engine graph.
 
-**Request**
+**Command Envelope (Pulse → Signal):**
 
-```json
+```jsonc
 {
-  "command": "graph.querySummary"
+  "v": 1,
+  "id": "query-summary-123",
+  "cid": null,
+  "ts": "2025-11-20T12:34:56.789Z",
+  "origin": "pulse",
+  "target": "signal",
+  "domain": "graph",
+  "kind": "command",
+  "name": "querySummary",
+  "priority": "normal",
+  "payload": {},
+  "error": null
 }
 ```
 
-**Response**
+**Response Envelope (Signal → Pulse):**
 
-```json
+```jsonc
 {
-  "replyTo": "graph.querySummary",
-  "graphId": "graph:project:current",
-  "channels": [
-    {
-      "channelId": "ch:master",
-      "nodeCount": 3,
-      "inputChannelIds": ["ch:bus:drums", "ch:bus:music"],
-      "outputChannelIds": [],
-      "hardwareOutputs": ["hw:mainOut"]
-    }
-  ],
-  "cohorts": [
-    {
-      "cohortId": "cohort:rt:master",
-      "mode": "realtime",
-      "channelIds": ["ch:master"]
-    }
-  ]
+  "v": 1,
+  "id": "query-summary-response-456",
+  "cid": "query-summary-123",
+  "ts": "2025-11-20T12:34:56.790Z",
+  "origin": "signal",
+  "target": "pulse",
+  "domain": "graph",
+  "kind": "response",
+  "name": "querySummary",
+  "priority": "normal",
+  "payload": {
+    "graphId": "graph:project:current",
+    "channels": [
+      {
+        "channelId": "ch:master",
+        "nodeCount": 3,
+        "inputChannelIds": ["ch:bus:drums", "ch:bus:music"],
+        "outputChannelIds": [],
+        "hardwareOutputs": ["hw:mainOut"]
+      }
+    ],
+    "cohorts": [
+      {
+        "cohortId": "cohort:rt:master",
+        "mode": "realtime",
+        "channelIds": ["ch:master"]
+      }
+    ]
+  },
+  "error": null
 }
 ```
 

@@ -95,11 +95,11 @@ All commands/events in this domain manipulate these conceptual entities.
 
 ### 3.1 Library Introspection
 
-**`pluginLibrary.requestSummary`**  
+**`pluginLibrary.requestSummary`** (command — domain: pluginLibrary)  
 Request a summary of the current library state.
 
 - No payload.
-- Pulse responds with `pluginLibrary.summary`.
+- Pulse emits `pluginLibrary.summary` event (not a direct response envelope).
 
 Used when the browser first opens, or when Aura reconnects.
 
@@ -118,7 +118,7 @@ Payload fields (illustrative):
   - `format?: ("vst3"|"clap"|"au")[]`
   - `features?: object` (e.g. `{ sidechain: true, ara: false }`)
 
-Pulse responds with `pluginLibrary.searchResults`.
+Pulse emits `pluginLibrary.searchResults` event (not a direct response envelope).
 
 ---
 
@@ -129,7 +129,7 @@ Payload fields:
 
 - `pluginIds: string[]` – stable plugin IDs.
 
-Pulse responds with `pluginLibrary.details`.
+Pulse emits `pluginLibrary.details` event (not a direct response envelope).
 
 ---
 
@@ -280,7 +280,7 @@ Payload fields (optional):
   - `tags?: string[]`
   - `containsPluginId?: string`
 
-Pulse responds with `pluginLibrary.chains`.
+Pulse emits `pluginLibrary.chains` event (not a direct response envelope).
 
 ---
 
@@ -327,7 +327,7 @@ Payload fields:
 - `pluginId: string`
 - `scopeFilter?: ("factory"|"user"|"project")[]`
 
-Pulse responds with `pluginLibrary.presets`.
+Pulse emits `pluginLibrary.presets` event (not a direct response envelope).
 
 ---
 
@@ -385,8 +385,8 @@ Pulse:
 
 ### 4.1 Library State
 
-**`pluginLibrary.summary`**  
-Sent in response to `pluginLibrary.requestSummary`.
+**`pluginLibrary.summary`** (event — domain: pluginLibrary)  
+Emitted in response to `pluginLibrary.requestSummary` command. This is an event, not a direct response envelope.
 
 Includes:
 - a minimal summary of all PluginEntries:
@@ -489,8 +489,8 @@ Payload fields:
 
 ---
 
-**`pluginLibrary.chains`**  
-Response to `pluginLibrary.requestChains`.
+**`pluginLibrary.chains`** (event — domain: pluginLibrary)  
+Emitted in response to `pluginLibrary.requestChains` command. This is an event, not a direct response envelope.
 
 Payload fields:
 
@@ -518,8 +518,8 @@ Payload fields:
 
 ---
 
-**`pluginLibrary.presets`**  
-Response to `pluginLibrary.requestPresets`.
+**`pluginLibrary.presets`** (event — domain: pluginLibrary)  
+Emitted in response to `pluginLibrary.requestPresets` command. This is an event, not a direct response envelope.
 
 Payload fields:
 

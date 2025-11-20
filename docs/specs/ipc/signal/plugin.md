@@ -129,34 +129,58 @@ Typical flows:
 
 Request a list of known/available plugins.
 
-**Request**
+**Command Envelope (Pulse → Signal):**
 
-```json
+```jsonc
 {
-  "command": "plugin.listAvailable",
-  "filters": {
-    "format": null,          // "vst3" | "clap" | "au" | null
-    "isInstrument": null     // true | false | null
-  }
+  "v": 1,
+  "id": "list-available-123",
+  "cid": null,
+  "ts": "2025-11-20T12:34:56.789Z",
+  "origin": "pulse",
+  "target": "signal",
+  "domain": "plugin",
+  "kind": "command",
+  "name": "listAvailable",
+  "priority": "normal",
+  "payload": {
+    "filters": {
+      "format": null,          // "vst3" | "clap" | "au" | null
+      "isInstrument": null     // true | false | null
+    }
+  },
+  "error": null
 }
 ```
 
-**Response**
+**Response Envelope (Signal → Pulse):**
 
-```json
+```jsonc
 {
-  "replyTo": "plugin.listAvailable",
-  "plugins": [
-    {
-      "pluginId": "plugin:vst3:FabFilter:ProQ3",
-      "format": "vst3",
-      "vendor": "FabFilter",
-      "name": "Pro-Q 3",
-      "version": "3.12.0",
-      "categories": ["EQ", "Filter"],
-      "isInstrument": false
-    }
-  ]
+  "v": 1,
+  "id": "list-available-response-456",
+  "cid": "list-available-123",
+  "ts": "2025-11-20T12:34:56.790Z",
+  "origin": "signal",
+  "target": "pulse",
+  "domain": "plugin",
+  "kind": "response",
+  "name": "listAvailable",
+  "priority": "normal",
+  "payload": {
+    "plugins": [
+      {
+        "pluginId": "plugin:vst3:FabFilter:ProQ3",
+        "format": "vst3",
+        "vendor": "FabFilter",
+        "name": "Pro-Q 3",
+        "version": "3.12.0",
+        "categories": ["EQ", "Filter"],
+        "isInstrument": false
+      }
+    ]
+  },
+  "error": null
 }
 ```
 
@@ -171,24 +195,48 @@ Semantics:
 
 Request a plugin rescan (full or partial).
 
-**Request**
+**Command Envelope (Pulse → Signal):**
 
-```json
+```jsonc
 {
-  "command": "plugin.rescan",
-  "options": {
-    "formats": ["vst3", "clap"],
-    "force": false
-  }
+  "v": 1,
+  "id": "rescan-123",
+  "cid": null,
+  "ts": "2025-11-20T12:34:56.789Z",
+  "origin": "pulse",
+  "target": "signal",
+  "domain": "plugin",
+  "kind": "command",
+  "name": "rescan",
+  "priority": "normal",
+  "payload": {
+    "options": {
+      "formats": ["vst3", "clap"],
+      "force": false
+    }
+  },
+  "error": null
 }
 ```
 
-**Response**
+**Response Envelope (Signal → Pulse):**
 
-```json
+```jsonc
 {
-  "replyTo": "plugin.rescan",
-  "scanId": "pluginScan:2025-11-18T12:00:00Z"
+  "v": 1,
+  "id": "rescan-response-456",
+  "cid": "rescan-123",
+  "ts": "2025-11-20T12:34:56.790Z",
+  "origin": "signal",
+  "target": "pulse",
+  "domain": "plugin",
+  "kind": "response",
+  "name": "rescan",
+  "priority": "normal",
+  "payload": {
+    "scanId": "pluginScan:2025-11-18T12:00:00Z"
+  },
+  "error": null
 }
 ```
 
@@ -207,26 +255,50 @@ Semantics:
 
 Create a new instance of a plugin.
 
-**Request**
+**Command Envelope (Pulse → Signal):**
 
-```json
+```jsonc
 {
-  "command": "plugin.createInstance",
-  "pluginId": "plugin:vst3:FabFilter:ProQ3",
-  "options": {
-    "initialPreset": null,
-    "deterministicHint": true
-  }
+  "v": 1,
+  "id": "create-instance-123",
+  "cid": null,
+  "ts": "2025-11-20T12:34:56.789Z",
+  "origin": "pulse",
+  "target": "signal",
+  "domain": "plugin",
+  "kind": "command",
+  "name": "createInstance",
+  "priority": "high",
+  "payload": {
+    "pluginId": "plugin:vst3:FabFilter:ProQ3",
+    "options": {
+      "initialPreset": null,
+      "deterministicHint": true
+    }
+  },
+  "error": null
 }
 ```
 
-**Response**
+**Response Envelope (Signal → Pulse):**
 
-```json
+```jsonc
 {
-  "replyTo": "plugin.createInstance",
-  "pluginInstanceId": "pluginInstance:abc123",
-  "pluginId": "plugin:vst3:FabFilter:ProQ3"
+  "v": 1,
+  "id": "create-instance-response-456",
+  "cid": "create-instance-123",
+  "ts": "2025-11-20T12:34:56.790Z",
+  "origin": "signal",
+  "target": "pulse",
+  "domain": "plugin",
+  "kind": "response",
+  "name": "createInstance",
+  "priority": "high",
+  "payload": {
+    "pluginInstanceId": "pluginInstance:abc123",
+    "pluginId": "plugin:vst3:FabFilter:ProQ3"
+  },
+  "error": null
 }
 ```
 
@@ -248,12 +320,43 @@ Semantics:
 
 Destroy a plugin instance that is no longer needed.
 
-**Request**
+**Command Envelope (Pulse → Signal):**
 
-```json
+```jsonc
 {
-  "command": "plugin.destroyInstance",
-  "pluginInstanceId": "pluginInstance:abc123"
+  "v": 1,
+  "id": "destroy-instance-123",
+  "cid": null,
+  "ts": "2025-11-20T12:34:56.789Z",
+  "origin": "pulse",
+  "target": "signal",
+  "domain": "plugin",
+  "kind": "command",
+  "name": "destroyInstance",
+  "priority": "high",
+  "payload": {
+    "pluginInstanceId": "pluginInstance:abc123"
+  },
+  "error": null
+}
+```
+
+**Response Envelope (Signal → Pulse):**
+
+```jsonc
+{
+  "v": 1,
+  "id": "destroy-instance-response-456",
+  "cid": "destroy-instance-123",
+  "ts": "2025-11-20T12:34:56.790Z",
+  "origin": "signal",
+  "target": "pulse",
+  "domain": "plugin",
+  "kind": "response",
+  "name": "destroyInstance",
+  "priority": "high",
+  "payload": {},
+  "error": null
 }
 ```
 
@@ -269,37 +372,61 @@ Semantics:
 
 Request extended information about a plugin type.
 
-**Request**
+**Command Envelope (Pulse → Signal):**
 
-```json
+```jsonc
 {
-  "command": "plugin.getInfo",
-  "pluginId": "plugin:vst3:FabFilter:ProQ3"
+  "v": 1,
+  "id": "get-info-123",
+  "cid": null,
+  "ts": "2025-11-20T12:34:56.789Z",
+  "origin": "pulse",
+  "target": "signal",
+  "domain": "plugin",
+  "kind": "command",
+  "name": "getInfo",
+  "priority": "normal",
+  "payload": {
+    "pluginId": "plugin:vst3:FabFilter:ProQ3"
+  },
+  "error": null
 }
 ```
 
-**Response**
+**Response Envelope (Signal → Pulse):**
 
-```json
+```jsonc
 {
-  "replyTo": "plugin.getInfo",
-  "pluginId": "plugin:vst3:FabFilter:ProQ3",
-  "format": "vst3",
-  "vendor": "FabFilter",
-  "name": "Pro-Q 3",
-  "version": "3.12.0",
-  "categories": ["EQ", "Filter"],
-  "isInstrument": false,
-  "io": {
-    "maxInputs": 10,
-    "maxOutputs": 10,
-    "supportsSidechain": true
+  "v": 1,
+  "id": "get-info-response-456",
+  "cid": "get-info-123",
+  "ts": "2025-11-20T12:34:56.790Z",
+  "origin": "signal",
+  "target": "pulse",
+  "domain": "plugin",
+  "kind": "response",
+  "name": "getInfo",
+  "priority": "normal",
+  "payload": {
+    "pluginId": "plugin:vst3:FabFilter:ProQ3",
+    "format": "vst3",
+    "vendor": "FabFilter",
+    "name": "Pro-Q 3",
+    "version": "3.12.0",
+    "categories": ["EQ", "Filter"],
+    "isInstrument": false,
+    "io": {
+      "maxInputs": 10,
+      "maxOutputs": 10,
+      "supportsSidechain": true
+    },
+    "capabilities": {
+      "supportsDoublePrecision": true,
+      "supportsMIDI": true,
+      "supportsMPE": false
+    }
   },
-  "capabilities": {
-    "supportsDoublePrecision": true,
-    "supportsMIDI": true,
-    "supportsMPE": false
-  }
+  "error": null
 }
 ```
 
@@ -316,34 +443,58 @@ Semantics:
 
 Request the parameter list for a plugin instance (or type, if supported).
 
-**Request**
+**Command Envelope (Pulse → Signal):**
 
-```json
+```jsonc
 {
-  "command": "plugin.getParameters",
-  "pluginInstanceId": "pluginInstance:abc123"
+  "v": 1,
+  "id": "get-parameters-123",
+  "cid": null,
+  "ts": "2025-11-20T12:34:56.789Z",
+  "origin": "pulse",
+  "target": "signal",
+  "domain": "plugin",
+  "kind": "command",
+  "name": "getParameters",
+  "priority": "normal",
+  "payload": {
+    "pluginInstanceId": "pluginInstance:abc123"
+  },
+  "error": null
 }
 ```
 
-**Response**
+**Response Envelope (Signal → Pulse):**
 
-```json
+```jsonc
 {
-  "replyTo": "plugin.getParameters",
-  "pluginInstanceId": "pluginInstance:abc123",
-  "parameters": [
-    {
-      "id": "param:cutoff",
-      "name": "Cutoff",
-      "unit": "Hz",
-      "min": 20.0,
-      "max": 20000.0,
-      "default": 1000.0,
-      "automationSafe": true,
-      "stepped": false,
-      "kind": "float" // "float" | "int" | "bool" | "enum"
-    }
-  ]
+  "v": 1,
+  "id": "get-parameters-response-456",
+  "cid": "get-parameters-123",
+  "ts": "2025-11-20T12:34:56.790Z",
+  "origin": "signal",
+  "target": "pulse",
+  "domain": "plugin",
+  "kind": "response",
+  "name": "getParameters",
+  "priority": "normal",
+  "payload": {
+    "pluginInstanceId": "pluginInstance:abc123",
+    "parameters": [
+      {
+        "id": "param:cutoff",
+        "name": "Cutoff",
+        "unit": "Hz",
+        "min": 20.0,
+        "max": 20000.0,
+        "default": 1000.0,
+        "automationSafe": true,
+        "stepped": false,
+        "kind": "float" // "float" | "int" | "bool" | "enum"
+      }
+    ]
+  },
+  "error": null
 }
 ```
 
@@ -360,31 +511,55 @@ Semantics:
 
 Request program/preset list for a plugin instance (if supported).
 
-**Request**
+**Command Envelope (Pulse → Signal):**
 
-```json
+```jsonc
 {
-  "command": "plugin.getPrograms",
-  "pluginInstanceId": "pluginInstance:abc123"
+  "v": 1,
+  "id": "get-programs-123",
+  "cid": null,
+  "ts": "2025-11-20T12:34:56.789Z",
+  "origin": "pulse",
+  "target": "signal",
+  "domain": "plugin",
+  "kind": "command",
+  "name": "getPrograms",
+  "priority": "normal",
+  "payload": {
+    "pluginInstanceId": "pluginInstance:abc123"
+  },
+  "error": null
 }
 ```
 
-**Response**
+**Response Envelope (Signal → Pulse):**
 
-```json
+```jsonc
 {
-  "replyTo": "plugin.getPrograms",
-  "pluginInstanceId": "pluginInstance:abc123",
-  "programs": [
-    {
-      "index": 0,
-      "name": "Init"
-    },
-    {
-      "index": 1,
-      "name": "Bright EQ"
-    }
-  ]
+  "v": 1,
+  "id": "get-programs-response-456",
+  "cid": "get-programs-123",
+  "ts": "2025-11-20T12:34:56.790Z",
+  "origin": "signal",
+  "target": "pulse",
+  "domain": "plugin",
+  "kind": "response",
+  "name": "getPrograms",
+  "priority": "normal",
+  "payload": {
+    "pluginInstanceId": "pluginInstance:abc123",
+    "programs": [
+      {
+        "index": 0,
+        "name": "Init"
+      },
+      {
+        "index": 1,
+        "name": "Bright EQ"
+      }
+    ]
+  },
+  "error": null
 }
 ```
 
@@ -398,13 +573,44 @@ Semantics:
 
 Set the current program for a plugin instance.
 
-**Request**
+**Command Envelope (Pulse → Signal):**
 
-```json
+```jsonc
 {
-  "command": "plugin.setProgram",
-  "pluginInstanceId": "pluginInstance:abc123",
-  "index": 1
+  "v": 1,
+  "id": "set-program-123",
+  "cid": null,
+  "ts": "2025-11-20T12:34:56.789Z",
+  "origin": "pulse",
+  "target": "signal",
+  "domain": "plugin",
+  "kind": "command",
+  "name": "setProgram",
+  "priority": "normal",
+  "payload": {
+    "pluginInstanceId": "pluginInstance:abc123",
+    "index": 1
+  },
+  "error": null
+}
+```
+
+**Response Envelope (Signal → Pulse):**
+
+```jsonc
+{
+  "v": 1,
+  "id": "set-program-response-456",
+  "cid": "set-program-123",
+  "ts": "2025-11-20T12:34:56.790Z",
+  "origin": "signal",
+  "target": "pulse",
+  "domain": "plugin",
+  "kind": "response",
+  "name": "setProgram",
+  "priority": "normal",
+  "payload": {},
+  "error": null
 }
 ```
 
@@ -419,25 +625,49 @@ Semantics:
 
 Get the serialised state blob for a plugin instance.
 
-**Request**
+**Command Envelope (Pulse → Signal):**
 
-```json
+```jsonc
 {
-  "command": "plugin.getState",
-  "pluginInstanceId": "pluginInstance:abc123"
+  "v": 1,
+  "id": "get-state-123",
+  "cid": null,
+  "ts": "2025-11-20T12:34:56.789Z",
+  "origin": "pulse",
+  "target": "signal",
+  "domain": "plugin",
+  "kind": "command",
+  "name": "getState",
+  "priority": "normal",
+  "payload": {
+    "pluginInstanceId": "pluginInstance:abc123"
+  },
+  "error": null
 }
 ```
 
-**Response**
+**Response Envelope (Signal → Pulse):**
 
-```json
+```jsonc
 {
-  "replyTo": "plugin.getState",
-  "pluginInstanceId": "pluginInstance:abc123",
-  "state": {
-    "format": "opaque",
-    "dataBase64": "AAECAwQFBgcICQoL..." 
-  }
+  "v": 1,
+  "id": "get-state-response-456",
+  "cid": "get-state-123",
+  "ts": "2025-11-20T12:34:56.790Z",
+  "origin": "signal",
+  "target": "pulse",
+  "domain": "plugin",
+  "kind": "response",
+  "name": "getState",
+  "priority": "normal",
+  "payload": {
+    "pluginInstanceId": "pluginInstance:abc123",
+    "state": {
+      "format": "opaque",
+      "dataBase64": "AAECAwQFBgcICQoL..." 
+    }
+  },
+  "error": null
 }
 ```
 
@@ -453,19 +683,50 @@ Semantics:
 
 Set the serialised state blob for a plugin instance.
 
-**Request**
+**Command Envelope (Pulse → Signal):**
 
-```json
+```jsonc
 {
-  "command": "plugin.setState",
-  "pluginInstanceId": "pluginInstance:abc123",
-  "state": {
-    "format": "opaque",
-    "dataBase64": "AAECAwQFBgcICQoL..." 
+  "v": 1,
+  "id": "set-state-123",
+  "cid": null,
+  "ts": "2025-11-20T12:34:56.789Z",
+  "origin": "pulse",
+  "target": "signal",
+  "domain": "plugin",
+  "kind": "command",
+  "name": "setState",
+  "priority": "normal",
+  "payload": {
+    "pluginInstanceId": "pluginInstance:abc123",
+    "state": {
+      "format": "opaque",
+      "dataBase64": "AAECAwQFBgcICQoL..." 
+    },
+    "options": {
+      "allowPartial": true
+    }
   },
-  "options": {
-    "allowPartial": true
-  }
+  "error": null
+}
+```
+
+**Response Envelope (Signal → Pulse):**
+
+```jsonc
+{
+  "v": 1,
+  "id": "set-state-response-456",
+  "cid": "set-state-123",
+  "ts": "2025-11-20T12:34:56.790Z",
+  "origin": "signal",
+  "target": "pulse",
+  "domain": "plugin",
+  "kind": "response",
+  "name": "setState",
+  "priority": "normal",
+  "payload": {},
+  "error": null
 }
 ```
 
@@ -481,23 +742,47 @@ Semantics:
 
 Request an explicit determinism assessment for a plugin type or instance.
 
-**Request**
+**Command Envelope (Pulse → Signal):**
 
-```json
+```jsonc
 {
-  "command": "plugin.assessDeterminism",
-  "pluginId": "plugin:vst3:FabFilter:ProQ3"
+  "v": 1,
+  "id": "assess-determinism-123",
+  "cid": null,
+  "ts": "2025-11-20T12:34:56.789Z",
+  "origin": "pulse",
+  "target": "signal",
+  "domain": "plugin",
+  "kind": "command",
+  "name": "assessDeterminism",
+  "priority": "normal",
+  "payload": {
+    "pluginId": "plugin:vst3:FabFilter:ProQ3"
+  },
+  "error": null
 }
 ```
 
-**Response**
+**Response Envelope (Signal → Pulse):**
 
-```json
+```jsonc
 {
-  "replyTo": "plugin.assessDeterminism",
-  "pluginId": "plugin:vst3:FabFilter:ProQ3",
-  "deterministic": true,
-  "notes": "No known time-dependent or random modulation internally."
+  "v": 1,
+  "id": "assess-determinism-response-456",
+  "cid": "assess-determinism-123",
+  "ts": "2025-11-20T12:34:56.790Z",
+  "origin": "signal",
+  "target": "pulse",
+  "domain": "plugin",
+  "kind": "response",
+  "name": "assessDeterminism",
+  "priority": "normal",
+  "payload": {
+    "pluginId": "plugin:vst3:FabFilter:ProQ3",
+    "deterministic": true,
+    "notes": "No known time-dependent or random modulation internally."
+  },
+  "error": null
 }
 ```
 

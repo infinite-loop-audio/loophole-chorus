@@ -301,9 +301,9 @@ Includes:
 
 ### 4.5 Generic Diagnostic Events
 
-#### **`engineDiagnostics.snapshotUpdated`**
+#### **`engineDiagnostics.snapshotUpdated`** (event — domain: engineDiagnostics)
 
-Response to `engineDiagnostics.requestSnapshot`.
+Emitted in response to `engineDiagnostics.requestSnapshot` command. This is an event, not a direct response envelope.
 
 Contains a structured snapshot:
 

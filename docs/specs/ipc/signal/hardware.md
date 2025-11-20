@@ -128,37 +128,60 @@ Typical flows:
 
 List available audio input and output devices.
 
-**Request**
+**Command Envelope (Pulse → Signal):**
 
-```json
+```jsonc
 {
-  "command": "hardware.listAudioDevices"
+  "v": 1,
+  "id": "list-audio-devices-123",
+  "cid": null,
+  "ts": "2025-11-20T12:34:56.789Z",
+  "origin": "pulse",
+  "target": "signal",
+  "domain": "hardware",
+  "kind": "command",
+  "name": "listAudioDevices",
+  "priority": "normal",
+  "payload": {},
+  "error": null
 }
 ```
 
-**Response**
+**Response Envelope (Signal → Pulse):**
 
-```json
+```jsonc
 {
-  "replyTo": "hardware.listAudioDevices",
-  "devices": [
-    {
-      "deviceId": "audio:mac:CoreAudio:XYZ123",
-      "osDeviceId": "CoreAudioDevice:0x00112233",
-      "name": "RME Babyface Pro FS",
-      "manufacturer": "RME",
-      "isDefaultInput": true,
-      "isDefaultOutput": true,
-      "inputChannels": 8,
-      "outputChannels": 8,
-      "sampleRates": [44100, 48000, 96000],
-      "preferredSampleRate": 48000,
-      "bufferSizes": [64, 128, 256, 512, 1024],
-      "minBufferSize": 64,
-      "maxBufferSize": 2048,
-      "canChangeSampleRate": true
-    }
-  ]
+  "v": 1,
+  "id": "list-audio-devices-response-456",
+  "cid": "list-audio-devices-123",
+  "ts": "2025-11-20T12:34:56.790Z",
+  "origin": "signal",
+  "target": "pulse",
+  "domain": "hardware",
+  "kind": "response",
+  "name": "listAudioDevices",
+  "priority": "normal",
+  "payload": {
+    "devices": [
+      {
+        "deviceId": "audio:mac:CoreAudio:XYZ123",
+        "osDeviceId": "CoreAudioDevice:0x00112233",
+        "name": "RME Babyface Pro FS",
+        "manufacturer": "RME",
+        "isDefaultInput": true,
+        "isDefaultOutput": true,
+        "inputChannels": 8,
+        "outputChannels": 8,
+        "sampleRates": [44100, 48000, 96000],
+        "preferredSampleRate": 48000,
+        "bufferSizes": [64, 128, 256, 512, 1024],
+        "minBufferSize": 64,
+        "maxBufferSize": 2048,
+        "canChangeSampleRate": true
+      }
+    ]
+  },
+  "error": null
 }
 ```
 
@@ -178,34 +201,57 @@ Semantics:
 
 List available MIDI input and output ports.
 
-**Request**
+**Command Envelope (Pulse → Signal):**
 
-```json
+```jsonc
 {
-  "command": "hardware.listMidiDevices"
+  "v": 1,
+  "id": "list-midi-devices-123",
+  "cid": null,
+  "ts": "2025-11-20T12:34:56.789Z",
+  "origin": "pulse",
+  "target": "signal",
+  "domain": "hardware",
+  "kind": "command",
+  "name": "listMidiDevices",
+  "priority": "normal",
+  "payload": {},
+  "error": null
 }
 ```
 
-**Response**
+**Response Envelope (Signal → Pulse):**
 
-```json
+```jsonc
 {
-  "replyTo": "hardware.listMidiDevices",
-  "inputs": [
-    {
-      "portId": "midiIn:mac:0",
-      "name": "Keystep 37",
-      "manufacturer": "Arturia",
-      "supportsMPE": false
-    }
-  ],
-  "outputs": [
-    {
-      "portId": "midiOut:mac:0",
-      "name": "Keystep 37",
-      "manufacturer": "Arturia"
-    }
-  ]
+  "v": 1,
+  "id": "list-midi-devices-response-456",
+  "cid": "list-midi-devices-123",
+  "ts": "2025-11-20T12:34:56.790Z",
+  "origin": "signal",
+  "target": "pulse",
+  "domain": "hardware",
+  "kind": "response",
+  "name": "listMidiDevices",
+  "priority": "normal",
+  "payload": {
+    "inputs": [
+      {
+        "portId": "midiIn:mac:0",
+        "name": "Keystep 37",
+        "manufacturer": "Arturia",
+        "supportsMPE": false
+      }
+    ],
+    "outputs": [
+      {
+        "portId": "midiOut:mac:0",
+        "name": "Keystep 37",
+        "manufacturer": "Arturia"
+      }
+    ]
+  },
+  "error": null
 }
 ```
 
@@ -253,29 +299,52 @@ Semantics:
 
 Query the current effective audio hardware configuration.
 
-**Request**
+**Command Envelope (Pulse → Signal):**
 
-```json
+```jsonc
 {
-  "command": "hardware.getAudioConfig"
+  "v": 1,
+  "id": "get-audio-config-123",
+  "cid": null,
+  "ts": "2025-11-20T12:34:56.789Z",
+  "origin": "pulse",
+  "target": "signal",
+  "domain": "hardware",
+  "kind": "command",
+  "name": "getAudioConfig",
+  "priority": "normal",
+  "payload": {},
+  "error": null
 }
 ```
 
-**Response**
+**Response Envelope (Signal → Pulse):**
 
-```json
+```jsonc
 {
-  "replyTo": "hardware.getAudioConfig",
-  "config": {
-    "inputDeviceId": "audio:mac:CoreAudio:XYZ123",
-    "outputDeviceId": "audio:mac:CoreAudio:XYZ123",
-    "sampleRate": 47999.8,
-    "bufferSize": 256,
-    "options": {
-      "exclusiveMode": true,
-      "lowLatencyMode": true
+  "v": 1,
+  "id": "get-audio-config-response-456",
+  "cid": "get-audio-config-123",
+  "ts": "2025-11-20T12:34:56.790Z",
+  "origin": "signal",
+  "target": "pulse",
+  "domain": "hardware",
+  "kind": "response",
+  "name": "getAudioConfig",
+  "priority": "normal",
+  "payload": {
+    "config": {
+      "inputDeviceId": "audio:mac:CoreAudio:XYZ123",
+      "outputDeviceId": "audio:mac:CoreAudio:XYZ123",
+      "sampleRate": 47999.8,
+      "bufferSize": 256,
+      "options": {
+        "exclusiveMode": true,
+        "lowLatencyMode": true
+      }
     }
-  }
+  },
+  "error": null
 }
 ```
 

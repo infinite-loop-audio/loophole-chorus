@@ -204,6 +204,7 @@ Every normal IPC message is a single JSON object with this shape:
 
   **Naming Conventions:**
   - **Commands and responses share the exact same `name`**, differentiated only by `kind`. For example, a `client.hello` command (kind="command") and its response (kind="response") both use `name: "hello"`.
+  - **Responses must always match their command's `name` exactly**. Variants like `helloResponse`, `client.helloResponse`, or `project.openedResponse` are invalid.
   - **Events must never reuse a command name**. Events use distinct names such as `"connected"`, `"disconnected"`, `"stateChanged"` that do not conflict with command names.
   - The `name` field must not contain domain separators (e.g. `"gesture.begin"` is invalid; use `domain: "gesture"`, `name: "begin"` instead).
 
@@ -272,10 +273,12 @@ permitted. All cross-layer communication flows through Pulse.
     and what form they take.
 
 - `kind = "response"`  
-  - A reply to a command.
+  - A direct reply to a command.
   - Uses `cid = id` of the original command.
-  - **Shares the same `name` as the original command**, differentiated only by `kind`.
+  - **Must share the exact same `name` as the original command**, differentiated only by `kind`.
+  - For example, if a command is `domain: "client", kind: "command", name: "hello"`, its response must be `domain: "client", kind: "response", name: "hello"`.
   - A `response` may itself be a success or an error, depending on domain design.
+  - **Only direct replies to commands use `kind: "response"`**. Messages that are not direct replies to specific commands must use `kind: "event"` instead.
 
 - `kind = "event"`  
   - Fire-and-forget notification.
