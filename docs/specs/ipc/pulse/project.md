@@ -296,7 +296,7 @@ internally consistent at the moment they are emitted.
 
 ### Domain-Level Scoping (Clarified)
 
-Snapshots apply to the **project domain only**. Other domains (tracks, lanes,
+Snapshots apply to the **project domain only**. Other domains (track, lane,
 timebase, mixer, routing, etc.) will define their own snapshot formats where
 needed. Aura should treat each domain independently and apply snapshot updates
 per-domain.

@@ -97,7 +97,7 @@ EditOperation {
   operationId;
   timestamp;
   userId;
-  domain: string;          // tracks, clips, routing, etc.
+  domain: string;          // track, clip, routing, etc.
   command: string;         // e.g. "clip.split", "node.move"
   payload: object;
   baseVersion: VersionId;
