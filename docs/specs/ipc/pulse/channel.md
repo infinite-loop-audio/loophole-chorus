@@ -173,7 +173,7 @@ configuration (LaneStreamNode(s) + FaderNode/PanNode).
 
 Pulse then emits:
 
-- `channel.graphReset`,  
+- `graphReset` (event — domain: channel),  
 - followed by Node-domain events describing the newly created Node graph.
 
 ---
@@ -182,7 +182,7 @@ Pulse then emits:
 
 ### 4.1 Structural Events
 
-**`channel.created`**  
+**`created`** (event — domain: channel)  
 A Channel has been created (either due to Track enabling or via routing/project
 configuration).
 
@@ -193,7 +193,7 @@ Includes:
 - `role` (if applicable),
 - initial node list.
 
-**`channel.deleted`**  
+**`deleted`** (event — domain: channel)  
 The Channel has been removed (either due to Track disabling or routing/project
 configuration changes).
 
@@ -201,19 +201,19 @@ configuration changes).
 
 ### 4.2 Configuration Events
 
-**`channel.inputChanged`**  
+**`inputChanged`** (event — domain: channel)  
 Input configuration updated.
 
-**`channel.outputChanged`**  
+**`outputChanged`** (event — domain: channel)  
 Output routing updated.
 
-**`channel.sidechainSourceChanged`**  
+**`sidechainSourceChanged`** (event — domain: channel)  
 Sidechain routing updated.
 
-**`channel.gainChanged`**  
+**`gainChanged`** (event — domain: channel)  
 Fader gain updated.
 
-**`channel.panChanged`**  
+**`panChanged`** (event — domain: channel)  
 Pan/balance updated.
 
 ---
@@ -224,7 +224,7 @@ Metering data itself is sent via binary meter streams, not Channel events.
 
 Channel domain may emit:
 
-**`channel.meteringConfigChanged`**  
+**`meteringConfigChanged`** (event — domain: channel)  
 Static meter configuration updated.
 
 ---
@@ -246,7 +246,7 @@ Channel snapshot data binds them together.
 
 ### Snapshot Application
 
-When Aura receives a `project.snapshot` that includes this domain, it MUST treat
+When Aura receives a `snapshot` (kind: snapshot — domain: project) that includes this domain, it MUST treat
 the snapshot as the **authoritative** representation of the current state for
 this domain.
 

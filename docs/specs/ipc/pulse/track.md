@@ -188,28 +188,32 @@ occur (e.g. as part of snapshot generation).
 
 ### 3.1 Structural Events
 
-**`track.created`**  
+**`created`** (event — domain: track)  
 Indicates a Track has been created. Includes identity, hierarchy, name, colour,
 flags, processing policy and initial Channel attachment state.
 
-**`track.deleted`**  
+**`deleted`** (event — domain: track)  
 Indicates a Track has been removed. Aura should drop any associated UI state.
 
-**`track.moved`**  
+**`moved`** (event — domain: track)  
 Indicates a Track has been reparented or reordered. Includes old and new
 parent/index information.
+
+**`updated`** (event — domain: track)  
+Indicates a Track has been updated (e.g. renamed, parent changed, flags changed).
+Includes the updated Track identity and relevant fields.
 
 ---
 
 ### 3.2 Identity and Presentation Events
 
-**`track.renamed`**  
+**`renamed`** (event — domain: track)  
 Name successfully updated.
 
-**`track.colourChanged`**  
+**`colourChanged`** (event — domain: track)  
 Colour has changed.
 
-**`track.iconChanged`**  
+**`iconChanged`** (event — domain: track)  
 Icon metadata updated.
 
 (Pulse may choose to combine these into a single metadata event depending on
@@ -219,10 +223,10 @@ internal design, but this specification expresses them separately.)
 
 ### 3.3 Flag and Policy Events
 
-**`track.flagsChanged`**  
+**`flagsChanged`** (event — domain: track)  
 Mute/solo/arm/monitor flags successfully updated.
 
-**`track.processingPolicyChanged`**  
+**`processingPolicyChanged`** (event — domain: track)  
 Processing policy hint has changed. Aura may visualise this but the meaning
 is enforced by Pulse and Signal.
 
@@ -230,7 +234,7 @@ is enforced by Pulse and Signal.
 
 ### 3.4 Channel Binding Events
 
-**`track.channelBindingChanged`**  
+**`channelBindingChanged`** (event — domain: track)  
 Emitted when a Track-owned Channel is attached to or detached from a Track.
 
 Aura may use this to update mixer visibility or channel strip presentation.

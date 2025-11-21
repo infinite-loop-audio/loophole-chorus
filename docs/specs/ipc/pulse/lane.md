@@ -209,7 +209,7 @@ changes due to higher-level operations (e.g. Clip or Track snapshot loads).
 
 ### 4.1 Structural Events
 
-**`lane.created`**  
+**`created`** (event — domain: lane)  
 A new Lane has been created. Includes:
 
 - `laneId`,
@@ -217,39 +217,39 @@ A new Lane has been created. Includes:
 - `laneType`,
 - initial presentation metadata.
 
-**`lane.deleted`**  
+**`deleted`** (event — domain: lane)  
 Indicates a Lane has been removed.
 
-**`lane.attachedToClip`**  
+**`attachedToClip`** (event — domain: lane)  
 Lane now appears within the Clip.
 
-**`lane.detachedFromClip`**  
-Lane removed from the Clip’s lane list.
+**`detachedFromClip`** (event — domain: lane)  
+Lane removed from the Clip's lane list.
 
-**`lane.reorderedInClip`**  
+**`reorderedInClip`** (event — domain: lane)  
 Presentation ordering changed for a Clip.
 
 ---
 
 ### 4.2 Identity and Presentation Events
 
-**`lane.renamed`**  
-The Lane’s name has been updated.
+**`renamed`** (event — domain: lane)  
+The Lane's name has been updated.
 
-**`lane.colourChanged`**  
+**`colourChanged`** (event — domain: lane)  
 Colour metadata updated.
 
-**`lane.collapsedChanged`**  
+**`collapsedChanged`** (event — domain: lane)  
 Collapsed/expanded state updated.
 
 ---
 
 ### 4.3 Routing Events
 
-**`lane.laneStreamChanged`**  
+**`laneStreamChanged`** (event — domain: lane)  
 The Lane's associated LaneStreamNode has changed.
 
-**`lane.sendLevelChanged`**  
+**`sendLevelChanged`** (event — domain: lane)  
 Mixing or routing weight updated.
 
 Pulse may dispatch additional Channel or Node domain events if the Lane's
@@ -274,7 +274,7 @@ Lane snapshot entries include:
 
 ### Snapshot Application
 
-When Aura receives a `project.snapshot` that includes this domain, it MUST treat
+When Aura receives a `snapshot` (kind: snapshot — domain: project) that includes this domain, it MUST treat
 the snapshot as the **authoritative** representation of the current state for
 this domain.
 

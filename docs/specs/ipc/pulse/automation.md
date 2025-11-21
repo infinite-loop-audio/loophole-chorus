@@ -345,7 +345,7 @@ Pulse emits automation events:
 
 ### 4.1 Envelope Events
 
-**`automation.envelopeCreated`**  
+**`envelopeCreated`** (event — domain: automation)  
 A new envelope is available.
 
 Includes:
@@ -355,23 +355,23 @@ Includes:
 - `parameterId`,
 - optional initial summary (e.g. bounds).
 
-**`automation.envelopeDeleted`**  
+**`envelopeDeleted`** (event — domain: automation)  
 Envelope has been removed.
 
 ---
 
 ### 4.2 Point Events
 
-**`automation.pointAdded`**  
+**`pointAdded`** (event — domain: automation)  
 Point has been added to an envelope.
 
-**`automation.pointUpdated`**  
+**`pointUpdated`** (event — domain: automation)  
 Point has changed (time/value/shape).
 
-**`automation.pointDeleted`**  
+**`pointDeleted`** (event — domain: automation)  
 Point has been removed.
 
-**`automation.rangeChanged`**  
+**`rangeChanged`** (event — domain: automation)  
 Used when Pulse performs bulk operations (e.g. clear, move, scale) and prefers
 to send a single event rather than many point-level events. Aura may request
 full envelope data if needed.
@@ -380,10 +380,10 @@ full envelope data if needed.
 
 ### 4.3 Mode and Write-State Events
 
-**`automation.modeChanged`**  
+**`modeChanged`** (event — domain: automation)  
 Automation mode for a target has changed.
 
-**`automation.writeArmedChanged`**  
+**`writeArmedChanged`** (event — domain: automation)  
 Write-arming state has changed for a parameter or context.
 
 These events keep Aura’s mode indicators and transport controls in sync with
@@ -407,7 +407,7 @@ Automation is an integral part of project snapshots. Snapshot data includes:
 
 ### Snapshot Application
 
-When Aura receives a `project.snapshot` that includes this domain, it MUST treat
+When Aura receives a `snapshot` (kind: snapshot — domain: project) that includes this domain, it MUST treat
 the snapshot as the **authoritative** representation of the current state for
 this domain.
 

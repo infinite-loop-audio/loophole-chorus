@@ -152,7 +152,7 @@ Fields:
 - `nodeId`,
 - `newIndex`.
 
-Pulse updates the graph ordering and emits `node.moved`.
+Pulse updates the graph ordering and emits `moved` (event — domain: node).
 
 ---
 
@@ -177,7 +177,7 @@ Payload fields:
 - `nodeId` (must be a StackNode),
 - `activeIndex` (zero-based index of the variant to activate).
 
-Pulse updates the active variant and emits `node.activeVariantChanged`. From the perspective of routing and channel topology, the StackNode continues to be treated as a single processor.
+Pulse updates the active variant and emits `activeVariantChanged` (event — domain: node). From the perspective of routing and channel topology, the StackNode continues to be treated as a single processor.
 
 **`node.addVariant`**  
 Add a new plugin variant to a StackNode.
@@ -188,7 +188,7 @@ Payload fields:
 - `pluginFormat` (VST3/CLAP/AU, required if `pluginIdentifier` is provided),
 - `insertIndex` (optional; defaults to end of variants list).
 
-Pulse adds the variant and emits `node.variantAdded`.
+Pulse adds the variant and emits `variantAdded` (event — domain: node).
 
 **`node.removeVariant`**  
 Remove a variant from a StackNode.
@@ -197,7 +197,7 @@ Payload fields:
 - `nodeId` (must be a StackNode),
 - `variantIndex` (zero-based index of the variant to remove).
 
-Pulse removes the variant. If the removed variant was active, Pulse activates variant 0 (or the next available variant). Pulse emits `node.variantRemoved`.
+Pulse removes the variant. If the removed variant was active, Pulse activates variant 0 (or the next available variant). Pulse emits `variantRemoved` (event — domain: node).
 
 **`node.markVariantMissing`**  
 Mark a variant as missing/unavailable (typically used during project load when a plugin cannot be instantiated).
@@ -207,7 +207,7 @@ Payload fields:
 - `variantIndex`,
 - `missing: bool`.
 
-Pulse marks the variant and emits `node.variantMetadataChanged`. Missing variants preserve their original plugin identifier and state but are not instantiated in Signal.
+Pulse marks the variant and emits `variantMetadataChanged` (event — domain: node). Missing variants preserve their original plugin identifier and state but are not instantiated in Signal.
 
 ---
 
@@ -240,7 +240,7 @@ propagate from higher-level model updates.
 
 ### 4.1 Structural Events
 
-**`node.added`**  
+**`added`** (event — domain: node)  
 Node created. Includes:
 
 - `nodeId`,
@@ -249,48 +249,48 @@ Node created. Includes:
 - `index`,
 - initial metadata.
 
-**`node.removed`**  
+**`removed`** (event — domain: node)  
 Node removed from the Channel.
 
-**`node.moved`**  
+**`moved`** (event — domain: node)  
 Node reordered within its Channel.
 
 ---
 
 ### 4.2 State and Activation Events
 
-**`node.enabledChanged`**  
+**`enabledChanged`** (event — domain: node)  
 Node enabled/disabled.
 
-**`node.bypassChanged`**  
+**`bypassChanged`** (event — domain: node)  
 Bypass state updated.
 
-**`node.capabilitiesChanged`**  
+**`capabilitiesChanged`** (event — domain: node)  
 Capabilities modified.
 
 ---
 
 ### 4.3 Fault and Metadata Events
 
-**`node.faulted`**  
+**`faulted`** (event — domain: node)  
 Indicates a plugin or DSP failure. Aura may visualise this in the UI.  
 Pulse may re-route or disable the Node as required.
 
-**`node.metadataChanged`**  
+**`metadataChanged`** (event — domain: node)  
 For presentation updates (e.g. name, icon).
 
 ### 4.4 StackNode Variant Events
 
 The following events are emitted for StackNode variant operations:
 
-**`node.activeVariantChanged`**  
+**`activeVariantChanged`** (event — domain: node)  
 The active variant of a StackNode has changed.
 
 Payload includes:
 - `nodeId`,
 - `activeIndex` (new active variant index).
 
-**`node.variantAdded`**  
+**`variantAdded`** (event — domain: node)  
 A new variant has been added to a StackNode.
 
 Payload includes:
@@ -301,14 +301,14 @@ Payload includes:
 - `pluginFormat` (if provided),
 - `missing: bool`.
 
-**`node.variantRemoved`**  
+**`variantRemoved`** (event — domain: node)  
 A variant has been removed from a StackNode.
 
 Payload includes:
 - `nodeId`,
 - `variantIndex` (the removed variant's index).
 
-**`node.variantMetadataChanged`**  
+**`variantMetadataChanged`** (event — domain: node)  
 Variant metadata has been updated (e.g. missing status, plugin identifier).
 
 Payload includes:
@@ -344,7 +344,7 @@ For StackNodes, snapshot entries additionally include:
 
 ### Snapshot Application
 
-When Aura receives a `project.snapshot` that includes this domain, it MUST treat
+When Aura receives a `snapshot` (kind: snapshot — domain: project) that includes this domain, it MUST treat
 the snapshot as the **authoritative** representation of the current state for
 this domain.
 

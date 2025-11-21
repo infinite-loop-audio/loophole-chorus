@@ -127,11 +127,11 @@ Apply updated metadata such as author, description, notes or tags.
 
 ### 2.4 Inspection
 
-**`project.requestMeta`**
-Request that Pulse emit the project’s current metadata via `project.meta`.
+**`requestMeta`** (command — domain: project)  
+Request that Pulse emit the project's current metadata via a `meta` event (kind: event — domain: project).
 
-**`project.requestSnapshot`**
-Request a full project snapshot via `project.snapshot`.
+**`requestSnapshot`** (command — domain: project)  
+Request a full project snapshot via `snapshot` (kind: snapshot — domain: project).
 
 ---
 
@@ -139,58 +139,58 @@ Request a full project snapshot via `project.snapshot`.
 
 ### 3.1 Lifecycle Events
 
-**`project.loaded`**
+**`loaded`** (event — domain: project)  
 Emitted after Pulse has successfully loaded the project into memory following
 `project.open` or `project.new`.
 This event does **not** contain project data.
 
-Following `project.loaded`, Pulse performs fresh cohort assignment and prepares
-graph rebuild instructions for Signal. The subsequent `project.snapshot` event
+Following `loaded`, Pulse performs fresh cohort assignment and prepares
+graph rebuild instructions for Signal. The subsequent `snapshot` event (kind: snapshot)
 carries the complete project state to Aura.
 
-**`project.loadFailed`**
+**`loadFailed`** (event — domain: project)  
 The project could not be opened due to file I/O, format or version issues.
 
-**`project.closed`**
+**`closed`** (event — domain: project)  
 The project was closed and the model has been cleared.
 
 ---
 
 ### 3.2 Persistence Events
 
-**`project.draftSaved`**
+**`draftSaved`** (event — domain: project)  
 Draft state successfully persisted.
 
-**`project.draftSaveFailed`**
+**`draftSaveFailed`** (event — domain: project)  
 Draft save failed.
 
-**`project.saved`**
+**`saved`** (event — domain: project)  
 Primary project file successfully committed via `project.save` or
 `project.saveAs`.
 
-**`project.saveFailed`**
+**`saveFailed`** (event — domain: project)  
 Primary commit failed.
 
 ---
 
 ### 3.3 Identity and Metadata Events
 
-**`project.renamed`**
+**`renamed`** (event — domain: project)  
 Emitted after a successful rename.
 
-**`project.renameFailed`**
+**`renameFailed`** (event — domain: project)  
 Rename was rejected or failed.
 
-**`project.moved`**
+**`moved`** (event — domain: project)  
 Primary project location successfully moved.
 
-**`project.moveFailed`**
+**`moveFailed`** (event — domain: project)  
 Move failed.
 
-**`project.metaUpdated`**
+**`metaUpdated`** (event — domain: project)  
 Metadata successfully updated.
 
-**`project.metaUpdateFailed`**
+**`metaUpdateFailed`** (event — domain: project)  
 Metadata update failed validation or persistence.
 
 ---
@@ -237,13 +237,13 @@ keys. Aura MUST treat unknown fields as opaque extensions.
 
 ### Emission Rules (Clarified)
 
-- `project.loaded` **never carries data**. It only indicates that a project has
+- `loaded` (event — domain: project) **never carries data**. It only indicates that a project has
   been successfully opened and is resident in memory.
 
-- `project.snapshot` MUST always follow `project.loaded` and MUST be the **only**
+- `snapshot` (kind: snapshot — domain: project) MUST always follow `loaded` and MUST be the **only**
   source of authoritative project state visible to Aura.
 
-- `project.snapshot` MUST also be emitted:
+- `snapshot` MUST also be emitted:
   - after `project.new`,
   - after `project.save`, `project.saveAs`, or `project.saveDraft` (if state changed),
   - after `project.updateMeta`,
@@ -257,11 +257,11 @@ state for the Project domain when receiving one.
 
 ## 4. Snapshot Semantics
 
-Pulse emits `project.snapshot` to provide Aura with a complete representation of
-the current project. This differs from `project.loaded`:
+Pulse emits `snapshot` (kind: snapshot — domain: project) to provide Aura with a complete representation of
+the current project. This differs from `loaded` (event — domain: project):
 
-- `project.loaded` indicates that the project exists in memory,
-- `project.snapshot` conveys the actual project data.
+- `loaded` indicates that the project exists in memory,
+- `snapshot` conveys the actual project data.
 
 Snapshots may be used for:
 
@@ -272,7 +272,7 @@ Snapshots may be used for:
 
 ### Snapshot Application
 
-When Aura receives a `project.snapshot` that includes this domain, it MUST treat
+When Aura receives a `snapshot` (kind: snapshot — domain: project) that includes this domain, it MUST treat
 the snapshot as the **authoritative** representation of the current state for
 this domain.
 

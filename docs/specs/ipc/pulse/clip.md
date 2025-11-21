@@ -82,7 +82,7 @@ Payload fields include:
 - optional initial lane list (if omitted, empty Clip is created),
 - optional flags such as initial loop state.
 
-Pulse assigns a new `clipId` and emits `clip.created`.
+Pulse assigns a new `clipId` and emits `created` (event — domain: clip).
 
 **`clip.delete`**  
 Remove a Clip entirely. Pulse validates and updates the Track’s Clip list.
@@ -234,7 +234,7 @@ a consequence of snapshot application.
 
 ### 3.1 Structural Events
 
-**`clip.created`**  
+**`created`** (event — domain: clip)  
 A new Clip has been created. Includes:
 
 - `clipId`,
@@ -243,10 +243,10 @@ A new Clip has been created. Includes:
 - initial Lane list (laneIds),
 - loop state.
 
-**`clip.deleted`**  
+**`deleted`** (event — domain: clip)  
 Clip removed from the project. Aura must drop related UI state.
 
-**`clip.moved`**  
+**`moved`** (event — domain: clip)  
 Clip moved to a new Track and/or position.
 
 Includes:
@@ -255,33 +255,33 @@ Includes:
 - old and new `trackId` (if applicable),
 - old and new `start`.
 
-**`clip.resized`**  
+**`resized`** (event — domain: clip)  
 Clip length changed.
 
 ---
 
 ### 3.2 Temporal and Content Events
 
-**`clip.loopingChanged`**  
+**`loopingChanged`** (event — domain: clip)  
 Loop enable/disable or parameters updated.
 
-**`clip.stretchChanged`**  
-A Clip’s stretching rules have changed.
+**`stretchChanged`** (event — domain: clip)  
+A Clip's stretching rules have changed.
 
-**`clip.slipped`**  
+**`slipped`** (event — domain: clip)  
 Indicates content-offset shifts.
 
 ---
 
 ### 3.3 Lane Events
 
-**`clip.laneAdded`**  
+**`laneAdded`** (event — domain: clip)  
 A Lane has been attached to a Clip.
 
-**`clip.laneRemoved`**  
+**`laneRemoved`** (event — domain: clip)  
 A Lane has been detached from a Clip.
 
-**`clip.lanesReordered`**  
+**`lanesReordered`** (event — domain: clip)  
 Lane order changed.
 
 ---
@@ -289,7 +289,7 @@ Lane order changed.
 ## 4. Snapshot Semantics
 
 Clip state appears in project-level snapshots emitted by Pulse (e.g.
-`project.snapshot`). Clip snapshot entries may include:
+`snapshot` — kind: snapshot, domain: project). Clip snapshot entries may include:
 
 - identity (`clipId`),
 - track association,
@@ -304,7 +304,7 @@ Lane and content-specific snapshots exist in the Lane domain.
 
 ### Snapshot Application
 
-When Aura receives a `project.snapshot` that includes this domain, it MUST treat
+When Aura receives a `snapshot` (kind: snapshot — domain: project) that includes this domain, it MUST treat
 the snapshot as the **authoritative** representation of the current state for
 this domain.
 
