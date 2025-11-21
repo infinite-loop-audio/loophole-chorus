@@ -38,7 +38,7 @@ The Engine domain does **not**:
 
 - manage the audio/MIDI device selection directly (handled by `signal.hardware`),
 - define or modify the graph (Channels/Nodes) (handled by `signal.graph`),
-- control transport state (play/stop/locate) (handled by `signal.transport`),
+- control transport state (play/stop/seek) (handled by `signal.transport`),
 - handle per-node or per-cohort configuration (handled by `signal.graph` and
   `signal.diagnostics`),
 - perform media decoding or analysis (`signal.media`),

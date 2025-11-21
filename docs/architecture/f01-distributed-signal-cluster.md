@@ -219,7 +219,7 @@ All Signal nodes must share a **common notion of time** for:
 
 Pulse is the authoritative source of:
 
-- transport state (play, stop, locate),
+- transport state (play, stop, seek),
 - project timebase (bars/beats, tempo map, time signatures),
 - sample position (or equivalent high-precision timeline).
 
