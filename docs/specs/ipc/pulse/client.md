@@ -154,24 +154,24 @@ Announce a new client connection and request a session. This is the initial hand
 - `clientVersion` (string, optional) — version string of the client (e.g. `"0.1.0-dev"`).
 - `capabilities` (object, optional) — map of capability flags indicating what the client supports.
 
-**Response Envelope (Pulse → Aura):**
+**Event Envelope (Pulse → Aura):**
 
-Pulse responds with a response envelope using:
+Pulse responds with an event envelope using:
 - `domain: "client"`
-- `kind: "response"`
-- `name: "hello"` (same name as the command, differentiated by `kind`)
+- `kind: "event"`
+- `name: "hello"` (same name as the command)
 - `cid: <id of the hello command>`
 
 ```jsonc
 {
   "v": 1,
-  "id": "hello-response-456",
+  "id": "hello-event-456",
   "cid": "hello-123",
   "ts": "2025-11-20T12:34:56.790Z",
   "origin": "pulse",
   "target": "aura",
   "domain": "client",
-  "kind": "response",
+  "kind": "event",
   "name": "hello",
   "priority": "high",
   "payload": {
@@ -187,7 +187,7 @@ Pulse responds with a response envelope using:
 }
 ```
 
-**Response Payload:**
+**Event Payload:**
 
 ```json
 {
@@ -201,7 +201,7 @@ Pulse responds with a response envelope using:
 }
 ```
 
-**Response Fields:**
+**Event Fields:**
 
 - `clientId` (string) — echo of the effective client ID for this session (as provided in the request).
 - `instanceId` (string) — echo of the instance ID for this session (as provided in the request).
@@ -213,11 +213,11 @@ Pulse responds with a response envelope using:
 
 **Behaviour:**
 
-- Pulse accepts the provided `clientId` and `instanceId` and echoes them back in the response.
+- Pulse accepts the provided `clientId` and `instanceId` and echoes them back in the event.
 - Pulse determines manager status based solely on `clientId` matching. A newly started instance with the same `clientId` may reclaim management.
 - Pulse stores the client identity on the session state.
-- Pulse responds with a response envelope (kind="response", name="hello") containing the handshake response payload.
-- Pulse may also emit `welcome` and `connected` events after the handshake (these are informational events, not the response to the command).
+- Pulse emits an event envelope (kind="event", name="hello", cid=<command.id>) containing the handshake acknowledgment payload.
+- Pulse may also emit `welcome` and `connected` events after the handshake (these are unsolicited informational events with `cid = null`).
 
 **Error Handling:**
 
@@ -240,8 +240,8 @@ Behaviour:
 
 - Pulse marks the session as closing.
 - Pulse stops sending events to this session.
-- Pulse responds with a response envelope (kind="response", name="goodbye").
-- Pulse may emit `disconnected` events.
+- Pulse emits an event envelope (kind="event", name="goodbye", cid=<command.id>).
+- Pulse may emit `disconnected` events (unsolicited, `cid = null`).
 - The underlying transport may then be closed by either side.
 
 If the TCP/WebSocket connection is dropped without sending `goodbye`, Pulse
@@ -278,13 +278,13 @@ All UI clients **must reply** with:
 ```jsonc
 {
   "v": 1,
-  "id": "heartbeat-response-456",
+  "id": "heartbeat-event-456",
   "cid": "heartbeat-123",
   "ts": "2025-11-20T12:34:56.790Z",
   "origin": "aura",
   "target": "pulse",
   "domain": "client",
-  "kind": "response",
+  "kind": "event",
   "name": "heartbeat",
   "priority": "normal",
   "payload": {}
@@ -294,11 +294,11 @@ All UI clients **must reply** with:
 **Behaviour:**
 
 - Pulse sends heartbeat commands at regular intervals to all connected clients.
-- Clients **must** respond with a response envelope using the same `name: "heartbeat"` and setting `cid` to the command's `id`.
-- Pulse tracks missing responses and emits timeout events when responses are not received within the grace period.
-- Missing responses beyond a configured timeout window result in:
-  - `client.timedOut` event
-  - `client.disconnected` event
+- Clients **must** respond with an event envelope using the same `name: "heartbeat"`, `kind: "event"`, and setting `cid` to the command's `id`.
+- Pulse tracks missing event replies and emits timeout events when events are not received within the grace period.
+- Missing event replies beyond a configured timeout window result in:
+  - `client.timedOut` event (unsolicited, `cid = null`)
+  - `client.disconnected` event (unsolicited, `cid = null`)
   - eventual session teardown
 
 Heartbeat cadence is configured by Pulse and may be adjusted based on connection characteristics.
@@ -622,6 +622,5 @@ Examples:
   Manager status is determined **only by `clientId`**, not `instanceId`.
   The `instanceId` is auxiliary identity metadata used for tracking specific
   client instances but does not affect manager status determination.
-- **Commands and responses share the exact same `name`**, differentiated only by `kind`.
-- **Events must never reuse a command name**. For example, `client.connected` is an event
-  and does not conflict with the `client.hello` command.
+- **Commands and their correlated events share the exact same `name`**, differentiated only by `kind` and correlation via `cid`.
+- **Unsolicited events** (not replying to a command) use distinct names such as `connected`, `disconnected`, `welcome` and have `cid = null`.

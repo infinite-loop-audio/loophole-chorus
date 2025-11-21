@@ -99,11 +99,11 @@ transport in early versions but are conceptually distinct.
 
 This plane carries:
 
-- Editing operations
-- Project state changes
+- Editing operations (commands from Aura to Pulse)
+- Project state changes (events from Pulse to Aura, correlated to commands via `cid`)
 - Graph updates
-- Engine control messages
-- Engine state notifications relevant to the model
+- Engine control messages (commands from Pulse to Signal)
+- Engine state notifications relevant to the model (events from Signal to Pulse)
 
 Traffic on this plane is structured, low-frequency and encoded as JSON envelopes.
 Pulse is the hub of this plane.

@@ -72,13 +72,12 @@ Create a new empty project in memory. No primary storage location is required.
 #### open (command — domain: project)
 
 Open a project from a specified location (path or URI).
-Triggers `loaded` events followed by `snapshot` events on success.
-
 On success, `open` triggers:
 - model load in Pulse,
 - **fresh cohort assignment**,
 - a new engine graph build for Signal,
-- emission of `snapshot` events toward Aura.
+- emission of `open` event (kind: event, cid: <command.id>) to acknowledge the command,
+- emission of `snapshot` event (kind: snapshot) toward Aura with full project state.
 
 #### close (command — domain: project)
 
@@ -128,70 +127,79 @@ Apply updated metadata such as author, description, notes or tags.
 ### 2.4 Inspection
 
 **`requestMeta`** (command — domain: project)  
-Request that Pulse emit the project's current metadata via a `meta` event (kind: event — domain: project).
+Request that Pulse emit the project's current metadata via a `meta` event (kind: event, name: `meta`, cid: <command.id>).
 
 **`requestSnapshot`** (command — domain: project)  
-Request a full project snapshot via `snapshot` (kind: snapshot — domain: project).
+Request a full project snapshot via `snapshot` (kind: snapshot — domain: project). The snapshot event may correlate via `cid = <command.id>` or be unsolicited (`cid = null`) depending on domain semantics.
 
 ---
 
 ## 3. Events (Pulse → Aura)
 
-### 3.1 Lifecycle Events
+### 3.1 Command Result Events
 
-**`loaded`** (event — domain: project)  
-Emitted after Pulse has successfully loaded the project into memory following
-`project.open` or `project.new`.
-This event does **not** contain project data.
+Events that directly result from commands share the same `name` as the command and use `cid` for correlation.
 
-Following `loaded`, Pulse performs fresh cohort assignment and prepares
-graph rebuild instructions for Signal. The subsequent `snapshot` event (kind: snapshot)
-carries the complete project state to Aura.
+**`open`** (event — domain: project)  
+Emitted after Pulse has successfully processed an `open` command. This event acknowledges the command but does **not** contain project data.
 
-**`loadFailed`** (event — domain: project)  
-The project could not be opened due to file I/O, format or version issues.
+- Correlates to command: `cid = <open command.id>`
+- The subsequent `snapshot` event (kind: snapshot) carries the complete project state to Aura.
 
-**`closed`** (event — domain: project)  
-The project was closed and the model has been cleared.
+**`close`** (event — domain: project)  
+Emitted after Pulse has successfully processed a `close` command.
 
----
+- Correlates to command: `cid = <close command.id>`
 
-### 3.2 Persistence Events
+**`save`** (event — domain: project)  
+Emitted after Pulse has successfully processed a `save` or `saveAs` command, indicating the primary project file has been committed.
 
-**`draftSaved`** (event — domain: project)  
-Draft state successfully persisted.
+- Correlates to command: `cid = <save command.id>`
 
-**`draftSaveFailed`** (event — domain: project)  
-Draft save failed.
+**`saveDraft`** (event — domain: project)  
+Emitted after Pulse has successfully processed a `saveDraft` command, indicating draft state has been persisted.
 
-**`saved`** (event — domain: project)  
-Primary project file successfully committed via `project.save` or
-`project.saveAs`.
+- Correlates to command: `cid = <saveDraft command.id>`
 
-**`saveFailed`** (event — domain: project)  
-Primary commit failed.
+**`rename`** (event — domain: project)  
+Emitted after Pulse has successfully processed a `rename` command.
 
----
+- Correlates to command: `cid = <rename command.id>`
 
-### 3.3 Identity and Metadata Events
+**`move`** (event — domain: project)  
+Emitted after Pulse has successfully processed a `move` command, indicating the primary project location has been moved.
 
-**`renamed`** (event — domain: project)  
-Emitted after a successful rename.
+- Correlates to command: `cid = <move command.id>`
 
-**`renameFailed`** (event — domain: project)  
-Rename was rejected or failed.
+**`updateMeta`** (event — domain: project)  
+Emitted after Pulse has successfully processed an `updateMeta` command.
 
-**`moved`** (event — domain: project)  
-Primary project location successfully moved.
+- Correlates to command: `cid = <updateMeta command.id>`
 
-**`moveFailed`** (event — domain: project)  
-Move failed.
+**`new`** (event — domain: project)  
+Emitted after Pulse has successfully processed a `new` command, creating an empty project.
 
-**`metaUpdated`** (event — domain: project)  
-Metadata successfully updated.
+- Correlates to command: `cid = <new command.id>`
 
-**`metaUpdateFailed`** (event — domain: project)  
-Metadata update failed validation or persistence.
+### 3.2 Unsolicited Events
+
+Events that do not correlate to a specific command have `cid = null`.
+
+**`draft`** (event — domain: project)  
+Emitted when Pulse automatically saves draft state (e.g. on a timer). This is not correlated to a specific command.
+
+- Unsolicited: `cid = null`
+
+**`state`** (event — domain: project)  
+Emitted to report incremental project state changes (e.g. dirty flag updates, status changes).
+
+- Unsolicited: `cid = null`
+- Payload includes current project status and metadata.
+
+**`meta`** (event — domain: project)  
+Emitted in response to `requestMeta` command, containing the current project metadata.
+
+- Correlates to command: `cid = <requestMeta command.id>`
 
 ---
 
@@ -237,10 +245,10 @@ keys. Aura MUST treat unknown fields as opaque extensions.
 
 ### Emission Rules (Clarified)
 
-- `loaded` (event — domain: project) **never carries data**. It only indicates that a project has
-  been successfully opened and is resident in memory.
+- `open` (event — domain: project) **never carries project data**. It only indicates that a project has
+  been successfully opened and is resident in memory. This event correlates to the `open` command via `cid`.
 
-- `snapshot` (kind: snapshot — domain: project) MUST always follow `loaded` and MUST be the **only**
+- `snapshot` (kind: snapshot — domain: project) MUST always follow `open` (when project state is available) and MUST be the **only**
   source of authoritative project state visible to Aura.
 
 - `snapshot` MUST also be emitted:
@@ -258,10 +266,10 @@ state for the Project domain when receiving one.
 ## 4. Snapshot Semantics
 
 Pulse emits `snapshot` (kind: snapshot — domain: project) to provide Aura with a complete representation of
-the current project. This differs from `loaded` (event — domain: project):
+the current project. This differs from `open` (event — domain: project):
 
-- `loaded` indicates that the project exists in memory,
-- `snapshot` conveys the actual project data.
+- `open` indicates that the project has been loaded into memory (acknowledgement of the command),
+- `snapshot` conveys the actual project data (authoritative state).
 
 Snapshots may be used for:
 

@@ -8,7 +8,7 @@ The envelope provides:
 - a consistent structure for all JSON-based IPC messages,
 - a clear routing model centred on Pulse,
 - support for domain-based message classification,
-- correlation for request/response pairs,
+- correlation for commands and events via correlation IDs,
 - priority hints for scheduling,
 - a foundation for binary fast-path streams (gestures, metering, etc.),
 - a forwards-compatible versioning scheme.
@@ -64,8 +64,8 @@ The IPC envelope format must:
 - be versioned and forwards-compatible,
 - support:
 
-  - request/response pairs (via correlation IDs),  
-  - fire-and-forget events,  
+  - commands and correlated events (via correlation IDs),  
+  - unsolicited events (fire-and-forget notifications),  
   - snapshots vs incremental updates,  
   - high-rate streams via a dedicated binary path.
 
@@ -81,7 +81,6 @@ There are two high-level envelope families:
    - commands,
    - events,
    - snapshots,
-   - responses,
    - errors.
 
 2. **Binary frames**  
@@ -112,7 +111,7 @@ Every normal IPC message is a single JSON object with this shape:
 
   "domain": "project|transport|track|clip|lane|channel|node|parameter|automation|routing|mixer|ui|engine|cohort|...",
 
-  "kind": "command|event|snapshot|response|error",
+  "kind": "command|event|snapshot|error",
 
   "name": "open|snapshot|play|create|add|...",
 
@@ -141,12 +140,14 @@ Every normal IPC message is a single JSON object with this shape:
 
 - `cid` (string or null)  
   Correlation ID.  
-  - For request/response pairs:
+  - For events that are direct replies to commands:
 
-    - request: `cid = null`,  
-    - response: `cid = id` of the original request.
+    - command: `cid = null`,  
+    - event: `cid = id` of the original command.
 
-  - Fire-and-forget messages (most events) use `null`.
+  - For unsolicited events (not replying to a specific command): `cid = null`.
+  
+  - The `cid` field allows clients to correlate events with the commands that triggered them, or distinguish between solicited and unsolicited events.
 
 - `ts` (string, ISO 8601, required)  
   Timestamp when the message was created by the origin.  
@@ -186,26 +187,26 @@ Every normal IPC message is a single JSON object with this shape:
   High-level category of message:
 
   - `"command"` – request to perform an action.
-  - `"event"` – notification that something happened (fire-and-forget).
+  - `"event"` – notification that something happened. May be a direct reply to a command (correlated via `cid`) or an unsolicited notification (`cid = null`).
   - `"snapshot"` – authoritative state projection from Pulse to Aura.
-  - `"response"` – response to a command.
-  - `"error"` – error response or error event.
+  - `"error"` – error notification (may correlate to a command via `cid` or be standalone).
 
 - `name` (string)  
   Unqualified message name within the domain. Examples:
 
   - `"open"`, `"snapshot"`,  
-  - `"play"`, `"stateChanged"`,  
+  - `"play"`, `"state"`,  
   - `"create"`, `"split"`,  
   - `"add"`, `"setValue"`,  
-  - `"cohortAssigned"`.
+  - `"assign"`.
 
   The fully-qualified label is derived as `domain + "." + name` (e.g. `"project.open"`). This fully-qualified form is available to runtimes that want it for logging or debugging, but is not part of the envelope structure itself.
 
   **Naming Conventions:**
-  - **Commands and responses share the exact same `name`**, differentiated only by `kind`. For example, a `client.hello` command (kind="command") and its response (kind="response") both use `name: "hello"`.
-  - **Responses must always match their command's `name` exactly**. Variants like `helloResponse`, `client.helloResponse`, or `project.openedResponse` are invalid.
-  - **Events must never reuse a command name**. Events use distinct names such as `"connected"`, `"disconnected"`, `"stateChanged"` that do not conflict with command names.
+  - **Commands and events share the exact same `name`** when the event is a direct result of a command. They are differentiated only by `kind` and correlation via `cid`. For example, a `client.hello` command (kind="command") and its corresponding event (kind="event", cid=<command.id>) both use `name: "hello"`.
+  - **Present-tense operation names**: Use present-tense, camelCase names such as `"create"`, `"open"`, `"update"`, `"state"`. Avoid past-tense variants like `"created"`, `"opened"`, `"updated"`, `"stateChanged"`.
+  - **Minimise double-barrel names**: Prefer single words where clear (e.g. `"create"` not `"createTrack"` when domain is `"track"`). Use compound names only when needed for clarity (e.g. `"resetGraph"` in `channel` domain).
+  - **State reporting**: For stateful domains, use `name = "state"` for incremental state events, and `kind = "snapshot"` for full-state snapshots.
   - The `name` field must not contain domain separators (e.g. `"gesture.begin"` is invalid; use `domain: "gesture"`, `name: "begin"` instead).
 
   Each domain spec enumerates the valid names and their payloads.
@@ -248,7 +249,7 @@ Logical flows:
 
 - Pulse → Aura  
   - `origin = "pulse"`, `target = "aura"`  
-  - Snapshots, validation errors, notifications.
+  - Snapshots, events (correlated or unsolicited), validation errors.
 
 - Pulse → Signal  
   - `origin = "pulse"`, `target = "signal"`  
@@ -264,36 +265,34 @@ Logical flows:
 Direct messaging paths such as Aura → Signal or Signal → Composer are not
 permitted. All cross-layer communication flows through Pulse.
 
-### 4.2 Commands, Events, Snapshots, Responses and Errors
+### 4.2 Commands, Events, Snapshots and Errors
 
 - `kind = "command"`  
   - A request to perform an action.
   - Typically sent from Aura → Pulse or Pulse → Signal.
-  - May expect a `response`. Domain specs define which commands expect responses
-    and what form they take.
-
-- `kind = "response"`  
-  - A direct reply to a command.
-  - Uses `cid = id` of the original command.
-  - **Must share the exact same `name` as the original command**, differentiated only by `kind`.
-  - For example, if a command is `domain: "client", kind: "command", name: "hello"`, its response must be `domain: "client", kind: "response", name: "hello"`.
-  - A `response` may itself be a success or an error, depending on domain design.
-  - **Only direct replies to commands use `kind: "response"`**. Messages that are not direct replies to specific commands must use `kind: "event"` instead.
+  - May trigger one or more events. Domain specs define which commands generate events and what form they take.
+  - When a command expects an immediate acknowledgment or result, the corresponding event uses the same `name` and includes `cid = <command.id>` for correlation.
 
 - `kind = "event"`  
-  - Fire-and-forget notification.
-  - Does not expect a response.
-  - Common for engine status, state changes, and logging signals.
+  - A notification that something happened.
+  - Events may be **correlated** to a command (via `cid`) or **unsolicited** (`cid = null`).
+  - When an event is a direct result of a command, it **shares the same `name`** as the command. For example:
+    - Command: `domain: "track", kind: "command", name: "create"`  
+    - Event: `domain: "track", kind: "event", name: "create", cid: <command.id>`
+  - Unsolicited events (e.g. `domain: "client", name: "connected"`) have `cid = null`.
+  - Common for engine status, state changes, command acknowledgements, and logging signals.
 
 - `kind = "snapshot"`  
   - Authoritative state projection from Pulse to Aura.
   - Usually contains a model view (tracks, clips, parameters, etc.).
   - Snapshots may be full or partial; semantics are defined per domain.
+  - Typically uses `name = "state"` or `name = "snapshot"` depending on domain conventions.
 
 - `kind = "error"`  
-  - An error response or standalone error event.
+  - An error notification.
   - Contains an `error` block with details.
-  - May or may not correlate to a command (via `cid`).
+  - May correlate to a command (via `cid`) or be standalone (`cid = null`).
+  - When correlating to a command, uses the same `name` as the command (e.g. `domain: "project", kind: "error", name: "open", cid: <command.id>`).
 
 ---
 
@@ -383,11 +382,11 @@ Example for a gesture stream:
 }
 ```
 
-Signal replies with a response/event (domain: `gesture`, name: `opened`). Afterwards,
+Signal emits an event (domain: `gesture`, name: `open`, cid: <command.id>) to acknowledge the stream. Afterwards,
 binary frames using `streamId = "gstrm-abc"` carry the actual gesture data.
 
 Closing a stream is symmetrical, via a command (domain: `gesture`, name: `close`) and
-corresponding event/response (domain: `gesture`, name: `closed`).
+corresponding event (domain: `gesture`, name: `close`, cid: <command.id>).
 
 Metering streams may follow an analogous pattern (`meterStream.open`, etc.).
 
@@ -397,7 +396,7 @@ Metering streams may follow an analogous pattern (`meterStream.open`, etc.).
 
 Errors are expressed using standard envelopes with `kind = "error"`.
 
-For example, a response to a failing command:
+For example, an error event correlating to a failing command:
 
 ```jsonc
 {
@@ -546,7 +545,7 @@ Pulse will respond by:
 
 - updating internal transport state,
 - sending appropriate commands to Signal,
-- emitting `transportStateChanged` events and/or snapshots to Aura.
+- emitting `transport.state` events and/or snapshots to Aura.
 
 ### 10.2 Pulse → Signal: Cohort Graph Update
 

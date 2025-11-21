@@ -63,7 +63,7 @@ All Track domain IPC adheres to the routing rules established by the envelope
 specification:
 
 - **Aura → Pulse**: sends Track-related commands (create, delete, move, rename).
-- **Pulse → Aura**: sends Track-related events (created, deleted, moved, etc.).
+- **Pulse → Aura**: sends Track-related events (create, delete, move, rename, etc.) that share the same `name` as their corresponding commands.
 - **Pulse → Signal**: may send Channel/graph updates as a consequence of Track
   changes, but this occurs in other domains.
 - **Signal → Pulse**: Signal never initiates Track-level behaviour.
@@ -77,7 +77,7 @@ applies them, then emits the corresponding events.
 
 ### 2.1 Creation and Deletion
 
-**`track.create`**  
+**`create`** (command — domain: track)  
 Create a new Track under a specified parent, at a specified index. If the Track
 is intended to host audio/MIDI processing, Aura may request that Pulse attach a
 Channel at creation time.
@@ -92,7 +92,7 @@ Payload fields include:
 - optional processing policy hints,
 - createChannel (boolean).
 
-**`track.delete`**  
+**`delete`** (command — domain: track)  
 Delete an existing Track. Pulse validates that deletion is legal (e.g., cannot
 remove required system Tracks) before applying the change.
 
@@ -100,11 +100,11 @@ remove required system Tracks) before applying the change.
 
 ### 2.2 Hierarchy and Ordering
 
-**`track.move`**  
+**`move`** (command — domain: track)  
 Reparent or reorder a Track. Pulse updates:
 
-- the Track’s parent,
-- the Track’s index within the new parent’s child list,
+- the Track's parent,
+- the Track's index within the new parent's child list,
 - the ordering of sibling Tracks.
 
 This command does not modify Track identity or its Channel.
@@ -113,13 +113,13 @@ This command does not modify Track identity or its Channel.
 
 ### 2.3 Identity and Presentation
 
-**`track.rename`**  
+**`rename`** (command — domain: track)  
 Rename an existing Track.
 
-**`track.setColour`**  
+**`setColour`** (command — domain: track)  
 Assign or clear a Track colour.
 
-**`track.setIcon`**  
+**`setIcon`** (command — domain: track)  
 Set a Track icon reference. Icons are presentation metadata used by Aura; Pulse
 treats them as opaque.
 
@@ -127,7 +127,7 @@ treats them as opaque.
 
 ### 2.4 Flags and Processing Policy
 
-**`track.setFlags`**  
+**`setFlags`** (command — domain: track)  
 Update one or more user-facing flags, such as:
 
 - mute,
@@ -136,9 +136,9 @@ Update one or more user-facing flags, such as:
 - monitor input.
 
 Unspecified flags remain unchanged. Pulse applies the update and emits a
-`track.flagsChanged` event.
+`setFlags` event (kind: event, name: `setFlags`, cid: <command.id>).
 
-**`track.setProcessingPolicy`**  
+**`setProcessingPolicy`** (command — domain: track)  
 Set processing policy hints influencing cohort assignment. The `mode` field is:
 
 - `auto` – Pulse decides based on routing and metadata,
@@ -151,7 +151,7 @@ Pulse stores this hint and may trigger a cohort re-evaluation.
 
 ### 2.5 Channel Binding
 
-**`track.setChannelEnabled`**  
+**`setChannelEnabled`** (command — domain: track)  
 Attach or detach a Track-owned Channel from a Track:
 
 - When enabling and no Channel exists, Pulse creates a Track-owned Channel
@@ -163,13 +163,13 @@ This command only affects Channels owned by this Track. Other Channels
 (busses, master, etc.) are managed separately via routing/project-level
 commands.
 
-Pulse emits `track.channelBindingChanged`.
+Pulse emits `setChannelEnabled` event (kind: event, name: `setChannelEnabled`, cid: <command.id>).
 
 ---
 
 ### 2.6 Duplication
 
-**`track.duplicate`**  
+**`duplicate`** (command — domain: track)  
 Duplicate a Track and optionally include:
 
 - Clips,
@@ -188,54 +188,62 @@ occur (e.g. as part of snapshot generation).
 
 ### 3.1 Structural Events
 
-**`created`** (event — domain: track)  
-Indicates a Track has been created. Includes identity, hierarchy, name, colour,
-flags, processing policy and initial Channel attachment state.
+**`create`** (event — domain: track)  
+Emitted after Pulse has successfully processed a `create` command. Indicates a Track has been created.
 
-**`deleted`** (event — domain: track)  
-Indicates a Track has been removed. Aura should drop any associated UI state.
+- Correlates to command: `cid = <create command.id>`
+- Payload includes identity, hierarchy, name, colour, flags, processing policy and initial Channel attachment state.
 
-**`moved`** (event — domain: track)  
-Indicates a Track has been reparented or reordered. Includes old and new
-parent/index information.
+**`delete`** (event — domain: track)  
+Emitted after Pulse has successfully processed a `delete` command. Indicates a Track has been removed.
 
-**`updated`** (event — domain: track)  
-Indicates a Track has been updated (e.g. renamed, parent changed, flags changed).
-Includes the updated Track identity and relevant fields.
+- Correlates to command: `cid = <delete command.id>`
+- Aura should drop any associated UI state.
 
----
+**`move`** (event — domain: track)  
+Emitted after Pulse has successfully processed a `move` command. Indicates a Track has been reparented or reordered.
 
-### 3.2 Identity and Presentation Events
+- Correlates to command: `cid = <move command.id>`
+- Payload includes old and new parent/index information.
 
-**`renamed`** (event — domain: track)  
-Name successfully updated.
+**`rename`** (event — domain: track)  
+Emitted after Pulse has successfully processed a `rename` command. Name successfully updated.
 
-**`colourChanged`** (event — domain: track)  
-Colour has changed.
+- Correlates to command: `cid = <rename command.id>`
 
-**`iconChanged`** (event — domain: track)  
-Icon metadata updated.
+**`setColour`** (event — domain: track)  
+Emitted after Pulse has successfully processed a `setColour` command. Colour has changed.
+
+- Correlates to command: `cid = <setColour command.id>`
+
+**`setIcon`** (event — domain: track)  
+Emitted after Pulse has successfully processed a `setIcon` command. Icon metadata updated.
+
+- Correlates to command: `cid = <setIcon command.id>`
 
 (Pulse may choose to combine these into a single metadata event depending on
 internal design, but this specification expresses them separately.)
 
----
+**`setFlags`** (event — domain: track)  
+Emitted after Pulse has successfully processed a `setFlags` command. Mute/solo/arm/monitor flags successfully updated.
 
-### 3.3 Flag and Policy Events
+- Correlates to command: `cid = <setFlags command.id>`
 
-**`flagsChanged`** (event — domain: track)  
-Mute/solo/arm/monitor flags successfully updated.
+**`setProcessingPolicy`** (event — domain: track)  
+Emitted after Pulse has successfully processed a `setProcessingPolicy` command. Processing policy hint has changed.
 
-**`processingPolicyChanged`** (event — domain: track)  
-Processing policy hint has changed. Aura may visualise this but the meaning
-is enforced by Pulse and Signal.
+- Correlates to command: `cid = <setProcessingPolicy command.id>`
+- Aura may visualise this but the meaning is enforced by Pulse and Signal.
 
----
+**`setChannelEnabled`** (event — domain: track)  
+Emitted after Pulse has successfully processed a `setChannelEnabled` command. Indicates when a Track-owned Channel is attached to or detached from a Track.
 
-### 3.4 Channel Binding Events
+- Correlates to command: `cid = <setChannelEnabled command.id>`
 
-**`channelBindingChanged`** (event — domain: track)  
-Emitted when a Track-owned Channel is attached to or detached from a Track.
+**`duplicate`** (event — domain: track)  
+Emitted after Pulse has successfully processed a `duplicate` command. Indicates a Track has been duplicated.
+
+- Correlates to command: `cid = <duplicate command.id>`
 
 Aura may use this to update mixer visibility or channel strip presentation.
 Note that this event only concerns Track-owned Channels; standalone Channels

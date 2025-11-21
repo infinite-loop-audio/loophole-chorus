@@ -120,12 +120,12 @@ Pulse:
 
 ### 3.1 State Changes
 
-#### stateChanged (event — domain: transport)
+#### state (event — domain: transport)
 
 Emitted whenever the semantic transport state changes. This includes:
 
 - transitions between playing, stopped (and paused, if introduced later),
-- updates to Pulse’s notion of the transport position,
+- updates to Pulse's notion of the transport position,
 - changes to loop enablement,
 - changes to loop region.
 
@@ -136,7 +136,9 @@ Typical payload fields include:
 - `loopEnabled`: boolean,
 - `loopRegion`: start and end positions.
 
-Aura should rely on `stateChanged` events to update transport controls and
+When a transport command (`play`, `stop`, `seek`, `setLoopRegion`, `setLoopEnabled`) is processed, Pulse emits a `state` event to acknowledge the command and report the new state. This event correlates to the command via `cid`.
+
+Aura should rely on `state` events to update transport controls and
 high-level UI elements (e.g. play/stop/loop button states). Fine-grained
 playhead position for drawing is provided by telemetry from Signal.
 
@@ -144,22 +146,35 @@ playhead position for drawing is provided by telemetry from Signal.
 
 ### 3.2 Errors
 
-#### error (event — domain: transport)
+Errors are reported using `kind = "error"` envelopes with the same `name` as the failing command and `cid` set to the command's `id`.
 
-Emitted when a transport command cannot be fulfilled. Examples include:
+For example, if a `play` command fails:
 
+```jsonc
+{
+  "v": 1,
+  "id": "error-789",
+  "cid": "play-123",
+  "ts": "2025-11-17T22:34:10.000Z",
+  "origin": "pulse",
+  "target": "aura",
+  "domain": "transport",
+  "kind": "error",
+  "name": "play",
+  "priority": "high",
+  "payload": {},
+  "error": {
+    "code": "transport.noDevice",
+    "message": "No active audio device available.",
+    "details": {}
+  }
+}
+```
+
+Common error scenarios include:
 - no active or valid audio device,
 - Signal refusing to start playback,
 - project not in a valid state for the requested command.
-
-Typical payload fields include:
-
-- `command`: the originating transport command (e.g. `play`),
-- `code`: machine-readable error code,
-- `message`: human-readable description,
-- `details`: optional structured context (for logging or diagnostics).
-
-Aura may surface these errors to the user, log them or both.
 
 ---
 
@@ -171,7 +186,7 @@ The Transport domain concerns the model-level representation of playback:
 - Pulse issues engine commands to Signal in the Engine Integration Protocol
   (e.g. engine-level play, stop, seek, loop configuration).
 - Signal reports engine outcomes back to Pulse, which reconciles them before
-  emitting `stateChanged` and any relevant `error` events.
+  emitting `state` events (correlated to commands via `cid`) and any relevant `error` events.
 
 High-resolution transport information (e.g. continuous playhead position and
 timing data) is delivered directly from Signal to Aura via the telemetry plane,

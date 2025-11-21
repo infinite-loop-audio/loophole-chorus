@@ -109,7 +109,7 @@ However, Aura may issue Channel-specific operations once a Channel exists.
 
 ### 3.2 Input and Output Configuration
 
-**`channel.setInput`**  
+**`setInput`** (command — domain: channel)  
 Set input source(s) for the Channel.
 
 Payload fields include:
@@ -121,7 +121,7 @@ Payload fields include:
 
 Pulse validates that the input exists and is compatible.
 
-**`channel.setOutput`**  
+**`setOutput`** (command — domain: channel)  
 Set the output routing target for the Channel.
 
 Fields include:
@@ -131,7 +131,7 @@ Fields include:
 
 Pulse recomputes routing if necessary.
 
-**`channel.setSidechainSource`**  
+**`setSidechainSource`** (command — domain: channel)  
 Define a sidechain source for Nodes that support sidechain input.
 
 Pulse may update routing nodes accordingly.
@@ -140,10 +140,10 @@ Pulse may update routing nodes accordingly.
 
 ### 3.3 Gain, Pan and Fader State
 
-**`channel.setGain`**  
+**`setGain`** (command — domain: channel)  
 Set fader gain for the Channel.
 
-**`channel.setPan`**  
+**`setPan`** (command — domain: channel)  
 Set pan/balance state.
 
 These affect built-in fader/pan nodes or Channel-level mixing nodes.
@@ -155,7 +155,7 @@ These affect built-in fader/pan nodes or Channel-level mixing nodes.
 Metering streams are created via the gesture/metering stream protocol.  
 The Channel domain exposes non-stream configuration only.
 
-**`channel.setMeteringConfig`**  
+**`setMeteringConfig`** (command — domain: channel)  
 Configure meter behaviour:
 
 - peak window,
@@ -167,14 +167,11 @@ Configure meter behaviour:
 
 ### 3.5 Channel Graph Reset
 
-**`channel.resetGraph`**  
+**`resetGraph`** (command — domain: channel)  
 Remove all user-added Nodes and restore the Channel to its default minimal
 configuration (LaneStreamNode(s) + FaderNode/PanNode).
 
-Pulse then emits:
-
-- `graphReset` (event — domain: channel),  
-- followed by Node-domain events describing the newly created Node graph.
+Pulse emits `resetGraph` event (kind: event, name: `resetGraph`, cid: <command.id>) followed by Node-domain events describing the newly created Node graph.
 
 ---
 
@@ -182,39 +179,47 @@ Pulse then emits:
 
 ### 4.1 Structural Events
 
-**`created`** (event — domain: channel)  
-A Channel has been created (either due to Track enabling or via routing/project
-configuration).
+**`create`** (event — domain: channel)  
+Emitted when a Channel has been created (either due to Track enabling or via routing/project
+configuration). This is an unsolicited event (not directly correlating to a channel command, but triggered by track/routing operations).
 
-Includes:
+- Unsolicited: `cid = null`
+- Payload includes: `channelId`, `trackId` (if track-owned), `role` (if applicable), initial node list.
 
-- `channelId`,
-- `trackId` (if track-owned),
-- `role` (if applicable),
-- initial node list.
+**`delete`** (event — domain: channel)  
+Emitted when a Channel has been removed (either due to Track disabling or routing/project
+configuration changes). This is an unsolicited event.
 
-**`deleted`** (event — domain: channel)  
-The Channel has been removed (either due to Track disabling or routing/project
-configuration changes).
+- Unsolicited: `cid = null`
 
 ---
 
 ### 4.2 Configuration Events
 
-**`inputChanged`** (event — domain: channel)  
-Input configuration updated.
+**`setInput`** (event — domain: channel)  
+Emitted after Pulse has successfully processed a `setInput` command. Input configuration updated.
 
-**`outputChanged`** (event — domain: channel)  
-Output routing updated.
+- Correlates to command: `cid = <setInput command.id>`
 
-**`sidechainSourceChanged`** (event — domain: channel)  
-Sidechain routing updated.
+**`setOutput`** (event — domain: channel)  
+Emitted after Pulse has successfully processed a `setOutput` command. Output routing updated.
 
-**`gainChanged`** (event — domain: channel)  
-Fader gain updated.
+- Correlates to command: `cid = <setOutput command.id>`
 
-**`panChanged`** (event — domain: channel)  
-Pan/balance updated.
+**`setSidechainSource`** (event — domain: channel)  
+Emitted after Pulse has successfully processed a `setSidechainSource` command. Sidechain routing updated.
+
+- Correlates to command: `cid = <setSidechainSource command.id>`
+
+**`setGain`** (event — domain: channel)  
+Emitted after Pulse has successfully processed a `setGain` command. Fader gain updated.
+
+- Correlates to command: `cid = <setGain command.id>`
+
+**`setPan`** (event — domain: channel)  
+Emitted after Pulse has successfully processed a `setPan` command. Pan/balance updated.
+
+- Correlates to command: `cid = <setPan command.id>`
 
 ---
 
@@ -222,10 +227,15 @@ Pan/balance updated.
 
 Metering data itself is sent via binary meter streams, not Channel events.
 
-Channel domain may emit:
+**`setMeteringConfig`** (event — domain: channel)  
+Emitted after Pulse has successfully processed a `setMeteringConfig` command. Static meter configuration updated.
 
-**`meteringConfigChanged`** (event — domain: channel)  
-Static meter configuration updated.
+- Correlates to command: `cid = <setMeteringConfig command.id>`
+
+**`resetGraph`** (event — domain: channel)  
+Emitted after Pulse has successfully processed a `resetGraph` command. Channel graph has been reset to default minimal configuration.
+
+- Correlates to command: `cid = <resetGraph command.id>`
 
 ---
 
@@ -258,8 +268,7 @@ In particular:
   snapshot according to its own UX rules (for example, by cancelling unsent
   edits, or prompting the user where appropriate).
 
-- Incremental events for this domain (e.g. `*.added`, `*.updated`,
-  `*.removed`) are only applied on top of the last successfully applied
+- Incremental events for this domain (e.g. `create`, `setInput`, `setOutput`) are only applied on top of the last successfully applied
   snapshot.
 
 Snapshots are **replacements**, not merges. If Aura is unsure whether to trust
