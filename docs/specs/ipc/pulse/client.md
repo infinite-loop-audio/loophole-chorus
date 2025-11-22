@@ -242,10 +242,30 @@ Behaviour:
 - Pulse stops sending events to this session.
 - Pulse emits an event envelope (kind="event", name="goodbye", cid=<command.id>).
 - Pulse may emit `disconnected` events (unsolicited, `cid = null`).
+- If the **manager** sends `goodbye`, Pulse SHOULD begin shutdown after sending the goodbye acknowledgement and broadcast a `client.shutdown` event (see below).
 - The underlying transport may then be closed by either side.
 
 If the TCP/WebSocket connection is dropped without sending `goodbye`, Pulse
 will infer disconnection based on transport events and heartbeat timeouts.
+
+#### shutdown (command — domain: client)
+
+Request Pulse to shut down gracefully. Any connected client may issue this, not just the manager.
+
+Payload:
+
+```json
+{
+  "reason": "string" // optional
+}
+```
+
+Behaviour:
+
+- Pulse emits an event envelope (kind="event", name="shutdown", cid=<command.id>) to acknowledge the request.
+- Pulse broadcasts an unsolicited `client.shutdown` event to **all** connected clients (cid may equal the request id).
+- Pulse begins graceful shutdown and closes its transport; clients should respond by shutting down or cleaning up locally to avoid reconnect loops.
+- If multiple shutdown triggers occur (command, manager goodbye, internal exit), only one broadcast is required.
 
 ### 2.2 Heartbeats
 
@@ -478,6 +498,32 @@ Payload:
   "reason": "clientRequested"  // or "transportClosed", "timeout"
 }
 ```
+
+Fields:
+
+- `clientId` (string) — echo of the effective client ID for this session.
+- `instanceId` (string) — echo of the instance ID for this session.
+- `reason` (string) — reason for disconnection (e.g., `"clientRequested"`, `"transportClosed"`, `"timeout"`).
+
+#### shutdown (event — domain: client)
+
+Broadcast when Pulse is about to shut down, regardless of trigger (manager `goodbye`, `client.shutdown` command, or internal exit).
+
+Payload:
+
+```json
+{
+  "reason": "clientShutdown",
+  "managerInitiated": true,
+  "shuttingDown": true
+}
+```
+
+Fields:
+
+- `reason` (string) — reason provided by the trigger, or `"clientShutdown"` if unspecified.
+- `managerInitiated` (boolean) — whether the shutdown was triggered by the manager.
+- `shuttingDown` (boolean) — always true; signals clients to begin their own shutdown/cleanup.
 
 #### reconnected (event — domain: client) (optional / future)
 
