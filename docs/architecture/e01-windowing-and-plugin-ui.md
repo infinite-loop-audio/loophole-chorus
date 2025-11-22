@@ -270,7 +270,7 @@ applies **clamping rules** before showing any window:
     and resize).
 
 Even if a plugin requests a size that would be larger than the current
-display, Aura and Signal cooperate to constrain the actual window geometry so
+display, Pulse coordinates between Aura and Signal to constrain the actual window geometry so
 that:
 
 - the user can always access drag handles or resize corners,
@@ -298,8 +298,10 @@ that:
 
   - coordinating plugin UI lifecycle and routing between Aura and Signal,
   - storing minimal plugin UI state in the project where appropriate
-    (e.g. “this plugin has a UI open” flag, if needed),
-  - carrying position/size commands between Aura and Signal.
+    (e.g. "this plugin has a UI open" flag, if needed),
+  - relaying position/size commands from Aura to Signal via standard IPC.
+  
+  Pulse acts as the intermediary: Aura sends plugin UI commands to Pulse, and Pulse forwards them to Signal. Aura never communicates directly with Signal.
 
 ### 7.2 IPC Considerations
 
@@ -316,8 +318,8 @@ The Plugin UI IPC domain (specified separately) will include commands such as:
   coordinates, corresponding to the Window Descriptor computed by Aura.
 
 - `pluginUi.windowGeometryChanged`  
-  Event from Signal to Pulse/Aura when a plugin window is resized by the user
-  or by the plugin itself (e.g. when the plugin changes its own UI size).
+  Event from Signal to Pulse when a plugin window is resized by the user
+  or by the plugin itself (e.g. when the plugin changes its own UI size). Pulse forwards this event to Aura via standard IPC.
 
 Aura then:
 

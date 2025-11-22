@@ -14,21 +14,26 @@ It does not define raw message formats — those live in JSON/TS schemas under
 
 Primary IPC participants:
 
-- **Aura → Signal**
-  - Control messages (transport, graph updates, parameter changes)
-  - Telemetry subscriptions
-
-- **Signal → Aura**
-  - Telemetry (meters, analysis, transport state)
-  - Error notifications
-
-- **Aura → Pulse** (when Pulse is a separate process)
+- **Aura → Pulse**
   - Project state change requests
   - Query requests
+  - Editing intents
 
 - **Pulse → Aura**
-  - Project state deltas
+  - Project state deltas (snapshots and events)
   - Validation results
+  - Aggregated metering/analysis data (from Signal via Pulse)
+
+- **Pulse → Signal**
+  - Control messages (transport, graph updates, parameter changes)
+  - Gesture stream data (aggregated from Aura)
+
+- **Signal → Pulse**
+  - Telemetry (meters, analysis, transport state)
+  - Error notifications
+  - Engine status updates
+
+**Note:** Aura never communicates directly with Signal. All communication flows through Pulse as the central hub.
 
 Future participants may include:
 
@@ -53,7 +58,7 @@ Imperative instructions to perform an action, such as:
 - Change parameter values
 - Load/unload projects
 
-Commands are typically sent from Aura or Pulse to Signal.
+Commands are typically sent from Aura to Pulse, or from Pulse to Signal. Aura never sends commands directly to Signal.
 
 ## 2.2 Events
 
@@ -209,7 +214,7 @@ This MUST NOT compromise RT safety.
 - Signal SHOULD use lock-free queues for incoming commands and outgoing
   telemetry relevant to RT operation.
 - Aura SHOULD maintain a local representation of UI-facing state, reconciled
-  against Pulse and Signal responses.
+  against Pulse responses (which aggregate data from Signal).
 - Pulse SHOULD treat incoming IPC as a stream of high-level operations, not
   low-level engine mutations.
 

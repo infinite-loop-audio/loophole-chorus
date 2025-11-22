@@ -8,6 +8,8 @@
   - `docs/specs/ipc/signal/engine.md`  
   - `docs/architecture/01-overview.md`  
 
+**Note:** This decision describes the initial topology where Aura connected directly to Signal. This architecture has been superseded. The current architecture specifies that **Pulse is the sole client of Signal**, and **Aura never connects directly to Signal**. All communication flows through Pulse as the central hub. See `docs/specs/ipc/overview.md` for the current IPC topology.
+
 ---
 
 ## 1. Context
