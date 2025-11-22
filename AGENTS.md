@@ -388,3 +388,55 @@ When acting as an AI agent against this repo:
 
 Keep documentation predictable. Future tools (and humans) should be able to
 reason about the whole system by reading Chorus without surprises.
+
+---
+
+## 10. Changelog Discipline
+
+You must **always** update `CHANGELOG.md` for any **significant** change:
+
+- new feature or user-visible behaviour
+- refactor that affects architecture or APIs
+- bug fix or stability/shutdown fix
+- documentation/spec changes
+- build, tooling, or test infrastructure changes
+
+Minor cosmetic edits or trivial renames **do not** need a changelog entry unless they impact behaviour or developer workflow.
+
+### 10.1 File & section
+
+- All entries go into the root `CHANGELOG.md`.
+- New entries are added under the **`[Unreleased]`** heading.
+- **Newest entries go at the top** of the `[Unreleased]` list.
+
+### 10.2 Entry format
+
+- Exactly **one line per change**, no multi-line blocks.
+- Each line must include:
+  - **UTC timestamp** in the form: `YYYY-MM-DD HH:MM:SS UTC`
+  - An inline **tag** in square brackets, for example:
+    - `[added]` – new features / new files
+    - `[changed]` – behaviour changes, refactors, API tweaks
+    - `[fixed]` – bug fixes, crashes, shutdown issues
+    - `[removed]` – removals, deprecations
+    - `[docs]` – documentation / spec changes
+    - `[dev]` – tests, build system, CI, tooling
+  - A **short, informative summary** in British English.
+- Example:
+  - `(2025-11-21 22:46:10 UTC) [changed] Normalised IPC event naming and removed response kind in favour of correlated events.`
+
+### 10.3 Content style
+
+- Do **not** copy-paste the full Cursor prompt into the changelog.
+- Instead, write a concise summary of what actually changed and why it matters.
+- Keep it **short but informative** (one sentence).
+- Use British English spelling.
+
+### 10.4 Discipline
+
+- When you complete a significant change:
+  - Finish your code / docs edits.
+  - Then **immediately** add a new `[Unreleased]` entry to `CHANGELOG.md`.
+- Never reorder or rewrite older entries.
+- Never delete historical entries.
+- Never remove the `[Unreleased]` section.
