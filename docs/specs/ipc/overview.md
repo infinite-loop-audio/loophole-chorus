@@ -117,8 +117,8 @@ Characteristics:
 
 - High-rate, small messages
 - Compact representation (binary or minimal framed format)
-- Routed directly between Aura and Signal
-- Pulse sees only gesture boundaries, not individual samples
+- Routed directly between Pulse and Signal (Signal ↔ Pulse only)
+- Pulse aggregates and forwards curated updates to Aura via standard IPC events
 
 ### 3.3 Telemetry Plane
 
@@ -129,8 +129,7 @@ This plane carries high-frequency engine output used for UI display:
 - Transport timing
 - Other visualisation-oriented signals
 
-Telemetry is routed directly from Signal to Aura. Pulse does not process this
-plane.
+Telemetry flows from Signal to Pulse via a high-rate channel (Signal ↔ Pulse only). Pulse aggregates this data and forwards curated updates to Aura via standard JSON IPC events. Aura never establishes a direct connection to Signal.
 
 ---
 
@@ -142,14 +141,11 @@ All high-level commands originate from Aura and go to Pulse. Pulse is the
 central router/authority for project state and model changes:
 
 - **Aura → Pulse**: all project-level commands (open, save, track edits, etc.)
-- **Pulse → Aura**: project snapshots and model-change events
-- **Pulse → Signal**: graph rebuild instructions and engine commands
-- **Signal → Pulse**: engine status, errors, and confirmations (never initiates
-  project-level changes)
-- **Signal → Aura**: high-rate telemetry (bypasses Pulse)
+- **Pulse → Aura**: project snapshots and model-change events, aggregated metering/analysis data
+- **Pulse → Signal**: graph rebuild instructions and engine commands, aggregated gesture streams
+- **Signal → Pulse**: engine status, errors, confirmations, and high-rate metering/analysis streams (never initiates project-level changes)
 
-Signal and Composer never communicate directly with Aura. Signal and Composer
-never communicate directly with each other. All model state flows through Pulse.
+Signal and Composer never communicate directly with Aura. Signal and Composer never communicate directly with each other. All model state flows through Pulse. Any side-channel (binary or high-rate) is strictly **Signal ↔ Pulse**, not Aura.
 
 ### 4.2 Aura to Pulse
 
@@ -185,15 +181,16 @@ Signal reports engine and hardware events relevant to the project model:
 
 Pulse updates the model and emits model-change events to Aura.
 
-### 4.5 Signal to Aura
+### 4.5 Signal Communication with Aura
 
-High-rate telemetry bypasses Pulse entirely:
+**Aura never establishes any IPC connection to Signal.**
 
-- Metering
-- Transport state
-- Spectral data
+All communication flows through Pulse:
 
-Aura uses this data for visual display.
+- **Signal → Pulse**: high-rate metering/analysis streams (via side-channel if needed)
+- **Pulse → Aura**: aggregated and curated metering/analysis events (via standard JSON IPC)
+
+Aura receives all engine analysis, metering and diagnostic data from Pulse via standard IPC envelopes. Pulse aggregates high-rate streams from Signal and forwards them as JSON IPC events to clients (e.g., Aura).
 
 ---
 
@@ -298,13 +295,11 @@ as setting an initial or final value).
 
 ### 7.2 High-Rate Parameter Streaming
 
-During the gesture, Aura sends compact high-frequency parameter updates directly
-to Signal via the engine stream plane.
+During the gesture, Pulse forwards compact high-frequency parameter updates to Signal via the engine stream plane.
 
-These messages are not JSON and do not involve Pulse. Signal applies them
-immediately to the relevant plugin parameter.
+The data-plane channel is strictly **Pulse ↔ Signal**. These messages are not JSON. Signal applies them immediately to the relevant plugin parameter.
 
-Streams may be identified with a gesture or stream identifier provided by Pulse.
+Pulse aggregates gesture data from Aura and forwards it to Signal. Streams are identified with a gesture or stream identifier managed by Pulse.
 
 ### 7.3 Model Commitment
 
@@ -366,9 +361,8 @@ Signal acts as a transport layer: it parses low-level inputs and forwards struct
 When Pulse becomes a standalone service:
 
 - Aura connects to Pulse using the same project-protocol messages.
-- Pulse connects directly to Signal for the control/model plane.
-- The engine stream and telemetry planes may remain between Aura and Signal or
-  be re-evaluated depending on performance characteristics.
+- Pulse connects directly to Signal for the control/model plane, engine stream plane, and telemetry plane.
+- All high-rate streams (gesture, metering, analysis) flow through Pulse.
+- Aura never establishes a direct IPC connection to Signal.
 
-The message contracts defined here remain stable regardless of the process
-topology.
+The message contracts defined here remain stable regardless of the process topology. Signal communicates exclusively with Pulse. Aura never opens a transport to Signal; all analysis, metering and gesture information is proxied by Pulse.

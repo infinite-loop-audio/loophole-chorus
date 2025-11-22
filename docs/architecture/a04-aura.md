@@ -117,6 +117,8 @@ Aura communicates:
 
 Aura never bypasses Pulse for structural or project data.
 
+**Aura MUST NOT establish a direct IPC channel with Signal. All engine analysis, metering and diagnostic data flows through Pulse.**
+
 ---
 
 ## 4. State Model
@@ -204,9 +206,9 @@ Signal receives transport state only from Pulse, never directly from Aura.
 
 ### 6.3 Metering and Analysis
 
-Metering and analysis data (levels, spectrograms, waveforms) arrives via a
-high-rate side channel from Signal. Aura visualises these without affecting
-routing or structure.
+Metering and analysis data (levels, spectrograms, waveforms) arrives from Pulse via standard IPC events. Pulse aggregates high-rate analysis data from Signal and forwards curated updates to Aura. Aura visualises these without affecting routing or structure.
+
+**Aura MUST NOT establish a direct IPC channel with Signal. All engine analysis, metering and diagnostic data flows through Pulse.**
 
 ---
 
@@ -349,14 +351,14 @@ This is essential for performance in large projects.
 
 ### 10.3 High-Frequency Updates
 
-Aura may receive large volumes of metering/analysis data.
+Aura may receive large volumes of metering/analysis data from Pulse.
 It must:
 
 - throttle rendering,
 - batch updates,
 - schedule painting efficiently.
 
-These updates do not affect project state.
+These updates do not affect project state and arrive via Pulse's standard IPC events.
 
 ---
 

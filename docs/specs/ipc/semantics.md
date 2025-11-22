@@ -131,13 +131,14 @@ be translated by Pulse into real-time-safe, ordered streams toward Signal.
 
 Unless specified otherwise:
 
-- Messages from Aura to Signal are processed in order of arrival.
-- Telemetry messages from Signal to Aura may be:
+- Messages from Aura to Pulse are processed in order of arrival.
+- Pulse forwards aggregated messages to Signal in order.
+- Telemetry messages from Signal to Pulse are aggregated by Pulse and forwarded to Aura as curated events. These forwarded events may be:
   - throttled
   - dropped
   - coalesced
 
-Consumers MUST tolerate occasional gaps in telemetry.
+Consumers MUST tolerate occasional gaps in telemetry. Aura never communicates directly with Signal.
 
 ## 4.3 Time-Stamped Messages
 

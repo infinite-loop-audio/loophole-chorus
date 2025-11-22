@@ -10,7 +10,8 @@ transport state and issues appropriate engine commands to Signal via the Engine
 Integration Protocol.
 
 High-resolution timing and visual playhead updates are provided separately via
-the telemetry plane from Signal to Aura and do not pass through this domain.
+the telemetry plane from Signal to Pulse, which aggregates and forwards curated
+events to Aura via standard IPC. They do not pass through this domain.
 
 ---
 
@@ -189,8 +190,10 @@ The Transport domain concerns the model-level representation of playback:
   emitting `state` events (correlated to commands via `cid`) and any relevant `error` events.
 
 High-resolution transport information (e.g. continuous playhead position and
-timing data) is delivered directly from Signal to Aura via the telemetry plane,
-and is not part of the Pulse Project Protocol.
+timing data) flows from Signal to Pulse via the telemetry plane (Signal ↔ Pulse
+only). Pulse aggregates this data and forwards curated events to Aura via
+standard IPC. This high-resolution telemetry is not part of the Pulse Project
+Protocol.
 
 ### Cohort and Anticipative Implications
 

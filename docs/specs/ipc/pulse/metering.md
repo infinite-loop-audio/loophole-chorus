@@ -11,15 +11,14 @@ Metering streams carry **high-rate, engine-originated** analysis data such as:
 - plugin-provided analyser output (if supported),
 - timing and latency diagnostics.
 
-Metering streams use the same **dual-path architecture** as gesture streams:
+Metering streams use a **dual-path architecture**:
 
-- **Control-plane (Pulse ↔ Signal ↔ Aura):**  
+- **Control-plane (Pulse ↔ Signal, Pulse ↔ Aura):**  
   Create/destroy streams, negotiate format, select metering modes, subscribe.
-- **Data-plane (Signal → Aura):**  
-  High-rate binary stream delivering analysis frames.
+- **Data-plane (Signal ↔ Pulse):**  
+  High-rate binary stream delivering analysis frames from Signal to Pulse.
 
-Pulse may also receive **low-rate summaries** for monitoring and UI
-synchronisation, but does not consume bulk metering data.
+Pulse aggregates high-rate metering data from Signal and forwards curated updates to Aura via standard JSON IPC events. Pulse may also receive **low-rate summaries** for monitoring and UI synchronisation.
 
 ---
 
@@ -60,7 +59,7 @@ state. They:
 - integrate plugin-provided analyser outputs,
 - drive engine diagnostics.
 
-Metering streams are **Signal → Aura**, with Pulse acting as coordinator.
+Metering streams flow **Signal → Pulse → Aura**, with Pulse aggregating high-rate data from Signal and forwarding curated events to Aura.
 
 They are generally session-scoped and ephemeral.
 
@@ -70,7 +69,7 @@ They are generally session-scoped and ephemeral.
 
 ### 2.1 Control-Plane vs Data-Plane
 
-#### **Control-plane (Pulse ↔ Signal ↔ Aura)**
+#### **Control-plane (Pulse ↔ Signal, Pulse ↔ Aura)**
 Manages:
 
 - stream creation,
@@ -78,9 +77,9 @@ Manages:
 - enabling/disabling meter types,
 - subscription state,
 - routing analysis to the right UI panels,
-- low-rate summaries for Pulse’s internal monitoring.
+- low-rate summaries for Pulse's internal monitoring.
 
-#### **Data-plane (Signal → Aura)**
+#### **Data-plane (Signal ↔ Pulse)**
 
 Carries high-rate data such as:
 
@@ -99,7 +98,7 @@ This data is:
 - non-JSON,
 - rate-managed by Signal.
 
-Aura consumes the high-rate stream; Pulse sees only metadata and summaries.
+Pulse receives the high-rate stream from Signal, aggregates it, and forwards curated updates to Aura via standard JSON IPC events. Aura never establishes a direct connection to Signal.
 
 ---
 
@@ -249,7 +248,7 @@ Acknowledges unsubscription.
 ### 4.3 Data-Plane Negotiation Events
 
 **`meter.dataChannelReady`**  
-Indicates that the Signal→Aura binary stream is established.
+Indicates that the Signal↔Pulse binary stream is established and Pulse is ready to forward metering data to Aura.
 
 Includes:
 
@@ -263,7 +262,7 @@ Includes:
 
 ### 4.4 Summary Events
 
-Pulse may receive and forward **low-frequency summaries** such as:
+Pulse aggregates high-rate metering data from Signal and forwards **curated events** to Aura, including **low-frequency summaries** such as:
 
 - peaks,
 - RMS,

@@ -24,6 +24,8 @@ Example entry:
 
 ## [Unreleased]
 
+(2025-11-22 19:04:01 UTC) [changed] Updated IPC and architecture docs to state that Aura never communicates directly with Signal; all high-rate analysis/metering/gesture data flows via Pulse.
+
 <!-- New changes go here, newest at the top. -->
 
 ## [0.1.0] - TBC

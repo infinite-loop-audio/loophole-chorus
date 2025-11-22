@@ -10,14 +10,13 @@ Conceptually:
 
 - **Pulse** coordinates gesture *sessions* (who controls what, when, and how).  
 - **Signal** provides a **gesture stream endpoint**:
-  - high-rate value packets from Aura,
+  - high-rate value packets from Pulse,
   - mapped to one or more engine parameters,
   - with optional low-rate tap back to Pulse.
 
-Aura never talks to Signal directly for control plane (open/close sessions);
-it always goes via Pulse.  
-But **for data**, Aura may connect directly to Signal using a dedicated
-gesture stream channel.
+Aura never talks to Signal directly. All communication flows through Pulse:
+- Aura sends gesture commands to Pulse via standard IPC.
+- Pulse aggregates gesture data and forwards high-rate samples to Signal via a dedicated side-channel (Signal ↔ Pulse only).
 
 ---
 
@@ -73,10 +72,10 @@ The typical lifecycle of a gesture looks like this:
    - acknowledgement,
    - optional stream parameters (packet format, recommended rate).
 
-4. **Aura ↔ Signal (data plane)**  
-   Aura obtains the `gestureSessionId` and any connection details from Pulse,
-   then:
-   - opens a direct gesture stream connection to Signal,
+4. **Pulse ↔ Signal (data plane)**  
+   Pulse:
+   - establishes a direct gesture stream connection to Signal,
+   - forwards high-rate value packets from Aura (aggregated via standard IPC),
    - sends value packets at high rate (for the duration of the gesture),
    - optionally receives acknowledgements or low-rate mirror samples.
 
@@ -290,7 +289,7 @@ Semantics:
 
 ## 5. Data Plane: Gesture Stream Protocol
 
-The data plane is the **high-rate value stream** from Aura to Signal.
+The data plane is the **high-rate value stream** from Pulse to Signal. Pulse aggregates gesture data from Aura via standard IPC and forwards high-rate samples to Signal via a dedicated side-channel (Signal ↔ Pulse only).
 
 This document describes the **packet structure and expectations**, without
 mandating a particular transport (e.g. separate IPC pipe, shared memory region,
@@ -566,6 +565,7 @@ Future extensions may include:
 These should remain compatible with the core design:
 
 - control plane via JSON IPC (Pulse ↔ Signal),
-- data plane via dedicated high-rate streams (Aura ↔ Signal),
+- data plane via dedicated high-rate streams (Pulse ↔ Signal only),
+- Aura sends gesture commands to Pulse via standard IPC; Pulse aggregates and forwards high-rate samples to Signal,
 - Pulse as the authority over which parameters are affected and how they are
   ultimately committed into the project model.

@@ -9,14 +9,12 @@ Critically, the Gesture domain is explicitly designed with a **dual-path model**
 
 - **Control-plane (Aura ↔ Pulse)**  
   Manages gesture stream lifecycle, binding, metadata, and precedence rules.
-- **Data-plane (Aura → Signal)**  
-  Carries high-frequency gesture samples directly to the audio engine.
+- **Data-plane (Pulse ↔ Signal)**  
+  Carries high-frequency gesture samples from Pulse to Signal.
 
-Pulse *knows about* all gesture activity, but does not need to relay every
-sample. Signal is the primary consumer of the high-rate control stream.
+Aura sends gesture commands to Pulse via standard IPC. Pulse aggregates these and forwards high-rate samples to Signal via a dedicated side-channel (Signal ↔ Pulse only). Signal is the primary consumer of the high-rate control stream.
 
-Final parameter state and low-rate updates are synchronised back to Pulse so
-the model remains coherent and automation semantics are correct.
+Final parameter state and low-rate updates are synchronised back to Pulse so the model remains coherent and automation semantics are correct. **Aura never establishes a direct IPC connection to Signal.**
 
 This design is mandatory and foundational — not optional or deferred.
 
@@ -85,7 +83,7 @@ Pulse remains the authority for:
 - how gestures interact with automation and cohorts,
 - what values are recorded.
 
-#### **Data-plane (Aura → Signal)**
+#### **Data-plane (Pulse ↔ Signal)**
 
 A high-rate, low-latency channel (WebRTC, named pipe, UNIX socket, shared
 memory segment, custom binary channel) carries:
@@ -95,14 +93,15 @@ memory segment, custom binary channel) carries:
 
 This channel is:
 
-- **direct** between Aura → Signal,
+- **direct** between Pulse ↔ Signal (Signal ↔ Pulse only),
 - **binary**, **non-JSON**, **loss-tolerant**,
 - optionally timestamped,
-- negotiated and authorised by Pulse,
+- negotiated and managed by Pulse,
 - capable of being multiplexed between streams.
 
-Pulse does *not* need to see every sample. It only needs *enough* information
-to:
+Aura sends gesture commands to Pulse via standard IPC. Pulse aggregates these and forwards high-rate samples to Signal via the data-plane channel.
+
+Pulse needs *enough* information from gesture activity to:
 
 - update model state,
 - resolve automation,
@@ -288,7 +287,7 @@ stay in sync.
 
 #### dataChannelReady (event — domain: gesture)
 
-Indicates Pulse and Signal have agreed on a data-plane transport.
+Indicates Pulse and Signal have agreed on a data-plane transport. This is strictly between Pulse and Signal; Aura never establishes a direct connection.
 
 Fields include:
 
