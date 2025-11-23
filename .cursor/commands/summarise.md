@@ -95,3 +95,4 @@ Provide a short, ordered list:
 - Use British English.
 - Use accurate file paths.
 - Respect repo conventions for naming, formatting, and architecture.
+- Output the file in to the docs/reports/ directory of the repo being summarised, in the usual timestamped format: <YYYY-MM-DD-HHMMSS>-<report-name>.md
